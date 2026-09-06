@@ -19,6 +19,15 @@
   --success: #22c55e;
   --warning: #f59e0b;
   --error: #ef4444;
+
+  --type-campur-bg: #fef3c7;
+  --type-campur-text: #92400e;
+
+  --type-laki-bg: #dbeafe;
+  --type-laki-text: #1e40af;
+
+  --type-perempuan-bg: #fce7f3;
+  --type-perempuan-text: #9d174d;
 }
 
 @theme inline {
@@ -43,6 +52,15 @@
 
   --font-heading: var(--font-geist);
   --font-body: var(--font-rubik);
+
+  --color-type-campur-bg: var(--type-campur-bg);
+  --color-type-campur-text: var(--type-campur-text);
+
+  --color-type-laki-bg: var(--type-laki-bg);
+  --color-type-laki-text: var(--type-laki-text);
+
+  --color-type-perempuan-bg: var(--type-perempuan-bg);
+  --color-type-perempuan-text: var(--type-perempuan-text);
 }
 
 * {

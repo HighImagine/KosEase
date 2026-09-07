@@ -1,3 +1,4 @@
+import { TipeKos } from "@/data/kos";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -7,7 +8,7 @@ type KosCardProps = {
     lokasi: string;
     harga: string;
     gambar: string;
-    tipe: string;
+    tipe: TipeKos;
     status: string;
 };
 
@@ -20,7 +21,7 @@ export default function KosCard({
     tipe,
     status,
 }: KosCardProps) {
-    const tipeStyles: Record<string, string> = {
+    const tipeStyles: Record<TipeKos, string> = {
         "Campur": "bg-type-campur-bg text-type-campur-text",
         "Laki-laki": "bg-type-laki-bg text-type-laki-text",
         "Perempuan": "bg-type-perempuan-bg text-type-perempuan-text",

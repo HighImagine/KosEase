@@ -1,3 +1,4 @@
+import { kosList, TipeKos } from "@/data/kos";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -9,6 +10,17 @@ type PageProps = {
 
 export default async function KosDetailPage({ params }: PageProps) {
     const { id } = await params;
+    const kos = kosList.find((item) => item.id === Number(id));
+
+    if (!kos) {
+        return <div>Kos tidak ditemukan.</div>;
+    }
+
+    const tipeStyles: Record<TipeKos, string> = {
+        "Campur": "bg-type-campur-bg text-type-campur-text",
+        "Laki-laki": "bg-type-laki-bg text-type-laki-text",
+        "Perempuan": "bg-type-perempuan-bg text-type-perempuan-text",
+    };
 
     return (
         <main className="min-h-screen bg-background">
@@ -38,8 +50,8 @@ export default async function KosDetailPage({ params }: PageProps) {
 
                         <div className="relative">
                             <Image
-                                src="/img/kos-placeholder.png"
-                                alt="Kos Putri Sakinah - Foto 2"
+                                src={kos.gambar}
+                                alt={kos.nama}
                                 fill
                                 sizes="(max-width: 1024px) 33vw, 33vw"
                                 className="object-cover"
@@ -60,22 +72,16 @@ export default async function KosDetailPage({ params }: PageProps) {
                 </div>
                 {/* Info Kos & Harga */}
                 <section className="mt-6 grid gap-6 lg:grid-cols-3">
-
-                    {/* KOLOM KIRI */}
                     <div className="space-y-6 lg:col-span-2">
 
-                        {/* Kotak kiri 1 */}
                         <div className="rounded-2xl bg-surface p-4">
 
-                            {/* Badge + Rating */}
                             <div className="flex items-center justify-between">
 
-                                {/* Badge tipe kos */}
-                                <span className="rounded-md bg-pink-100 px-2 py-1 text-[10px] font-semibold text-pink-800">
-                                    Putri
+                                <span className="rounded-md bg-type-perempuan-bg px-2 py-1 text-[10px] font-semibold text-type-perempuan-text">
+                                    {kos.tipe}
                                 </span>
 
-                                {/* Rating */}
                                 <div className="flex items-center gap-1 text-[11px]">
                                     <span className="text-accent">★</span>
 
@@ -90,14 +96,14 @@ export default async function KosDetailPage({ params }: PageProps) {
 
                             </div>
 
-                            {/* Nama Kos */}
+
                             <h1 className="mt-2 font-heading text-xl font-bold text-text-primary">
-                                Kos Putri Sakinah Depok Sleman
+                                {kos.nama}
                             </h1>
 
                             {/* Lokasi */}
                             <p className="mt-2 text-[10px] text-text-secondary">
-                                📍 Jl. Bougenville No. 12, Karang Gayam, Caturtunggal, Kec. Depok, Sleman, Yogyakarta
+                                {kos.lokasi}
                             </p>
 
                         </div>
@@ -245,17 +251,82 @@ export default async function KosDetailPage({ params }: PageProps) {
                     </div>
 
                     {/* KOLOM KANAN */}
-                    <div className="rounded-2xl bg-surface p-6">
+                    <div className="self-start rounded-2xl bg-surface p-6 mx">
+
                         <p className="text-sm text-text-secondary">
                             Mulai dari
                         </p>
 
                         <p className="mt-1 font-heading text-2xl font-bold text-primary">
-                            Rp1.200.000
+                            {kos.harga}
                             <span className="font-body text-sm font-normal text-text-secondary">
                                 {" "}/ bulan
                             </span>
                         </p>
+
+                        <div className="mt-6 space-y-3 text-xs">
+
+                            <div className="flex items-center justify-between">
+                                <span className="text-text-secondary">
+                                    Tipe Kos
+                                </span>
+
+                                <span
+                                    className={`rounded-md px-2 py-1 text-[10px] font-semibold ${tipeStyles[kos.tipe]}`}
+                                >
+                                    {kos.tipe}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <span className="text-text-secondary">
+                                    Kamar Tersedia
+                                </span>
+
+                                <span className="font-semibold text-primary">
+                                    1 Kamar Kosong
+                                </span>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <span className="text-text-secondary">
+                                    Biaya Tambahan
+                                </span>
+
+                                <span className="text-text-primary">
+                                    Sudah Termasuk Listrik
+                                </span>
+                            </div>
+
+                        </div>
+
+                        {/* Tombol Pesan */}
+                        <button
+                            type="button"
+                            className="mt-5 w-full rounded-lg bg-accent px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-orange-600"
+                        >
+                            Pesan Kamar Sekarang
+                        </button>
+
+                        {/* Simpan & Bagikan */}
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+
+                            <button
+                                type="button"
+                                className="rounded-lg bg-background px-3 py-2 text-xs font-semibold text-text-secondary transition-colors hover:bg-border"
+                            >
+                                ♡ Simpan
+                            </button>
+
+                            <button
+                                type="button"
+                                className="rounded-lg bg-background px-3 py-2 text-xs font-semibold text-text-secondary transition-colors hover:bg-border"
+                            >
+                                ↗ Bagikan
+                            </button>
+
+                        </div>
+
                     </div>
 
                 </section>

@@ -1,34 +1,7 @@
 import KosCard from "./KosCard";
+import { kosList } from "@/data/kos";
 
 export default function KosSection() {
-    const kosList = [
-        {
-            id: 1, //DUMMY
-            nama: "Kos Melati",
-            lokasi: "Yogyakarta",
-            harga: "Rp800.000",
-            gambar: "/img/kos-placeholder.png",
-            tipe: "Perempuan",
-            status: "Tersedia",
-        },
-        {
-            id: 2, // DUMMY
-            nama: "Kos Mawar",
-            lokasi: "Bandung",
-            harga: "Rp1.000.000",
-            gambar: "/img/kos-placeholder.png",
-            tipe: "Campur",
-            status: "Tersedia",
-        },
-        {   id: 3, //DUMMY
-            nama: "Kos Dahlia",
-            lokasi: "Malang",
-            harga: "Rp750.000",
-            gambar: "/img/kos-placeholder.png",
-            tipe: "Laki-laki",
-            status: "Tersedia 2 Kamar",
-        },
-    ];
     return (
         <section className="bg-background py-16">
             <div className="mx-auto max-w-7xl px-6">

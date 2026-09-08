@@ -22,7 +22,7 @@ export default function Footer() {
                         KosEase
                     </h4>
 
-                    <div className="mt-3 space-y-2 text-xs text-text-secondary">
+                    <div className="mt-3 space-y-2 text-xs text-text-secondary hover:text-primary">
                         <p>Tentang Kami</p>
                     </div>
                 </div>
@@ -33,9 +33,15 @@ export default function Footer() {
                     </h4>
 
                     <div className="mt-3 flex flex-col gap-2 text-xs text-text-secondary">
-                        <Link href="/cari-kos">Cari Kos</Link>
-                        <Link href="/">Syarat & Ketentuan</Link>
-                        <Link href="/">Kebijakan Privasi</Link>
+                        <Link href="/cari-kos"
+                            className="hover:text-primary"
+                        >Cari Kos</Link>
+                        <Link href="/"
+                            className="hover:text-primary"
+                        >Syarat & Ketentuan</Link>
+                        <Link href="/"
+                            className="hover:text-primary"
+                        >Kebijakan Privasi</Link>
                     </div>
                 </div>
 

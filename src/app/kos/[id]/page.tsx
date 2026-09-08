@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import { kosList, TipeKos } from "@/data/kos";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,7 +24,7 @@ export default async function KosDetailPage({ params }: PageProps) {
     };
 
     return (
-        <main className="min-h-screen bg-background">
+        <><main className="min-h-screen bg-background">
             <div className="mx-auto max-w-7xl px-6 py-6">
 
                 <Link
@@ -41,8 +42,7 @@ export default async function KosDetailPage({ params }: PageProps) {
                             alt="Kos Putri Sakinah"
                             fill
                             sizes="(max-width: 1024px) 66vw, 66vw"
-                            className="object-cover"
-                        />
+                            className="object-cover" />
                     </div>
 
                     {/* Side Images */}
@@ -54,8 +54,7 @@ export default async function KosDetailPage({ params }: PageProps) {
                                 alt={kos.nama}
                                 fill
                                 sizes="(max-width: 1024px) 33vw, 33vw"
-                                className="object-cover"
-                            />
+                                className="object-cover" />
                         </div>
 
                         <div className="relative">
@@ -64,8 +63,7 @@ export default async function KosDetailPage({ params }: PageProps) {
                                 alt="Kos Putri Sakinah - Foto 3"
                                 fill
                                 sizes="(max-width: 1024px) 33vw, 33vw"
-                                className="object-cover"
-                            />
+                                className="object-cover" />
                         </div>
 
                     </div>
@@ -332,5 +330,6 @@ export default async function KosDetailPage({ params }: PageProps) {
                 </section>
             </div>
         </main>
+            <Footer /></>
     );
 }

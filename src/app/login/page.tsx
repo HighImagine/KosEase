@@ -11,7 +11,6 @@ export default function LoginPage() {
             <section className="flex flex-1 justify-center px-6 py-8">
                 <div className="w-full max-w-md self-start rounded-2xl bg-surface p-6 shadow-sm">
 
-                    {/* Logo & Judul */}
                     <div className="text-center">
                         <div className="flex justify-center">
                             <Image
@@ -31,10 +30,8 @@ export default function LoginPage() {
                         </p>
                     </div>
 
-                    {/* Form */}
                     <form className="mt-5 space-y-3">
 
-                        {/* Email */}
                         <div>
                             <label
                                 htmlFor="email"
@@ -51,7 +48,6 @@ export default function LoginPage() {
                             />
                         </div>
 
-                        {/* Password */}
                         <div>
                             <div className="flex items-center justify-between">
                                 <label
@@ -77,7 +73,6 @@ export default function LoginPage() {
                             />
                         </div>
 
-                        {/* Button */}
                         <Link
                             href="/"
                             className="mt-5 flex w-full items-center justify-center rounded-md bg-primary py-2.5 text-xs font-semibold text-white transition-colors hover:bg-primary-dark"
@@ -87,7 +82,6 @@ export default function LoginPage() {
 
                     </form>
 
-                    {/* Register */}
                     <p className="mt-3 text-center text-[10px] text-text-secondary">
                         Belum punya akun?{" "}
                         <Link

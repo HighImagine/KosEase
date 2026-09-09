@@ -39,4 +39,13 @@ export const kosList: Kos[] = [
         tipe: "Laki-laki",
         status: "Tersedia 2 Kamar",
     },
+    {
+        id: 4,
+        nama: "Kos Dahlia",
+        lokasi: "Malang",
+        harga: "Rp750.000",
+        gambar: "/img/kos-placeholder.png",
+        tipe: "Laki-laki",
+        status: "Tersedia 2 Kamar",
+    },
 ];

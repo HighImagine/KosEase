@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
     return (
@@ -6,9 +7,14 @@ export default function Footer() {
             <div className="mx-auto grid max-w-7xl grid-cols-4 gap-8">
 
                 <div>
-                    <h3 className="font-heading text-lg font-bold text-primary">
-                        KosEase
-                    </h3>
+                    <div>
+                        <Image
+                            src="/img/logo.png"
+                            alt="KosEase"
+                            width={100}
+                            height={30}
+                        />
+                    </div>
 
                     <p className="mt-3 max-w-sm text-xs leading-5 text-text-secondary">
                         Platform pencarian kos modern di Indonesia yang
@@ -63,11 +69,11 @@ export default function Footer() {
                     © 2026 KosEase. Seluruh hak cipta dilindungi undang-undang.
                 </p>
 
-                <div className="flex gap-4 text-xs text-text-secondary">
+                {/* <div className="flex gap-4 text-xs text-text-secondary">
                     <span>◎</span>
                     <span>f</span>
                     <span>𝕏</span>
-                </div>
+                </div> */}
             </div>
         </footer>
     );

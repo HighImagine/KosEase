@@ -1,11 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+
 export default function Navbar() {
+  const pathname = usePathname();
+
   return (
     <nav className="h-17 bg-white border-b border-gray-200">
       <div className="max-w-300 h-full mx-auto flex items-center justify-between px-6">
 
-        {/* Logo */}
         <div className="flex justify-center">
           <Image
             src="/img/logo.png"
@@ -15,31 +20,41 @@ export default function Navbar() {
           />
         </div>
 
-        {/* Menu */}
         <div className="flex items-center gap-8">
-          <a
+          <Link
             href="/"
-            className="text-primary font-semibold"
+            className={
+              pathname === "/"
+                ? "text-primary font-semibold"
+                : "text-text-primary hover:text-primary"
+            }
           >
             Beranda
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/cari-kos"
-            className="text-text-primary hover:text-primary"
+            className={
+              pathname === "/cari-kos"
+                ? "text-primary font-semibold"
+                : "text-text-primary hover:text-primary"
+            }
           >
             Cari Kos
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/tentang"
-            className="text-text-primary hover:text-primary"
+            className={
+              pathname === "/tentang"
+                ? "text-primary font-semibold"
+                : "text-text-primary hover:text-primary"
+            }
           >
             Tentang Kami
-          </a>
+          </Link>
         </div>
 
-        {/* Authentication */}
         <div className="flex items-center gap-6">
           <Link
             href="/login"

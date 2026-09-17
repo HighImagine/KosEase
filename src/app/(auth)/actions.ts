@@ -53,3 +53,31 @@ export async function logoutAction() {
   await supabase.auth.signOut();
   redirect("/login");
 }
+
+export async function forgotPasswordAction(_prev: unknown, formData: FormData) {
+  const email = String(formData.get("email") ?? "");
+  const parsed = z.string().email("Email tidak valid").safeParse(email);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const supabase = await createClient();
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+    redirectTo: `${origin}/reset-password`,
+  });
+  if (error) return { error: error.message };
+  return { success: "Link reset telah dikirim ke email Anda jika terdaftar." };
+}
+
+const resetSchema = z.object({
+  password: z.string().min(8, "Minimal 8 karakter"),
+  confirm: z.string(),
+}).refine((d) => d.password === d.confirm, { message: "Konfirmasi tidak cocok", path: ["confirm"] });
+
+export async function resetPasswordAction(_prev: unknown, formData: FormData) {
+  const raw = Object.fromEntries(formData) as Record<string, string>;
+  const parsed = resetSchema.safeParse(raw);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) return { error: error.message };
+  redirect("/login?reset=1");
+}

@@ -13,7 +13,7 @@ export default function RegisterForm() {
       </div>
       <div>
         <label htmlFor="email" className="block text-[10px] font-semibold text-text-primary">Alamat Email</label>
-        <input id="email" name="email" type="email" required placeholder="contoh@mahasiswa.ac.id" className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2.5 text-xs text-text-primary outline-none placeholder:text-text-secondary focus:border-primary" />
+        <input id="email" name="email" type="email" required placeholder="contoh@gmail.com" className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2.5 text-xs text-text-primary outline-none placeholder:text-text-secondary focus:border-primary" />
       </div>
       <div>
         <label htmlFor="password" className="block text-[10px] font-semibold text-text-primary">Kata Sandi</label>

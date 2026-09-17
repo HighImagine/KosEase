@@ -19,7 +19,10 @@ export default function LoginForm() {
         <input id="email" name="email" type="email" required placeholder="contoh@mahasiswa.ac.id" className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2.5 text-xs text-text-primary outline-none placeholder:text-text-secondary focus:border-primary" />
       </div>
       <div>
-        <label htmlFor="password" className="block text-[10px] font-semibold text-text-primary">Kata Sandi</label>
+        <div className="flex items-center justify-between">
+          <label htmlFor="password" className="block text-[10px] font-semibold text-text-primary">Kata Sandi</label>
+          <a href="/lupa-password" className="text-[10px] font-semibold text-primary hover:text-primary-dark">Lupa Kata Sandi?</a>
+        </div>
         <input id="password" name="password" type="password" required placeholder="Masukkan kata sandi Anda" className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2.5 text-xs text-text-primary outline-none placeholder:text-text-secondary focus:border-primary" />
       </div>
       <button type="submit" disabled={pending} className="mt-5 flex w-full items-center justify-center rounded-md bg-primary py-2.5 text-xs font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50">

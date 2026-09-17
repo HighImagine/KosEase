@@ -1,4 +1,4 @@
-import { TipeKos } from "@/data/kos";
+import { TipeKos, tipeStyles, formatHarga } from "@/data/kos";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -6,7 +6,7 @@ type KosCardProps = {
     id: number;
     nama: string;
     lokasi: string;
-    harga: string;
+    harga: number;
     gambar: string;
     tipe: TipeKos;
     status: string;
@@ -21,11 +21,6 @@ export default function KosCard({
     tipe,
     status,
 }: KosCardProps) {
-    const tipeStyles: Record<TipeKos, string> = {
-        "Campur": "bg-type-campur-bg text-type-campur-text",
-        "Laki-laki": "bg-type-laki-bg text-type-laki-text",
-        "Perempuan": "bg-type-perempuan-bg text-type-perempuan-text",
-    };
 
     return (
         <div className="overflow-hidden rounded-2xl bg-surface shadow-sm transition-shadow hover:shadow-md">
@@ -63,7 +58,7 @@ export default function KosCard({
                 </p>
 
                 <p className="mt-4 font-heading text-lg font-bold text-primary">
-                    {harga}
+                    {formatHarga(harga)}
                     <span className="font-body text-sm font-normal text-text-secondary">
                         {" "}/ bulan
                     </span>

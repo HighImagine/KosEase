@@ -12,12 +12,14 @@ export default function Navbar() {
       <div className="max-w-300 h-full mx-auto flex items-center justify-between px-6">
 
         <div className="flex justify-center">
+          <Link href="/">
           <Image
             src="/img/logo.png"
             alt="KosEase"
             width={120}
             height={36}
           />
+          </Link>
         </div>
 
         <div className="flex items-center gap-8">

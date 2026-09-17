@@ -34,8 +34,7 @@ export default function PengajuanPemilik() {
                                 <p className="mt-1 text-xs leading-relaxed text-text-secondary">
                                     Ingin mendaftarkan kos Anda di KosEase? Isi formulir
                                     di bawah ini untuk mengajukan diri sebagai Pemilik
-                                    Kos. Tim verifikasi kami akan meninjau kelengkapan
-                                    berkas Anda maksimal 2×24 jam.
+                                    Kos!
                                 </p>
                             </div>
                         </div>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import KosCard from "@/components/KosCard";
-import Image from "next/image";
+import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { kosList } from "@/data/kos";
 
 export default function CariKosPage() {
@@ -105,12 +105,7 @@ export default function CariKosPage() {
                         href="/cari-kos"
                         className="flex h-10 items-center gap-2 rounded-lg border border-border bg-surface px-4 text-sm font-semibold text-text-primary transition-colors hover:text-primary"
                     >
-                        <Image
-                            src="/img/arrow-left.svg"
-                            alt="Kembali"
-                            width={20}
-                            height={20}
-                        />
+                        <IconArrowLeft size={16} stroke={2} color="#0f9d91" />
                         Kembali
                     </Link>
 
@@ -164,12 +159,7 @@ export default function CariKosPage() {
                         className="flex h-10 items-center gap-2 rounded-lg border border-border bg-surface px-4 text-sm font-semibold text-text-primary transition-colors hover:text-primary"
                     >
                         Lanjut
-                        <Image
-                            src="/img/arrow-right.svg"
-                            alt="Lanjut"
-                            width={20}
-                            height={20}
-                        />
+                        <IconArrowRight size={16} stroke={2} color="#0f9d91" />
                     </Link>
                 </div>
             </section>

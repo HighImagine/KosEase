@@ -2,12 +2,12 @@ import KosCard from "./KosCard";
 import { kosList } from "@/data/kos";
 import Footer from "./Footer";
 import Link from "next/link";
-import Image from "next/image";
+import { IconArrowRight } from "@tabler/icons-react";
 
 export default function KosSection() {
     return (
         <><section className="bg-background py-16">
-            <div className="mx-auto max-w-7xl px-6">
+            <div className="mx-auto max-w-7xl px-6 items-center justify-between">
 
                 {/* Section Header */}
                 <div className="mb-8">
@@ -22,15 +22,9 @@ export default function KosSection() {
 
                 <Link
                     href="/cari-kos"
-                    className="flex items-right gap-2 pb-5 font-body font-semibold text-primary transition-colors hover:text-primary-dark"
+                    className="ml-auto flex w-fit items-center gap-2 pb-5 font-body font-semibold text-primary transition-colors hover:text-primary-dark"
                 >
-                    Lihat Semua
-                    <Image
-                        src="/img/arrow-right-primary.svg"
-                        alt="Lihat semua"
-                        width={20}
-                        height={20}
-                    />
+                    Lihat Semua <IconArrowRight size={16} stroke={2} color="#0f9d91" />
                 </Link>
 
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

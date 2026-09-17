@@ -29,7 +29,8 @@ export default function Footer() {
                     </h4>
 
                     <div className="mt-3 space-y-2 text-xs text-text-secondary hover:text-primary">
-                        <p>Tentang Kami</p>
+                        <Link href="tentang-kami">Tentang Kami
+                        </Link>
                     </div>
                 </div>
 

@@ -1,29 +1,35 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { IconLayoutDashboard, IconSearch } from '@tabler/icons-react';
+
+
 
 export default function DashboardSidebarUser() {
+    const pathname = usePathname()
     return (
         <aside className="flex h-screen w-60 flex-col border-r border-border bg-surface">
             <div className="px-6 py-6">
-                <Image
-                    src="/img/logo.png"
-                    alt="KosEase"
-                    width={100}
-                    height={30}
-                />
+                <Link href="/" title="Kembali ke homepage">
+                    <Image
+                        src="/img/logo.png"
+                        alt="KosEase"
+                        width={100}
+                        height={30}
+                    />
+                </Link>
             </div>
 
             <nav className="flex flex-col gap-1 px-4">
+
                 <Link
-                    href="/"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs text-text-primary hover:bg-primary-light hover:text-primary"
+                    href="/dashboard"
+                    title="Halaman utama dashboard"
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs ${pathname === "/dashboard" ? "bg-primary-light font-semibold text-primary" : "text-text-primary hover:bg-primary-light hover:text-primary"}`}
                 >
-                    <Image
-                        src="/img/home.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                    />
+                    <IconLayoutDashboard size={16} stroke={2} />
                     Beranda
                 </Link>
 
@@ -31,12 +37,7 @@ export default function DashboardSidebarUser() {
                     href="/cari-kos"
                     className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs text-text-primary hover:bg-primary-light hover:text-primary"
                 >
-                    <Image
-                        src="/img/search.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                    />
+                    <IconSearch size={16} stroke={2} />
                     Cari Kos
                 </Link>
 

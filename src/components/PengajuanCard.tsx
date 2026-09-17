@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { IconArrowRight } from "@tabler/icons-react";
 
 type PengajuanCardProps = {
     status: "belum_mengajukan" | "menunggu" | "disetujui" | "ditolak";
@@ -30,13 +31,7 @@ export default function PengajuanCard({
                             className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-body text-xs font-semibold text-white transition-colors hover:bg-primary-dark"
                         >
                             Ajukan Sekarang
-                            <Image
-                                src="/img/arrow-right-primary.svg"
-                                alt=""
-                                width={16}
-                                height={16}
-                                className="brightness-0 invert"
-                            />
+                            <IconArrowRight size={16} stroke={2} color="#ffffff" />
                         </Link>
                     </div>
 

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconSearch } from '@tabler/icons-react';
+import { logoutAction } from "@/app/(auth)/actions";
 
 
 
@@ -110,18 +111,15 @@ export default function DashboardSidebarUser() {
                     Ajukan Jadi Pemilik Kos
                 </Link>
 
-                <button
-                    type="button"
-                    className="mt-3 flex items-center gap-3 px-3 py-2.5 text-xs text-error hover:opacity-80"
-                >
-                    <Image
-                        src="/img/log-out.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                    />
-                    Keluar
-                </button>
+                <form action={logoutAction} className="mt-3">
+                    <button
+                        type="submit"
+                        className="flex w-full items-center gap-3 px-3 py-2.5 text-xs text-error hover:opacity-80"
+                    >
+                        <Image src="/img/log-out.svg" alt="" width={16} height={16} />
+                        Keluar
+                    </button>
+                </form>
             </div>
         </aside>
     );

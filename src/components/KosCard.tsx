@@ -44,7 +44,7 @@ export default function KosCard({
                         {tipe}
                     </span>
 
-                    <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status === "Penuh" ? "bg-error text-white" : "bg-primary text-white"}`}>
                         {status}
                     </span>
                 </div>

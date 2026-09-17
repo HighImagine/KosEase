@@ -1,5 +1,5 @@
 export type TipeKos = "Campur" | "Laki-laki" | "Perempuan";
-export type StatusKamar = "Tersedia" | "Hampir Penuh" | "Penuh";
+export type StatusKamar = "Tersedia" | "Penuh";
 
 export type Fasilitas = string; // e.g. "WiFi", "AC", "Kamar Mandi Dalam"
 
@@ -14,7 +14,7 @@ export type TipeKamar = {
 export type Kos = {
   id: number;
   nama: string;
-  lokasi: string; // kota/kecamatan singkat
+  lokasi: string; // kota/kecamatan
   alamat: string;
   harga: number; // harga termurah per bulan
   gambar: string; // thumbnail utama
@@ -59,7 +59,7 @@ export const kosList: Kos[] = [
     ulasanCount: 24,
     kamar: [
       { nama: "Standard", ukuran: "3 × 4 m", harga: 800000, ketersediaan: "Tersedia", stok: 2 },
-      { nama: "Deluxe", ukuran: "4 × 4 m", harga: 1100000, ketersediaan: "Hampir Penuh", stok: 1 },
+      { nama: "Deluxe", ukuran: "4 × 4 m", harga: 1100000, ketersediaan: "Tersedia", stok: 1 },
     ],
   },
   {
@@ -108,13 +108,13 @@ export const kosList: Kos[] = [
     gambar: "/img/kos-placeholder.png",
     images: ["/img/kos-placeholder.png", "/img/kos-placeholder.png", "/img/kos-placeholder.png"],
     tipe: "Campur",
-    status: "Hampir Penuh",
+    status: "Tersedia",
     deskripsi: "Kos premium di Kemang dengan desain modern, cocok untuk profesional muda. Akses TransJakarta dekat.",
     fasilitas: ["WiFi", "AC", "Kamar Mandi Dalam", "Parkir Motor", "Dapur Bersama", "Mesin Cuci Bersama"],
     rating: 4.9,
     ulasanCount: 32,
     kamar: [
-      { nama: "Standard", ukuran: "3 × 4 m", harga: 1500000, ketersediaan: "Hampir Penuh", stok: 1 },
+      { nama: "Standard", ukuran: "3 × 4 m", harga: 1500000, ketersediaan: "Penuh", stok: 0 },
       { nama: "Suite", ukuran: "5 × 4 m", harga: 2200000, ketersediaan: "Tersedia", stok: 2 },
     ],
   },

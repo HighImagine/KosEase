@@ -4,12 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconSearch } from '@tabler/icons-react';
-import { logoutAction } from "@/app/(auth)/actions";
+import LogoutButton from "./LogoutButton";
 
 
 
-export default function DashboardSidebarUser() {
+type Props = {
+    userName?: string | null;
+    userAvatar?: string | null;
+    userEmail?: string | null;
+};
+
+export default function DashboardSidebarUser({ userName, userAvatar, userEmail }: Props) {
     const pathname = usePathname()
+    const displayName = userName ?? "Tamu";
+    const avatarSrc = userAvatar ?? "/img/user.jpg";
     return (
         <aside className="flex h-screen w-60 flex-col border-r border-border bg-surface">
             <div className="px-6 py-6">
@@ -86,16 +94,21 @@ export default function DashboardSidebarUser() {
             <div className="mt-auto px-4 pb-6">
                 <div className="mb-4 flex items-center gap-3 px-3">
                     <Image
-                        src="/img/user.jpg"
-                        alt="Ahmad Syafi'i"
+                        src={avatarSrc}
+                        alt={displayName}
                         width={32}
                         height={32}
                         className="rounded-full object-cover"
                     />
 
-                    <p className="text-xs font-semibold text-text-primary">
-                        Ahmad Syafi'i
-                    </p>
+                    <div className="min-w-0">
+                        <p className="truncate text-xs font-semibold text-text-primary">
+                            {displayName}
+                        </p>
+                        {userEmail && (
+                            <p className="truncate text-[10px] text-text-secondary">{userEmail}</p>
+                        )}
+                    </div>
                 </div>
 
                 <Link
@@ -111,15 +124,9 @@ export default function DashboardSidebarUser() {
                     Ajukan Jadi Pemilik Kos
                 </Link>
 
-                <form action={logoutAction} className="mt-3">
-                    <button
-                        type="submit"
-                        className="flex w-full items-center gap-3 px-3 py-2.5 text-xs text-error hover:opacity-80"
-                    >
-                        <Image src="/img/log-out.svg" alt="" width={16} height={16} />
-                        Keluar
-                    </button>
-                </form>
+                <div className="mt-3">
+                    <LogoutButton variant="sidebar" />
+                </div>
             </div>
         </aside>
     );

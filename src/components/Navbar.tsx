@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { logoutAction } from "@/app/(auth)/actions";
+import LogoutButton from "./LogoutButton";
 
 type NavbarProps = {
   user: { email: string; displayName: string | null; role: string | null } | null;
@@ -41,7 +41,7 @@ export default function Navbar({ user }: NavbarProps) {
               <div className="absolute right-0 top-12 z-50 w-48 rounded-xl border border-border bg-surface p-2 shadow-lg">
                 <Link href="/dashboard" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2 text-xs hover:bg-background">Dashboard</Link>
                 {role === "pemilik" && <Link href="/dashboard/pemilik" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2 text-xs hover:bg-background">Kelola Kos</Link>}
-                <form action={logoutAction}><button type="submit" className="w-full text-left rounded-lg px-3 py-2 text-xs text-error hover:bg-background">Keluar</button></form>
+                <LogoutButton variant="dropdown" />
               </div>
             )}
           </div>

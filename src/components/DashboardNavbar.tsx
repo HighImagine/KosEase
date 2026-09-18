@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { IconBell } from '@tabler/icons-react';
 
 type DashboardNavbarProps = {
     title: string;
@@ -27,12 +28,7 @@ export default function DashboardNavbar({
                         type="button"
                         className="flex h-8 w-8 items-center justify-center rounded-full"
                     >
-                        <Image
-                            src="/img/bell.svg"
-                            alt="Notifikasi"
-                            width={20}
-                            height={20}
-                        />
+                        <IconBell size={16} stroke={2} color="#4b5563" />
                     </button>
 
                     {/* Profile */}

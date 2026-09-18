@@ -1,18 +1,41 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
-import DashboardSidebarUser from "@/components/DashboardSidebarUser";
+import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
 import PengajuanCard from "@/components/PengajuanCard";
+import ActiveBookingCard from "@/components/ActiveBookingCard";
+import { createClient } from "@/lib/supabase/server";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    let displayName: string | null = null;
+    let avatarUrl: string | null = null;
+    let email: string | null = null;
+    let roleLabel = "Pengguna";
+    if (user) {
+        email = user.email ?? null;
+        displayName = (user.user_metadata?.nama_lengkap as string) ?? user.email?.split("@")[0] ?? "Pengguna";
+        avatarUrl = (user.user_metadata?.avatar_url as string) ?? null;
+        try {
+            const { data } = await supabase.from("profiles").select("full_name, nama_lengkap, avatar_url, role").eq("id", user.id).single();
+            if (data) {
+                displayName = (data.full_name as string) ?? (data.nama_lengkap as string) ?? displayName;
+                avatarUrl = (data.avatar_url as string) ?? avatarUrl;
+                if (data.role === "pemilik") roleLabel = "Pemilik Kos";
+                else if (data.role === "admin") roleLabel = "Admin";
+            }
+        } catch {}
+    }
+
     return (
         <div className="flex min-h-screen bg-background">
-            <DashboardSidebarUser />
+            <DashboardSidebarUserWrapper />
 
             <div className="flex flex-1 flex-col">
                 <DashboardNavbar
                     title="Dashboard"
-                    userName="Ahmad Syafi'i"
-                    userRole="Pengguna"
-                    userImage="/img/user.jpg"
+                    userName={displayName ?? "Tamu"}
+                    userRole={roleLabel}
+                    userImage={avatarUrl ?? "/img/user.jpg"}
                 />
 
                 <main className="flex-1 p-6">
@@ -29,21 +52,21 @@ export default function DashboardPage() {
                                     Nama Lengkap
                                 </p>
                                 <p className="mt-1 font-body text-sm font-semibold text-text-primary">
-                                    Ahmad Syafi'i
+                                    {displayName ?? "-"}
                                 </p>
 
                                 <p className="mt-3 font-body text-xs text-text-secondary">
                                     Alamat Email
                                 </p>
                                 <p className="mt-1 font-body text-sm font-semibold text-text-primary">
-                                    ahmad.syafii@mahasiswa.ac.id
+                                    {email ?? "-"}
                                 </p>
 
                                 <p className="mt-3 font-body text-xs text-text-secondary">
                                     No. Telepon
                                 </p>
                                 <p className="mt-1 font-body text-sm font-semibold text-text-primary">
-                                    +62 856-1234-5678
+                                    {(user?.user_metadata?.phone as string) ?? "-"}
                                 </p>
                             </div>
                         </div>
@@ -51,6 +74,19 @@ export default function DashboardPage() {
                         {/* Pengajuan Pemilik */}
                         <PengajuanCard status="belum_mengajukan" />
 
+                    </div>
+
+                    {/* Reservasi Aktif */}
+                    <div className="mt-6 rounded-xl bg-surface overflow-hidden">
+                        <ActiveBookingCard
+                            gambar="/img/kos-placeholder.png"
+                            namaKos="Kos Putri Sakinah"
+                            kamarNama="Kamar A3"
+                            kamarDetail="3x4m • Kamar Mandi Dalam"
+                            tanggalMasuk="1 Februari 2026"
+                            harga={1200000}
+                            status="Menunggu"
+                        />
                     </div>
                 </main>
             </div>

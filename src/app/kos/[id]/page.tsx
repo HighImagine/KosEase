@@ -137,7 +137,11 @@ export default async function KosDetailPage({ params }: PageProps) {
                                             <p className="mt-1 text-xs text-text-secondary">{k.ukuran} · {k.stok} kamar</p>
                                         </div>
                                         <p className="text-sm font-semibold text-text-primary">{formatHarga(k.harga)}<span className="font-normal text-text-secondary"> / bulan</span></p>
-                                        <span className={`w-fit rounded-full px-2 py-1 text-xs font-semibold ${k.ketersediaan === "Tersedia" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{k.ketersediaan}</span>
+                                        {k.ketersediaan === "Tersedia" ? (
+                                            <Link href={`/pemesanan?kosId=${kos.id}&kamar=${encodeURIComponent(k.nama)}`} className="w-fit rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 hover:bg-green-200">Pesan</Link>
+                                        ) : (
+                                            <span className="w-fit rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">Penuh</span>
+                                        )}
                                     </div>
                                 ))}
 
@@ -195,13 +199,11 @@ export default async function KosDetailPage({ params }: PageProps) {
                         </div>
 
                         {kos.kamar.every((k) => k.ketersediaan === "Penuh") && <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">Kos ini sedang penuh — cek kembali nanti atau hubungi pemilik.</p>}
-                        <button
-                            type="button"
-                            disabled={kos.kamar.every((k) => k.ketersediaan === "Penuh")}
-                            className="mt-5 w-full rounded-lg bg-accent px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-orange-600 disabled:bg-gray-300 disabled:text-gray-500"
-                        >
-                            {kos.kamar.every((k) => k.ketersediaan === "Penuh") ? "Penuh" : "Pesan Kamar Sekarang"}
-                        </button>
+                        {kos.kamar.every((k) => k.ketersediaan === "Penuh") ? (
+                            <button disabled className="mt-5 w-full rounded-lg bg-gray-300 px-4 py-3 text-sm font-semibold text-gray-500">Penuh</button>
+                        ) : (
+                            <Link href={`/pemesanan?kosId=${kos.id}&kamar=${encodeURIComponent(kos.kamar.find((k) => k.ketersediaan === "Tersedia")?.nama ?? kos.kamar[0].nama)}`} className="mt-5 block w-full rounded-lg bg-accent px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-orange-600">Ajukan Pemesanan</Link>
+                        )}
 
                         {/* Simpan & Bagikan */}
                         <div className="mt-3 grid grid-cols-2 gap-2">

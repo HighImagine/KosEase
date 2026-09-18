@@ -40,12 +40,27 @@ export async function loginAction(_prev: unknown, formData: FormData) {
   const parsed = loginSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
   });
   if (error) return { error: "Email atau kata sandi salah" };
-  redirect((formData.get("next") as string) || "/dashboard");
+  const next = formData.get("next") as string | null;
+  if (next) redirect(next);
+  // PRD 3 aktor: penyewa/user, pemilik kos, admin (kamu)
+  let role: string | null = null;
+  try {
+    const userId = data.user?.id;
+    if (userId) {
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).single();
+      role = (profile?.role as string) ?? null;
+    }
+  } catch {}
+  // normalize: "user"/"pencari" dianggap "penyewa"
+  const norm = role?.toLowerCase();
+  if (norm === "pemilik" || norm === "pemilik_kos" || norm === "admin") redirect("/dashboard");
+  // penyewa/user -> homepage
+  redirect("/");
 }
 
 export async function logoutAction() {

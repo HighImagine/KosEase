@@ -9,7 +9,7 @@ export default async function NavbarWrapper() {
   if (user) {
     displayName = (user.user_metadata?.nama_lengkap as string) ?? user.email?.split("@")[0] ?? null;
     const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-    role = (data?.role as string) ?? "pencari";
+    role = (data?.role as string) ?? "penyewa";
   }
   return <Navbar user={user ? { email: user.email!, displayName, role } : null} />;
 }

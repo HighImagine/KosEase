@@ -10,18 +10,20 @@ export default async function DashboardPage() {
     let displayName: string | null = null;
     let avatarUrl: string | null = null;
     let email: string | null = null;
-    let roleLabel = "Pengguna";
+    let roleLabel = "Penyewa";
     if (user) {
         email = user.email ?? null;
-        displayName = (user.user_metadata?.nama_lengkap as string) ?? user.email?.split("@")[0] ?? "Pengguna";
+        displayName = (user.user_metadata?.nama_lengkap as string) ?? user.email?.split("@")[0] ?? "Penyewa";
         avatarUrl = (user.user_metadata?.avatar_url as string) ?? null;
         try {
             const { data } = await supabase.from("profiles").select("full_name, nama_lengkap, avatar_url, role").eq("id", user.id).single();
             if (data) {
                 displayName = (data.full_name as string) ?? (data.nama_lengkap as string) ?? displayName;
                 avatarUrl = (data.avatar_url as string) ?? avatarUrl;
-                if (data.role === "pemilik") roleLabel = "Pemilik Kos";
-                else if (data.role === "admin") roleLabel = "Admin";
+                const r = (data.role as string)?.toLowerCase();
+                if (r === "pemilik" || r === "pemilik_kos") roleLabel = "Pemilik Kos";
+                else if (r === "admin") roleLabel = "Admin";
+                else roleLabel = "Penyewa";
             }
         } catch {}
     }

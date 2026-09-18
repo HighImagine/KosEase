@@ -21,7 +21,7 @@ export default async function PemesananPage({ searchParams }: PageProps) {
         <main className="min-h-screen bg-background">
             <NavbarWrapper />
             <div className="mx-auto max-w-7xl px-6 py-6">
-                <Link href="/dashboard" className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-dark">← Kembali</Link>
+                <Link href={kos ? `/kos/${kos.id}` : "/cari-kos"} className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-dark">← Kembali</Link>
 
                 {/* Kos header card sesuai pemesanan.png */}
                 <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl bg-surface p-4 shadow-sm">

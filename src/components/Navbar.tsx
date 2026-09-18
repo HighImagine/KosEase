@@ -12,7 +12,7 @@ type NavbarProps = {
 export default function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const role = user?.role ?? "pencari";
+  const role = user?.role ?? "penyewa";
 
   return (
     <nav className="relative z-50 h-[68px] bg-white border-b border-gray-200">
@@ -35,7 +35,6 @@ export default function Navbar({ user }: NavbarProps) {
             <button onClick={() => setOpen(!open)} className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 hover:bg-background">
               <Image src="/img/user.jpg" alt={user.displayName ?? "User"} width={28} height={28} className="rounded-full object-cover" />
               <span className="hidden sm:block text-xs font-semibold text-text-primary">{user.displayName}</span>
-              <span className="hidden sm:block rounded-full bg-primary-light px-2 py-0.5 text-[10px] font-semibold text-primary">{role}</span>
             </button>
             {open && (
               <div className="absolute right-0 top-12 z-50 w-48 rounded-xl border border-border bg-surface p-2 shadow-lg">

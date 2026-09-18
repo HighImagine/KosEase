@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconLayoutDashboard, IconSearch } from '@tabler/icons-react';
+import { IconLayoutDashboard, IconSearch, IconUser } from '@tabler/icons-react';
 import LogoutButton from "./LogoutButton";
 
 
@@ -87,6 +87,15 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail }
                         height={16}
                     />
                     Riwayat
+                </Link>
+                <Link
+                    href="/dashboard/profil"
+                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs text-text-primary hover:bg-primary-light hover:text-primary"
+                >
+
+
+                    <IconUser size={16} stroke={2} color="#4b5563" />
+                    Profil
                 </Link>
             </nav>
 

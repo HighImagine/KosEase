@@ -35,8 +35,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
   if (user && isAuth) {
+    // PRD 3 aktor: penyewa/user, pemilik kos, admin
+    let role: string | null = null;
+    try {
+      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+      role = (data?.role as string) ?? null;
+    } catch {}
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    const norm = role?.toLowerCase();
+    if (norm === "pemilik" || norm === "pemilik_kos" || norm === "admin") url.pathname = "/dashboard";
+    else url.pathname = "/";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

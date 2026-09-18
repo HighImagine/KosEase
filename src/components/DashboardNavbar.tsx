@@ -26,7 +26,7 @@ export default function DashboardNavbar({
                 <div className="flex items-center gap-4">
                     <button
                         type="button"
-                        className="flex h-8 w-8 items-center justify-center rounded-full"
+                        className="flex h-8 w-8 items-center justify-center rounded-full hover:cursor-pointer"
                     >
                         <IconBell size={16} stroke={2} color="#4b5563" />
                     </button>

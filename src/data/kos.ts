@@ -1,6 +1,27 @@
 export type TipeKos = "Campur" | "Laki-laki" | "Perempuan";
 export type StatusKamar = "Tersedia" | "Penuh";
 
+export type KetersediaanStatus = "banyak" | "sedang" | "sedikit";
+
+export function getKetersediaanStatus(totalStok: number, availableStok: number): KetersediaanStatus {
+  const ratio = availableStok / totalStok;
+  if (ratio >= 0.66) return "banyak";
+  if (ratio >= 0.33) return "sedang";
+  return "sedikit";
+}
+
+export function getStatusLabel(status: KetersediaanStatus): string {
+  if (status === "banyak") return "Tersedia";
+  if (status === "sedang") return "Hampir Penuh";
+  return "Penuh";
+}
+
+export const statusStyles: Record<KetersediaanStatus, string> = {
+  banyak: "bg-success text-white",
+  sedang: "bg-warning text-white",
+  sedikit: "bg-error text-white",
+};
+
 export type Fasilitas = string; // e.g. "WiFi", "AC", "Kamar Mandi Dalam"
 
 export type TipeKamar = {

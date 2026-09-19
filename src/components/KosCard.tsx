@@ -1,4 +1,4 @@
-import { TipeKos, tipeStyles, formatHarga } from "@/data/kos";
+import { TipeKos, tipeStyles, formatHarga, getKetersediaanStatus, getStatusLabel, statusStyles, kosList } from "@/data/kos";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -21,6 +21,10 @@ export default function KosCard({
     tipe,
     status,
 }: KosCardProps) {
+    const totalKamar = kosList.find((k) => k.id === id)?.kamar ?? [];
+    const availableKamar = totalKamar.filter((k) => k.ketersediaan === "Tersedia").length;
+    const availStatus = getKetersediaanStatus(totalKamar.length, availableKamar);
+    const availLabel = getStatusLabel(availStatus);
 
     return (
         <div className="overflow-hidden rounded-2xl bg-surface shadow-sm transition-shadow hover:shadow-md">
@@ -36,7 +40,7 @@ export default function KosCard({
 
             <div className="p-5">
 
-                <div className="flex items-center gap-2">
+                 <div className="flex items-center gap-2">
                     <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${tipeStyles[tipe]
                             }`}
@@ -44,10 +48,14 @@ export default function KosCard({
                         {tipe}
                     </span>
 
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status === "Penuh" ? "bg-error text-white" : "bg-primary text-white"}`}>
-                        {status}
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusStyles[availStatus]}`}>
+                        {availLabel}
                     </span>
                 </div>
+
+                <p className="mt-1 font-body text-xs text-text-secondary">
+                    Tersisa {availableKamar} kamar
+                </p>
 
                 <h3 className="mt-3 font-heading text-xl font-bold text-text-primary">
                     {nama}

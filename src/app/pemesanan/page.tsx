@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import NavbarWrapper from "@/components/NavbarWrapper";
 import Footer from "@/components/Footer";
-import { kosList, formatHarga } from "@/data/kos";
+import { kosList, formatHarga, getKetersediaanStatus, getStatusLabel, statusStyles } from "@/data/kos";
 import PemesananForm from "./PemesananForm";
 
 type PageProps = {
@@ -32,7 +32,12 @@ export default async function PemesananPage({ searchParams }: PageProps) {
                         <div>
                             <div className="flex items-center gap-2">
                                 <span className="rounded-md bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-700">{display.tipe}</span>
-                                <span className="text-xs font-semibold text-primary">{display.sisa}</span>
+                                {kos && (() => {
+                                    const totalStok = kos.kamar.reduce((a,c) => a+c.stok, 0);
+                                    const availStok = kos.kamar.filter((k) => k.ketersediaan === "Tersedia").length;
+                                    const s = getKetersediaanStatus(totalStok, availStok);
+                                    return <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusStyles[s]}`}>{getStatusLabel(s)}</span>;
+                                })()}
                             </div>
                             <h1 className="mt-1 font-heading text-lg font-bold text-text-primary">{display.nama}</h1>
                             <p className="text-xs text-text-secondary">{display.kamarLabel} • {display.fasilitas}</p>

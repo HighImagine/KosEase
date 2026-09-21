@@ -34,12 +34,7 @@ export default async function DashboardPage() {
             <DashboardSidebarUserWrapper />
 
             <div className="flex flex-1 flex-col">
-                <DashboardNavbar
-                    title="Dashboard"
-                    userName={displayName ?? "Tamu"}
-                    userRole={roleLabel}
-                    userImage={avatarUrl}
-                />
+                <DashboardNavbar title="Dashboard" />
 
                 <main className="flex-1 p-6">
                     <div className="grid gap-4 lg:grid-cols-3">

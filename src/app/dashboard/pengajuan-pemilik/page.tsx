@@ -5,15 +5,10 @@ import DashboardSidebarUser from "@/components/DashboardSidebarUser";
 export default function PengajuanPemilik() {
     return (
         <div className="flex min-h-screen bg-background">
-            <DashboardSidebarUser />
+            <DashboardSidebarUser userRole="Pengguna" />
 
             <div className="flex flex-1 flex-col">
-                <DashboardNavbar
-                    title="Ajukan Diri sebagai Pemilik Kos"
-                    userName="Ahmad Syafi'i"
-                    userRole="Pengguna"
-                    userImage="/img/user.jpg"
-                />
+<DashboardNavbar title="Ajukan Diri sebagai Pemilik Kos" />
 
                 <main className="flex-1 p-6">
                     {/* Info */}

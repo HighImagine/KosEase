@@ -38,12 +38,7 @@ if (user) {
       <DashboardSidebarUserWrapper />
 
       <div className="flex flex-1 flex-col">
-        <DashboardNavbar
-          title="Profil Saya"
-          userName={displayName ?? "Tamu"}
-          userRole={userRole}
-          userImage={avatarUrl}
-        />
+<DashboardNavbar title="Profil Saya" />
 
         <main className="flex-1 p-6">
           <div className="mx-auto max-w-xl">

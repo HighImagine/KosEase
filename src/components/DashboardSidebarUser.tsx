@@ -12,9 +12,10 @@ type Props = {
     userName?: string | null;
     userAvatar?: string | null;
     userEmail?: string | null;
+    userRole?: string | null;
 };
 
-export default function DashboardSidebarUser({ userName, userAvatar, userEmail }: Props) {
+export default function DashboardSidebarUser({ userName, userAvatar, userEmail, userRole }: Props) {
     const pathname = usePathname()
     const displayName = userName ?? "Tamu";
     const hasAvatar = !!userAvatar;
@@ -113,6 +114,9 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail }
                             </p>
                             {userEmail && (
                                 <p className="truncate text-[10px] text-text-secondary">{userEmail}</p>
+                            )}
+                            {userRole && (
+                                <p className="truncate text-[10px] font-semibold text-primary">{userRole}</p>
                             )}
                         </div>
                     </div>

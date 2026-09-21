@@ -113,7 +113,7 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail }
                     {hasAvatar ? (
                         <Image src={userAvatar} alt={displayName} width={32} height={32} className="rounded-full object-cover" />
                     ) : (
-                        <IconUser size={32} stroke={2} color="#4b5563" />
+                        <Image src="/img/avatar-default.png" alt={displayName} width={32} height={32} className="rounded-full object-cover" />
                     )}
 
                     <div className="min-w-0">

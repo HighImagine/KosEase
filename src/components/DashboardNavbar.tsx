@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { IconBell, IconUser } from '@tabler/icons-react';
+import { IconBell } from '@tabler/icons-react';
 
 type DashboardNavbarProps = {
     title: string;
@@ -46,7 +46,7 @@ export default function DashboardNavbar({
                         {hasImage ? (
                             <Image src={userImage} alt={userName} width={32} height={32} className="rounded-full object-cover" />
                         ) : (
-                            <IconUser size={32} stroke={2} color="#4b5563" />
+                            <Image src="/img/avatar-default.png" alt={userName} width={32} height={32} className="rounded-full object-cover" />
                         )}
                     </div>
                 </div>

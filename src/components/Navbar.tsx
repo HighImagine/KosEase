@@ -3,7 +3,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useCallback } from "react";
-import { IconUser } from "@tabler/icons-react";
 import LogoutButton from "./LogoutButton";
 
 type NavbarProps = {
@@ -50,12 +49,8 @@ export default function Navbar({ user, avatarUrl }: NavbarProps) {
         ) : (
           <div className="relative flex items-center gap-3">
             <button onClick={toggleDropdown} className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 hover:bg-background">
-              {avatarUrl ? (
-                <Image src={avatarUrl} alt={user.displayName ?? "User"} width={28} height={28} className="rounded-full object-cover" />
-              ) : (
-                <IconUser size={28} stroke={2} color="#4b5563" />
-              )}
-              <span className="hidden sm:block text-xs font-semibold text-text-primary">{user.displayName}</span>
+              <Image src={avatarUrl ?? "/img/avatar-default.png"} alt={user.displayName ?? "User"} width={28} height={28} className="rounded-full object-cover" />
+               <span className="hidden sm:block text-xs font-semibold text-text-primary">{user.displayName}</span>
             </button>
             {render && (
               <div

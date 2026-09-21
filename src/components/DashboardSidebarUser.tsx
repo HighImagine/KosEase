@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconLayoutDashboard, IconSearch, IconUser, IconHome } from '@tabler/icons-react';
+import { IconLayoutDashboard, IconSearch, IconHome } from '@tabler/icons-react';
 import LogoutButton from "./LogoutButton";
 
 
@@ -96,35 +96,27 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail }
                     />
                     Riwayat
                 </Link>
-                <Link
-                    href="/dashboard/profil"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs text-text-primary hover:bg-primary-light hover:text-primary"
-                >
-
-
-                    <IconUser size={16} stroke={2} color="#4b5563" />
-                    Profil
-                </Link>
             </nav>
 
             {/* Bottom */}
             <div className="mt-auto px-4 pb-6">
-                <div className="mb-4 flex items-center gap-3 px-3">
-                    {hasAvatar ? (
-                        <Image src={userAvatar} alt={displayName} width={32} height={32} className="rounded-full object-cover" />
-                    ) : (
-                        <Image src="/img/avatar-default.png" alt={displayName} width={32} height={32} className="rounded-full object-cover" />
-                    )}
-
-                    <div className="min-w-0">
-                        <p className="truncate text-xs font-semibold text-text-primary">
-                            {displayName}
-                        </p>
-                        {userEmail && (
-                            <p className="truncate text-[10px] text-text-secondary">{userEmail}</p>
+                <Link href="/dashboard/profil" className="flex items-center gap-3 px-3">
+                    <div className="mb-4 flex items-center gap-3">
+                        {hasAvatar ? (
+                            <Image src={userAvatar} alt={displayName} width={32} height={32} className="rounded-full object-cover" />
+                        ) : (
+                            <Image src="/img/avatar-default.png" alt={displayName} width={32} height={32} className="rounded-full object-cover" />
                         )}
+                        <div className="min-w-0">
+                            <p className="truncate text-xs font-semibold text-text-primary">
+                                {displayName}
+                            </p>
+                            {userEmail && (
+                                <p className="truncate text-[10px] text-text-secondary">{userEmail}</p>
+                            )}
+                        </div>
                     </div>
-                </div>
+                </Link>
 
                 <Link
                     href="/dashboard/pengajuan-pemilik"

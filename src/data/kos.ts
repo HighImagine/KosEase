@@ -25,11 +25,12 @@ export const statusStyles: Record<KetersediaanStatus, string> = {
 export type Fasilitas = string; // e.g. "WiFi", "AC", "Kamar Mandi Dalam"
 
 export type TipeKamar = {
-  nama: string; // e.g. "Standard", "Deluxe"
-  ukuran: string; // e.g. "3 × 4 m"
-  harga: number; // per bulan, angka murni untuk filter/sort
+  nama: string;
+  ukuran: string;
+  harga: number;
   ketersediaan: StatusKamar;
   stok: number;
+  deskripsi: string;
 };
 
 export type Kos = {
@@ -79,8 +80,8 @@ export const kosList: Kos[] = [
     rating: 4.8,
     ulasanCount: 24,
     kamar: [
-      { nama: "Standard", ukuran: "3 × 4 m", harga: 800000, ketersediaan: "Tersedia", stok: 2 },
-      { nama: "Deluxe", ukuran: "4 × 4 m", harga: 1100000, ketersediaan: "Tersedia", stok: 1 },
+      { nama: "Standard", ukuran: "3 × 4 m", harga: 800000, ketersediaan: "Tersedia", stok: 2, deskripsi: "Kamar nyaman untuk 1-2 orang, fasilitas dasar lengkap." },
+      { nama: "Deluxe", ukuran: "4 × 4 m", harga: 1100000, ketersediaan: "Tersedia", stok: 1, deskripsi: "Kamar lebih luas dengan balkon pribadi dan view taman." },
     ],
   },
   {
@@ -98,7 +99,7 @@ export const kosList: Kos[] = [
     rating: 4.6,
     ulasanCount: 18,
     kamar: [
-      { nama: "Standard", ukuran: "3 × 3 m", harga: 1000000, ketersediaan: "Tersedia", stok: 3 },
+      { nama: "Standard", ukuran: "3 × 3 m", harga: 1000000, ketersediaan: "Tersedia", stok: 3, deskripsi: "Kamar standar hemat, cocok untuk 1 orang." },
     ],
   },
   {
@@ -116,8 +117,8 @@ export const kosList: Kos[] = [
     rating: 4.5,
     ulasanCount: 12,
     kamar: [
-      { nama: "Standard", ukuran: "3 × 4 m", harga: 750000, ketersediaan: "Tersedia", stok: 2 },
-      { nama: "Deluxe", ukuran: "4 × 5 m", harga: 950000, ketersediaan: "Tersedia", stok: 1 },
+      { nama: "Standard", ukuran: "3 × 4 m", harga: 750000, ketersediaan: "Tersedia", stok: 2, deskripsi: "Kamar ekonomis dekat kampus, cocok mahasiswa." },
+      { nama: "Deluxe", ukuran: "4 × 5 m", harga: 950000, ketersediaan: "Tersedia", stok: 1, deskripsi: "Kamar luas dengan ruang belajar dan lemari besar." },
     ],
   },
   {
@@ -135,8 +136,8 @@ export const kosList: Kos[] = [
     rating: 4.9,
     ulasanCount: 32,
     kamar: [
-      { nama: "Standard", ukuran: "3 × 4 m", harga: 1500000, ketersediaan: "Penuh", stok: 0 },
-      { nama: "Suite", ukuran: "5 × 4 m", harga: 2200000, ketersediaan: "Tersedia", stok: 2 },
+      { nama: "Standard", ukuran: "3 × 4 m", harga: 1500000, ketersediaan: "Penuh", stok: 0, deskripsi: "Kamar standar premium, sangat strategis di Kemang." },
+      { nama: "Suite", ukuran: "5 × 4 m", harga: 2200000, ketersediaan: "Tersedia", stok: 2, deskripsi: "Suite premium dengan living room terpisah dan AC twin." },
     ],
   },
   {
@@ -154,7 +155,7 @@ export const kosList: Kos[] = [
     rating: 4.7,
     ulasanCount: 15,
     kamar: [
-      { nama: "Standard", ukuran: "3 × 4 m", harga: 900000, ketersediaan: "Tersedia", stok: 4 },
+      { nama: "Standard", ukuran: "3 × 4 m", harga: 900000, ketersediaan: "Tersedia", stok: 4, deskripsi: "Kamar standar nyaman, dekat ITS dan UNAIR." },
     ],
   },
   {
@@ -172,7 +173,7 @@ export const kosList: Kos[] = [
     rating: 4.3,
     ulasanCount: 9,
     kamar: [
-      { nama: "Standard", ukuran: "3 × 3 m", harga: 650000, ketersediaan: "Tersedia", stok: 5 },
+      { nama: "Standard", ukuran: "3 × 3 m", harga: 650000, ketersediaan: "Tersedia", stok: 5, deskripsi: "Kamar murah ekonomis, cocok untuk mahasiswa baru." },
     ],
   },
 ];

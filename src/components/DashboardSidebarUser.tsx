@@ -17,7 +17,7 @@ type Props = {
 export default function DashboardSidebarUser({ userName, userAvatar, userEmail }: Props) {
     const pathname = usePathname()
     const displayName = userName ?? "Tamu";
-    const avatarSrc = userAvatar ?? "/img/user.jpg";
+    const hasAvatar = !!userAvatar;
     return (
         <aside className="flex h-screen w-60 flex-col border-r border-border bg-surface">
             <div className="px-6 py-6">
@@ -110,13 +110,11 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail }
             {/* Bottom */}
             <div className="mt-auto px-4 pb-6">
                 <div className="mb-4 flex items-center gap-3 px-3">
-                    <Image
-                        src={avatarSrc}
-                        alt={displayName}
-                        width={32}
-                        height={32}
-                        className="rounded-full object-cover"
-                    />
+                    {hasAvatar ? (
+                        <Image src={userAvatar} alt={displayName} width={32} height={32} className="rounded-full object-cover" />
+                    ) : (
+                        <IconUser size={32} stroke={2} color="#4b5563" />
+                    )}
 
                     <div className="min-w-0">
                         <p className="truncate text-xs font-semibold text-text-primary">

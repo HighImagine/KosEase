@@ -1,6 +1,6 @@
+import Image from "next/image";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUser from "@/components/DashboardSidebarUser";
-import Image from "next/image";
 
 export default function PengajuanPemilik() {
     return (

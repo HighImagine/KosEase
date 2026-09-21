@@ -4,6 +4,11 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+const profileSchema = z.object({
+  nama: z.string().min(2, "Nama minimal 2 karakter"),
+  phone: z.string().min(5, "Nomor minimal 5 digit").optional().or(z.literal("")),
+});
+
 const registerSchema = z.object({
   nama: z.string().min(2, "Nama minimal 2 karakter"),
   email: z.string().email("Email tidak valid"),
@@ -95,4 +100,36 @@ export async function resetPasswordAction(_prev: unknown, formData: FormData) {
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) return { error: error.message };
   redirect("/login?reset=1");
+}
+
+export async function updateProfileAction(_prev: unknown, formData: FormData) {
+  const raw = Object.fromEntries(formData) as Record<string, string>;
+  const parsed = profileSchema.safeParse({ nama: raw.nama, phone: raw.phone ?? "" });
+  if (!parsed.success) return { error: parsed.error.issues[0].message, currentName: raw.nama ?? "", currentEmail: "", currentPhone: raw.phone ?? "", currentAvatar: null };
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const currentEmail = user?.email ?? "";
+  if (!user) return { error: "User tidak ditemukan", currentName: parsed.data.nama, currentEmail, currentPhone: parsed.data.phone ?? "", currentAvatar: null };
+
+  const { nama, phone } = parsed.data;
+  let avatarUrl: string | null = null;
+
+  const avatarFile = formData.get("avatar") as File | null;
+  if (avatarFile && avatarFile.size > 0) {
+    const fileExt = avatarFile.name.split(".").pop();
+    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage.from("avatars").upload(fileName, avatarFile, { cacheControl: "3600", upsert: true });
+    if (!uploadError) {
+      const { data } = await supabase.storage.from("avatars").getPublicUrl(fileName);
+      avatarUrl = data.publicUrl;
+    }
+  }
+
+  const { error: profileError } = await supabase.from("profiles").update({ full_name: nama, nama_lengkap: nama, avatar_url: avatarUrl, phone }).eq("id", user.id).select().single();
+  if (profileError) return { error: profileError.message, currentName: nama, currentEmail, currentPhone: phone ?? "", currentAvatar: null };
+
+  await supabase.auth.updateUser({ data: { nama_lengkap: nama } });
+
+  return { success: "Profil berhasil diperbarui", currentName: nama, currentEmail, currentPhone: phone ?? "", currentAvatar: avatarUrl };
 }

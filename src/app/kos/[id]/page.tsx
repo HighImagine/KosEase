@@ -1,5 +1,5 @@
 import Footer from "@/components/Footer";
-import { kosList, tipeStyles, formatHarga, getKetersediaanStatus, statusStyles, getStatusLabel } from "@/data/kos";
+import { kosList, tipeStyles, formatHarga } from "@/data/kos";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -133,28 +133,23 @@ export default async function KosDetailPage({ params }: PageProps) {
                                     </p>
                                 </div>
 
-                                 {kos.kamar.map((k) => {
-                                     const availStatus = k.ketersediaan === "Tersedia" ? "sedang" : "sedikit";
-                                     const label = k.ketersediaan === "Tersedia" ? "Tersedia" : "Penuh";
-                                     const style = k.ketersediaan === "Tersedia" ? "bg-success text-white" : "bg-error text-white";
-                                     return (
-                                     <div key={k.nama} className="grid grid-cols-[1fr_auto_auto] items-center border-t border-border px-4 py-4 gap-4">
-                                         <div>
-                                             <p className="text-sm font-semibold text-text-primary">Kamar {k.nama}</p>
-                                             <p className="mt-1 text-xs text-text-secondary">{k.ukuran} · {k.stok} kamar</p>
-                                         </div>
-                                         <p className="text-sm font-semibold text-text-primary">{formatHarga(k.harga)}<span className="font-normal text-text-secondary"> / bulan</span></p>
-                                         <div className="flex items-center gap-2">
-                                             {k.ketersediaan === "Tersedia" ? (
-                                                 <Link href={`/pemesanan?kosId=${kos.id}&kamar=${encodeURIComponent(k.nama)}`} className="rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ backgroundColor: "var(--success)" }}>Pesan</Link>
-                                             ) : (
-                                                 <span className={`rounded-full px-3 py-1 text-xs font-semibold ${style}`}>Penuh</span>
-                                             )}
-                                             <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${style}`}>{k.stok}</span>
-                                         </div>
-                                     </div>
-                                     );
-                                 })}
+{kos.kamar.map((k) => {
+    const isTersedia = k.ketersediaan === "Tersedia";
+    const badgeStyle = isTersedia ? "bg-success/10 text-success" : "bg-error/10 text-error";
+    return (
+    <div key={k.nama} className="grid grid-cols-[1fr_auto_auto] items-center border-t border-border px-4 py-4 gap-4">
+        <div>
+            <p className="text-sm font-semibold text-text-primary">Kamar {k.nama}</p>
+            <p className="mt-0.5 text-xs text-text-secondary">{k.ukuran} · {k.stok} kamar</p>
+        </div>
+        <p className="text-sm font-semibold text-text-primary">{formatHarga(k.harga)}<span className="font-normal text-text-secondary"> / bulan</span></p>
+        <div className="flex items-center gap-2">
+            <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${badgeStyle}`}>{isTersedia ? "Tersedia" : "Penuh"}</span>
+            <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-semibold text-text-secondary border border-border">{k.stok}</span>
+        </div>
+    </div>
+    );
+})}
 
                                  {/* Ringkasan */}
                                  <div className="grid grid-cols-3 bg-background px-4 py-3 border-t border-border">
@@ -216,11 +211,11 @@ export default async function KosDetailPage({ params }: PageProps) {
 
                         </div>
 
-                        {kos.kamar.every((k) => k.ketersediaan === "Penuh") && <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">Kos ini sedang penuh — cek kembali nanti atau hubungi pemilik.</p>}
+{kos.kamar.every((k) => k.ketersediaan === "Penuh") && <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">Kos ini sedang penuh — cek kembali nanti atau hubungi pemilik.</p>}
                         {kos.kamar.every((k) => k.ketersediaan === "Penuh") ? (
                             <button disabled className="mt-5 w-full rounded-lg bg-gray-300 px-4 py-3 text-sm font-semibold text-gray-500">Penuh</button>
                         ) : (
-                            <Link href={`/pemesanan?kosId=${kos.id}&kamar=${encodeURIComponent(kos.kamar.find((k) => k.ketersediaan === "Tersedia")?.nama ?? kos.kamar[0].nama)}`} className="mt-5 block w-full rounded-lg bg-accent px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-orange-600">Ajukan Pemesanan</Link>
+                            <Link href={`/pemesanan?kosId=${kos.id}`} className="mt-5 block w-full rounded-lg bg-accent px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-orange-600">Ajukan Pemesanan</Link>
                         )}
 
                         {/* Simpan & Bagikan */}

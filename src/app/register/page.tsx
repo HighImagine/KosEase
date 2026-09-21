@@ -3,8 +3,6 @@ import Image from "next/image";
 import RegisterForm from "./RegisterForm";
 import { IconArrowLeft } from '@tabler/icons-react';
 
-
-
 export default function RegisterPage() {
     return (
         <main className="flex min-h-screen flex-col bg-background">

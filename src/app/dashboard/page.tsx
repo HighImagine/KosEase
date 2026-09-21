@@ -1,3 +1,4 @@
+import Link from "next/link";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
 import PengajuanCard from "@/components/PengajuanCard";
@@ -37,7 +38,7 @@ export default async function DashboardPage() {
                     title="Dashboard"
                     userName={displayName ?? "Tamu"}
                     userRole={roleLabel}
-                    userImage={avatarUrl ?? "/img/user.jpg"}
+                    userImage={avatarUrl}
                 />
 
                 <main className="flex-1 p-6">
@@ -45,31 +46,17 @@ export default async function DashboardPage() {
 
                         {/* Profil */}
                         <div className="lg:col-span-2 rounded-xl bg-surface p-5">
-                            <h2 className="font-heading text-base font-bold text-text-primary">
-                                Profil Saya
-                            </h2>
-
+                            <div className="flex items-center justify-between">
+                                <h2 className="font-heading text-base font-bold text-text-primary">Profil Saya</h2>
+                                <Link href="/dashboard/profil" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">Edit Profil</Link>
+                            </div>
                             <div className="mt-4">
-                                <p className="font-body text-xs text-text-secondary">
-                                    Nama Lengkap
-                                </p>
-                                <p className="mt-1 font-body text-sm font-semibold text-text-primary">
-                                    {displayName ?? "-"}
-                                </p>
-
-                                <p className="mt-3 font-body text-xs text-text-secondary">
-                                    Alamat Email
-                                </p>
-                                <p className="mt-1 font-body text-sm font-semibold text-text-primary">
-                                    {email ?? "-"}
-                                </p>
-
-                                <p className="mt-3 font-body text-xs text-text-secondary">
-                                    No. Telepon
-                                </p>
-                                <p className="mt-1 font-body text-sm font-semibold text-text-primary">
-                                    {(user?.user_metadata?.phone as string) ?? "-"}
-                                </p>
+                                <p className="font-body text-xs text-text-secondary">Nama Lengkap</p>
+                                <p className="mt-0.5 font-body text-sm font-semibold text-text-primary">{displayName ?? "-"}</p>
+                                <p className="mt-3 font-body text-xs text-text-secondary">Alamat Email</p>
+                                <p className="mt-0.5 font-body text-sm font-semibold text-text-primary">{email ?? "-"}</p>
+                                <p className="mt-3 font-body text-xs text-text-secondary">Nomor Telepon</p>
+                                <p className="mt-0.5 font-body text-sm font-semibold text-text-primary">{(user?.user_metadata?.phone as string) ?? "-"}</p>
                             </div>
                         </div>
 

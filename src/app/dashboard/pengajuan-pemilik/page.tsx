@@ -1,12 +1,12 @@
 import { pengajuanPemilikAction } from "@/app/(auth)/actions";
 import Image from "next/image";
 import DashboardNavbar from "@/components/DashboardNavbar";
-import DashboardSidebarUser from "@/components/DashboardSidebarUser";
+import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
 
 export default function PengajuanPemilik() {
     return (
         <div className="flex min-h-screen bg-background">
-            <DashboardSidebarUser userRole="Pengguna" />
+            <DashboardSidebarUserWrapper />
 
             <div className="flex flex-1 flex-col">
 <DashboardNavbar title="Ajukan Diri sebagai Pemilik Kos" />

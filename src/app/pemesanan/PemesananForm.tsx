@@ -1,15 +1,13 @@
 "use client";
 import { useState, useMemo } from "react";
-import { formatHarga } from "@/data/kos";
+import { formatHarga } from "@/lib/format";
 import Link from "next/link";
 
 type Props = {
     kos: {
-        id: number;
+        id: string;
         nama: string;
-        tipe: string;
-        gambar: string;
-        kamar: { nama: string; ukuran: string; harga: number; ketersediaan: string; stok: number; deskripsi: string }[];
+        kamar: { nama: string; ukuran: string | null; harga: number; ketersediaan: string; stok: number; deskripsi: string | null }[];
     } | null;
 };
 

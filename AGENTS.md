@@ -28,7 +28,13 @@ No test runner, no CI workflows, no pre-commit hooks configured.
 - `src/app/pemesanan/page.tsx` — booking page (server, reads `searchParams.kosId`)
 - `src/app/pemesanan/PemesananForm.tsx` — booking form (client, holds all form state)
 - `src/app/(auth)/actions.ts` — server actions: `registerAction`, `loginAction`, `logoutAction`, `forgotPasswordAction`, `resetPasswordAction`, `updateProfileAction`
+- `src/app/kos/actions.ts` — CRUD kos/kamar/galeri/fasilitas: `createKosAction`, `updateKosAction`, `setPublikasiAction`, `deleteKosAction` (hapus manual berurutan, tanpa cascade), `upsertKamarAction`, `deleteKamarAction`, `setKosFasilitasAction`, `uploadGaleriAction`, `deleteGaleriAction`
 - `src/app/dashboard/profil/page.tsx` — profile page (server, fetches user + profiles)
+- `src/app/dashboard/pemilik/kos/` — kelola kos pemilik: `page.tsx` (daftar), `tambah/page.tsx`, `[id]/page.tsx` (edit + `KamarManager`, `GaleriManager`, `FasilitasPicker`), `KosForm.tsx`, `KosListActions.tsx`
+- `src/app/dashboard/admin/kos/page.tsx` — moderasi semua kos (takedown = set `draft`)
+- `src/lib/db/` — `types.ts` (tipe baris DB 1:1 dengan kolom SQL), `queries.ts` (baca publik/owner/admin), `compat.ts` (fallback `kosList` saat tabel kosong — hapus setelah data produksi terisi)
+- `src/lib/format.ts` — `formatHarga` (jangan import dari `@/data/kos` di kode baru)
+- `src/proxy.ts` — pengganti middleware (sudah migrasi Next 16); matcher `/dashboard/:path*`, `/admin/:path*`, `/login`, `/register`
 - `src/components/` — shared UI: `Navbar`, `NavbarWrapper`, `Footer`, `ProfileForm`, `DashboardNavbar`, `DashboardSidebarUser`, `DashboardSidebarUserWrapper`, `LogoutButton`
 - `src/data/kos.ts` — static data source: `kosList` (6 kos), `TipeKamar` has field `deskripsi: string`
 - `src/lib/supabase/` — `client.ts` (client-side), `server.ts` (server-side)
@@ -53,10 +59,19 @@ No test runner, no CI workflows, no pre-commit hooks configured.
 
 ## Auth & Roles
 
-- 3 roles: `penyewa` (user), `pemilik` (kos owner), `admin`
+- DB roles: `penyewa`, `pemilik`, `pemilik_kos` (keduanya pemilik), `admin`. Redirect login di `actions.ts:66-71`: pemilik → `/dashboard`, lainnya → `/`
 - `NavbarWrapper` (server component) fetches user from `auth.getUser()` + `profiles` table — **2 sequential Supabase queries per page**
-- `middleware.ts` protects `/dashboard/:path*`
-- **Deprecated**: `middleware.ts` filename is deprecated in Next 16.3.3. Migrate via: `npx @next/codemod@canary middleware-to-proxy .`
+- Route guard: `src/proxy.ts` (bukan `middleware.ts` — tidak ada file itu). Belum login + akses `/dashboard/*` atau `/admin/*` → redirect `/login?next=...`; `/admin/*` wajib role `admin`
+- Sidebar role-aware: `Kelola Kos` untuk pemilik/admin, `Moderasi Kos` untuk admin (`DashboardSidebarUser.tsx`)
+
+## Database (Supabase, schema `public`)
+
+- 5 tabel, **tanpa FK constraint** (kesepakatan): `kos` (`id_kos` uuid PK, `id_pemilik` uuid → `profiles.id`), `kamar` + `galeri` (punya `kos_id` uuid), `fasilitas` (master: `id, nama, created_at`), `kos_fasilitas` (relasi: `kos_id, fasilitas_id`)
+- Selalu tulis skema lengkap dengan tipe data saat diskusi DB dengan user
+- RLS: publik baca hanya `status_publikasi='tayang'` (plus anaknya via `EXISTS` ke `kos`); tulis hanya `id_pemilik = auth.uid()` atau `is_admin()`; `fasilitas` tulis-admin-saja. Bucket: `avatars` + `kos-foto` (public read)
+- Konsekuensi tanpa cascade: `deleteKosAction` hapus manual berurutan (file bucket → `galeri` → `kamar` → `kos_fasilitas` → `kos`)
+- `kos.harga` = min harga kamar, dihitung ulang (`recalcHargaMin`) setiap kamar berubah; `kamar.ketersediaan` ditulis kode (`stok > 0 ? Tersedia : Penuh`)
+- Halaman baca (home, cari-kos, `kos/[id]`, pemesanan) query DB dulu, fallback ke `kosList` bila kosong (`compat.ts`); `kosId` kini uuid string (fallback numerik lama tetap didukung)
 
 ## Avatar Handling
 
@@ -73,4 +88,6 @@ No test runner, no CI workflows, no pre-commit hooks configured.
 ## Other Notes
 
 - `PRD.md` exists at root but is in `.gitignore` — not committed to repo
-- `src/data/kos.ts` is the only data source; no real DB/API layer yet for kos listing (Supabase used for auth, profiles, storage)
+- `src/data/kos.ts` tersisa sebagai fallback + helper murni (`tipeStyles`, `getKetersediaanStatus`, `statusStyles`); sumber baca utama kini Supabase
+- Plain `<form action={fn}>` untuk server action 2-argumen tidak lolos typecheck — bungkus: `action={async (fd: FormData) => { await fn(null, fd); }}` (lihat `KosListActions.tsx`), jangan `as any`
+- `next.config.ts` `images.remotePatterns` mencakup `.../storage/v1/object/public/kos-foto/**` — wajib untuk render foto galeri via `<Image>`

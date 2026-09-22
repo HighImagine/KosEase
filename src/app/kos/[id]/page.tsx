@@ -1,7 +1,12 @@
 import Footer from "@/components/Footer";
-import { kosList, tipeStyles, formatHarga } from "@/data/kos";
+import { tipeStyles, type TipeKos } from "@/data/kos";
+import { formatHarga } from "@/lib/format";
+import { getPublicKosDetail } from "@/lib/db/queries";
+import { getFallbackKosDetail } from "@/lib/db/compat";
 import Image from "next/image";
 import Link from "next/link";
+
+const PLACEHOLDER = "/img/kos-placeholder.png";
 
 type PageProps = {
     params: Promise<{
@@ -11,11 +16,14 @@ type PageProps = {
 
 export default async function KosDetailPage({ params }: PageProps) {
     const { id } = await params;
-    const kos = kosList.find((item) => item.id === Number(id));
+    // id uuid dari DB; fallback ke data statis (id numerik lama) selama migrasi.
+    const detail = (await getPublicKosDetail(id)) ?? getFallbackKosDetail(id);
 
-    if (!kos) {
+    if (!detail) {
         return <div>Kos tidak ditemukan.</div>;
     }
+    const { kos, kamar, galeri, fasilitas } = detail;
+    const cover = galeri[0]?.image_url ?? PLACEHOLDER;
 
     return (
         <><main className="min-h-screen bg-background">
@@ -32,8 +40,8 @@ export default async function KosDetailPage({ params }: PageProps) {
 
                     <div className="relative col-span-2">
                         <Image
-                            src="/img/kos-placeholder.png"
-                            alt="Kos Putri Sakinah"
+                            src={cover}
+                            alt={kos.nama}
                             fill
                             sizes="(max-width: 1024px) 66vw, 66vw"
                             className="object-cover" />
@@ -42,10 +50,10 @@ export default async function KosDetailPage({ params }: PageProps) {
                     {/* Side Images */}
                     <div className="grid grid-rows-2 gap-2">
                         <div className="relative">
-                            <Image src={kos.images[1] ?? kos.gambar} alt={kos.nama} fill sizes="(max-width: 1024px) 33vw, 33vw" className="object-cover" />
+                            <Image src={galeri[1]?.image_url ?? PLACEHOLDER} alt={kos.nama} fill sizes="(max-width: 1024px) 33vw, 33vw" className="object-cover" />
                         </div>
                         <div className="relative">
-                            <Image src={kos.images[2] ?? kos.gambar} alt={`${kos.nama} - Foto 3`} fill sizes="(max-width: 1024px) 33vw, 33vw" className="object-cover" />
+                            <Image src={galeri[2]?.image_url ?? PLACEHOLDER} alt={`${kos.nama} - Foto 3`} fill sizes="(max-width: 1024px) 33vw, 33vw" className="object-cover" />
                         </div>
                     </div>
                 </div>
@@ -57,14 +65,14 @@ export default async function KosDetailPage({ params }: PageProps) {
 
                             <div className="flex items-center justify-between">
 
-                                <span className={`rounded-md px-2 py-1 text-[10px] font-semibold ${tipeStyles[kos.tipe]}`}>
+                                <span className={`rounded-md px-2 py-1 text-[10px] font-semibold ${tipeStyles[kos.tipe as TipeKos] ?? ""}`}>
                                     {kos.tipe}
                                 </span>
 
                                 <div className="flex items-center gap-1 text-[11px]">
                                     <span className="text-accent">★</span>
                                     <span className="font-semibold text-text-primary">{kos.rating.toFixed(1)}</span>
-                                    <span className="text-text-secondary">({kos.ulasanCount} ulasan)</span>
+                                    <span className="text-text-secondary">({kos.ulasan} ulasan)</span>
                                 </div>
 
                             </div>
@@ -76,7 +84,7 @@ export default async function KosDetailPage({ params }: PageProps) {
 
                             {/* Lokasi */}
                             <p className="mt-2 text-[10px] text-text-secondary">
-                                {kos.lokasi}
+                                {kos.lokasi} · {kos.alamat}
                             </p>
 
                         </div>
@@ -89,7 +97,7 @@ export default async function KosDetailPage({ params }: PageProps) {
                                 Deskripsi
                             </h2>
 
-                            <p className="mt-3 text-text-secondary">{kos.deskripsi}</p>
+                            <p className="mt-3 text-text-secondary">{kos.deskripsi ?? "-"}</p>
                         </div>
 
 
@@ -100,9 +108,13 @@ export default async function KosDetailPage({ params }: PageProps) {
                             </h2>
 
                             <div className="mt-4 flex flex-wrap gap-2">
-                                {kos.fasilitas.map((f) => (
-                                    <span key={f} className="rounded-full border border-border bg-background px-3 py-1.5 text-sm text-text-primary">{f}</span>
-                                ))}
+                                {fasilitas.length === 0 ? (
+                                    <p className="text-sm text-text-secondary">Belum ada data fasilitas.</p>
+                                ) : (
+                                    fasilitas.map((f) => (
+                                        <span key={f} className="rounded-full border border-border bg-background px-3 py-1.5 text-sm text-text-primary">{f}</span>
+                                    ))
+                                )}
                             </div>
                         </div>
 
@@ -133,14 +145,14 @@ export default async function KosDetailPage({ params }: PageProps) {
                                     </p>
                                 </div>
 
-{kos.kamar.map((k) => {
+{kamar.map((k) => {
     const isTersedia = k.ketersediaan === "Tersedia";
     const badgeStyle = isTersedia ? "bg-success/10 text-success" : "bg-error/10 text-error";
     return (
-    <div key={k.nama} className="grid grid-cols-[1fr_auto_auto] items-center border-t border-border px-4 py-4 gap-4">
+    <div key={k.id} className="grid grid-cols-[1fr_auto_auto] items-center border-t border-border px-4 py-4 gap-4">
         <div>
             <p className="text-sm font-semibold text-text-primary">Kamar {k.nama}</p>
-            <p className="mt-0.5 text-xs text-text-secondary">{k.ukuran} · {k.stok} kamar</p>
+            <p className="mt-0.5 text-xs text-text-secondary">{k.ukuran ?? "-"} · {k.stok} kamar</p>
         </div>
         <p className="text-sm font-semibold text-text-primary">{formatHarga(k.harga)}<span className="font-normal text-text-secondary"> / bulan</span></p>
         <div className="flex items-center gap-2">
@@ -155,7 +167,7 @@ export default async function KosDetailPage({ params }: PageProps) {
                                  <div className="grid grid-cols-3 bg-background px-4 py-3 border-t border-border">
                                      <p className="text-xs font-semibold text-text-secondary">Total</p>
                                      <p className="text-xs font-semibold text-text-secondary"></p>
-                                     <p className="text-xs font-semibold text-text-secondary">{kos.kamar.reduce((a,c)=>a+c.stok,0)} kamar</p>
+                                     <p className="text-xs font-semibold text-text-secondary">{kamar.reduce((a,c)=>a+c.stok,0)} kamar</p>
                                  </div>
 
                             </div>
@@ -183,7 +195,7 @@ export default async function KosDetailPage({ params }: PageProps) {
                                 </span>
 
                                 <span
-                                    className={`rounded-md px-2 py-1 text-[10px] font-semibold ${tipeStyles[kos.tipe]}`}
+                                    className={`rounded-md px-2 py-1 text-[10px] font-semibold ${tipeStyles[kos.tipe as TipeKos] ?? ""}`}
                                 >
                                     {kos.tipe}
                                 </span>
@@ -195,7 +207,7 @@ export default async function KosDetailPage({ params }: PageProps) {
                                 </span>
 
                                 <span className="font-semibold text-primary">
-                                    {kos.kamar.filter((k)=>k.ketersediaan==="Tersedia").length} Kamar Kosong
+                                    {kamar.filter((k)=>k.ketersediaan==="Tersedia").length} Kamar Kosong
                                 </span>
                             </div>
 
@@ -211,11 +223,11 @@ export default async function KosDetailPage({ params }: PageProps) {
 
                         </div>
 
-{kos.kamar.every((k) => k.ketersediaan === "Penuh") && <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">Kos ini sedang penuh — cek kembali nanti atau hubungi pemilik.</p>}
-                        {kos.kamar.every((k) => k.ketersediaan === "Penuh") ? (
+{kamar.every((k) => k.ketersediaan === "Penuh") && <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">Kos ini sedang penuh — cek kembali nanti atau hubungi pemilik.</p>}
+                        {kamar.length > 0 && kamar.every((k) => k.ketersediaan === "Penuh") ? (
                             <button disabled className="mt-5 w-full rounded-lg bg-gray-300 px-4 py-3 text-sm font-semibold text-gray-500">Penuh</button>
                         ) : (
-                            <Link href={`/pemesanan?kosId=${kos.id}`} className="mt-5 block w-full rounded-lg bg-accent px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-orange-600">Ajukan Pemesanan</Link>
+                            <Link href={`/pemesanan?kosId=${kos.id_kos}`} className="mt-5 block w-full rounded-lg bg-accent px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-orange-600">Ajukan Pemesanan</Link>
                         )}
 
                         {/* Simpan & Bagikan */}

@@ -1,10 +1,15 @@
 import KosCard from "./KosCard";
-import { kosList } from "@/data/kos";
+import { getTayangKosCards } from "@/lib/db/queries";
+import { getFallbackKosCards } from "@/lib/db/compat";
 import Footer from "./Footer";
 import Link from "next/link";
 import { IconArrowRight } from "@tabler/icons-react";
 
-export default function KosSection() {
+export default async function KosSection() {
+    const dbCards = await getTayangKosCards();
+    // Fallback ke data statis selama tabel Supabase masih kosong.
+    const cards = dbCards.length > 0 ? dbCards : getFallbackKosCards();
+
     return (
         <><section className="bg-background py-16">
             <div className="mx-auto max-w-7xl px-6 items-center justify-between">
@@ -28,16 +33,18 @@ export default function KosSection() {
                 </Link>
 
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {kosList.map((kos) => (
+                    {cards.map(({ kos, cover, kamarTersedia, kamarTotal, stokTersedia }) => (
                         <KosCard
-                            key={kos.id}
-                            id={kos.id} //dummy id, diganti kalau udah jalan database
+                            key={kos.id_kos}
+                            id={kos.id_kos}
                             nama={kos.nama}
                             lokasi={kos.lokasi}
                             harga={kos.harga}
-                            gambar={kos.gambar}
+                            gambar={cover ?? "/img/kos-placeholder.png"}
                             tipe={kos.tipe}
-                            status={kos.status} />
+                            kamarTersedia={kamarTersedia}
+                            kamarTotal={kamarTotal}
+                            stokTersedia={stokTersedia} />
                     ))}
                 </div>
 

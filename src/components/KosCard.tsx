@@ -1,15 +1,18 @@
-import { TipeKos, tipeStyles, formatHarga, getKetersediaanStatus, getStatusLabel, statusStyles, kosList } from "@/data/kos";
+import { TipeKos, tipeStyles, getKetersediaanStatus, getStatusLabel, statusStyles } from "@/data/kos";
+import { formatHarga } from "@/lib/format";
 import Image from "next/image";
 import Link from "next/link";
 
 type KosCardProps = {
-    id: number;
+    id: string;
     nama: string;
     lokasi: string;
     harga: number;
     gambar: string;
-    tipe: TipeKos;
-    status: string;
+    tipe: string;
+    kamarTersedia: number; // jumlah tipe kamar berstatus Tersedia
+    kamarTotal: number;
+    stokTersedia: number; // total sisa unit kamar Tersedia
 };
 
 export default function KosCard({
@@ -19,11 +22,11 @@ export default function KosCard({
     harga,
     gambar,
     tipe,
-    status,
+    kamarTersedia,
+    kamarTotal,
+    stokTersedia,
 }: KosCardProps) {
-    const totalKamar = kosList.find((k) => k.id === id)?.kamar ?? [];
-    const availableKamar = totalKamar.filter((k) => k.ketersediaan === "Tersedia").length;
-    const availStatus = getKetersediaanStatus(totalKamar.length, availableKamar);
+    const availStatus = getKetersediaanStatus(kamarTotal, kamarTersedia);
     const availLabel = getStatusLabel(availStatus);
 
     return (
@@ -42,7 +45,7 @@ export default function KosCard({
 
                  <div className="flex items-center gap-2">
                     <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${tipeStyles[tipe]
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${tipeStyles[tipe as TipeKos] ?? ""
                             }`}
                     >
                         {tipe}
@@ -54,7 +57,7 @@ export default function KosCard({
                 </div>
 
                 <p className="mt-1 font-body text-xs text-text-secondary">
-                    Tersisa {availableKamar} kamar
+                    Tersisa {stokTersedia} kamar
                 </p>
 
                 <h3 className="mt-3 font-heading text-xl font-bold text-text-primary">

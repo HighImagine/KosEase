@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconLayoutDashboard, IconSearch, IconHome } from '@tabler/icons-react';
+import { IconLayoutDashboard, IconSearch, IconHome, IconBuildingStore, IconShieldCheck } from '@tabler/icons-react';
 import LogoutButton from "./LogoutButton";
 
 
@@ -19,6 +19,11 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
     const pathname = usePathname()
     const displayName = userName ?? "Tamu";
     const hasAvatar = !!userAvatar;
+    const role = (userRole ?? "").toLowerCase();
+    const isPemilik = role === "pemilik" || role === "pemilik_kos";
+    const isAdmin = role === "admin";
+    const linkCls = (active: boolean) =>
+        `flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs ${active ? "bg-primary-light font-semibold text-primary" : "text-text-primary hover:bg-primary-light hover:text-primary"}`;
     return (
         <aside className="flex h-screen w-60 flex-col border-r border-border bg-surface">
             <div className="px-6 py-6">
@@ -58,6 +63,28 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
                     <IconSearch size={16} stroke={2} />
                     Cari Kos
                 </Link>
+
+                {(isPemilik || isAdmin) && (
+                    <Link
+                        href="/dashboard/pemilik/kos"
+                        title="Kelola kos milik Anda"
+                        className={linkCls(pathname.startsWith("/dashboard/pemilik/kos"))}
+                    >
+                        <IconBuildingStore size={16} stroke={2} />
+                        Kelola Kos
+                    </Link>
+                )}
+
+                {isAdmin && (
+                    <Link
+                        href="/dashboard/admin/kos"
+                        title="Moderasi semua kos"
+                        className={linkCls(pathname.startsWith("/dashboard/admin/kos"))}
+                    >
+                        <IconShieldCheck size={16} stroke={2} />
+                        Moderasi Kos
+                    </Link>
+                )}
 
                 <Link
                     href="/dashboard/reservasi"

@@ -4,8 +4,13 @@ import Footer from "@/components/Footer";
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import CariKosClient from "./CariKosClient";
 import { Suspense } from "react";
+import { getTayangKosCards } from "@/lib/db/queries";
+import { getFallbackKosCards } from "@/lib/db/compat";
 
-export default function CariKosPage() {
+export default async function CariKosPage() {
+    const dbCards = await getTayangKosCards();
+    // Fallback ke data statis selama tabel Supabase masih kosong.
+    const cards = dbCards.length > 0 ? dbCards : getFallbackKosCards();
     return (
         <main className="min-h-screen bg-background">
             <NavbarWrapper />
@@ -21,7 +26,7 @@ export default function CariKosPage() {
                     </p>
                 </div>
 
-                <Suspense><CariKosClient /></Suspense>
+                <Suspense><CariKosClient initial={cards} /></Suspense>
 
                 {/* Pagination */}
                 <div className="mt-10 flex items-center justify-center gap-3">

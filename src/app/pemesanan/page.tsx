@@ -1,7 +1,8 @@
 import Link from "next/link";
 import NavbarWrapper from "@/components/NavbarWrapper";
 import Footer from "@/components/Footer";
-import { kosList } from "@/data/kos";
+import { getPublicKosDetail } from "@/lib/db/queries";
+import { getFallbackKosDetail } from "@/lib/db/compat";
 import PemesananForm from "./PemesananForm";
 
 type PageProps = {
@@ -10,7 +11,11 @@ type PageProps = {
 
 export default async function PemesananPage({ searchParams }: PageProps) {
     const { kosId } = await searchParams;
-    const kos = kosId ? kosList.find((k) => k.id === Number(kosId)) ?? null : null;
+    // kosId uuid dari DB; fallback ke id numerik lama selama migrasi.
+    const detail = kosId ? ((await getPublicKosDetail(kosId)) ?? getFallbackKosDetail(kosId)) : null;
+    const kos = detail
+        ? { id: detail.kos.id_kos, nama: detail.kos.nama, kamar: detail.kamar }
+        : null;
 
     return (
         <main className="min-h-screen bg-background">

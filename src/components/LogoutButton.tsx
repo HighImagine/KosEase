@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { IconLogout } from "@tabler/icons-react";
 
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export default function LogoutButton({ variant = "sidebar" }: Props) {
+  const t = useTranslations("Logout");
   const [confirm, setConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -30,7 +32,7 @@ export default function LogoutButton({ variant = "sidebar" }: Props) {
           onClick={() => setConfirm(true)}
           className="w-full text-left rounded-lg px-3 py-2 text-xs text-error hover:bg-background"
         >
-          Keluar
+          {t("logout")}
         </button>
       );
     }
@@ -41,7 +43,7 @@ export default function LogoutButton({ variant = "sidebar" }: Props) {
         className="flex w-full items-center gap-3 px-3 py-2.5 text-xs text-error hover:opacity-80"
       >
         <IconLogout size={16} stroke={2} />
-        Keluar
+        {t("logout")}
       </button>
     );
   }
@@ -49,7 +51,7 @@ export default function LogoutButton({ variant = "sidebar" }: Props) {
   // confirm state
   return (
     <div className="rounded-lg border border-border bg-background p-3">
-      <p className="text-xs font-semibold text-text-primary">Yakin ingin keluar?</p>
+      <p className="text-xs font-semibold text-text-primary">{t("confirm")}</p>
       <div className="mt-3 flex gap-2">
         <button
           type="button"
@@ -57,7 +59,7 @@ export default function LogoutButton({ variant = "sidebar" }: Props) {
           onClick={handleLogout}
           className="flex-1 rounded-lg bg-error px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
         >
-          {isPending ? "..." : "Ya, Keluar"}
+          {isPending ? "..." : t("yes")}
         </button>
         <button
           type="button"
@@ -65,7 +67,7 @@ export default function LogoutButton({ variant = "sidebar" }: Props) {
           onClick={() => setConfirm(false)}
           className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-xs font-semibold text-text-primary hover:bg-background"
         >
-          Batal
+          {t("cancel")}
         </button>
       </div>
     </div>

@@ -1,5 +1,7 @@
+"use client";
 import Image from "next/image";
-import { formatHarga } from "@/data/kos";
+import { formatHarga } from "@/lib/format";
+import { useTranslations } from "next-intl";
 
 type StatusLabel = "Menunggu" | "Disetujui" | "Ditolak" | "Selesai";
 
@@ -8,6 +10,13 @@ const statusStyle: Record<StatusLabel, string> = {
     Disetujui: "bg-green-100 text-green-700",
     Selesai: "bg-green-100 text-green-700",
     Ditolak: "bg-red-100 text-red-700",
+};
+
+const statusKey: Record<StatusLabel, string> = {
+    Menunggu: "statusMenunggu",
+    Disetujui: "statusDisetujui",
+    Ditolak: "statusDitolak",
+    Selesai: "statusSelesai",
 };
 
 export type ActiveBookingCardProps = {
@@ -29,17 +38,18 @@ export default function ActiveBookingCard({
     harga,
     status,
 }: ActiveBookingCardProps) {
+    const t = useTranslations("ActiveBooking");
     return (
         <div className="overflow-hidden rounded-xl bg-surface">
             <div className="flex items-center justify-between px-4 py-3 bg-background">
-                <p className="text-xs font-semibold text-text-secondary">Reservasi Aktif</p>
+                <p className="text-xs font-semibold text-text-secondary">{t("active")}</p>
             </div>
             {/* header */}
             <div className="grid grid-cols-[1fr_140px_120px_130px] gap-4 bg-slate-50 px-4 py-2 text-xs font-semibold text-text-secondary max-md:hidden">
-                <span>Nama Kos & Kamar</span>
-                <span className="text-center">Tanggal Masuk</span>
-                <span className="text-center">Status</span>
-                <span className="text-right">Harga</span>
+                <span>{t("colKos")}</span>
+                <span className="text-center">{t("colDate")}</span>
+                <span className="text-center">{t("colStatus")}</span>
+                <span className="text-right">{t("colPrice")}</span>
             </div>
             {/* row */}
             <div className="grid grid-cols-[1fr_140px_120px_130px] items-center gap-4 border-b border-border px-4 py-4 max-md:grid-cols-1">
@@ -54,7 +64,7 @@ export default function ActiveBookingCard({
                 </div>
                 <p className="text-sm text-text-primary max-md:text-xs max-md:text-text-secondary md:text-center">{tanggalMasuk}</p>
                 <div className="md:flex md:justify-center">
-                    <span className={`rounded-md px-3 py-1 text-xs font-semibold ${statusStyle[status]}`}>{status}</span>
+                    <span className={`rounded-md px-3 py-1 text-xs font-semibold ${statusStyle[status]}`}>{t(statusKey[status])}</span>
                 </div>
                 <p className="text-sm font-bold text-primary md:text-right">{formatHarga(harga)}</p>
             </div>

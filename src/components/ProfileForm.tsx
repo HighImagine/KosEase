@@ -1,6 +1,7 @@
 "use client";
 import { useActionState, useRef } from "react";
-import { updateProfileAction } from "@/app/(auth)/actions";
+import { updateProfileAction } from "@/app/[locale]/(auth)/actions";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { IconUser, IconPhoto } from "@tabler/icons-react";
 
@@ -12,6 +13,7 @@ type InitialValues = {
 };
 
 export default function ProfileForm({ initialValues }: { initialValues: InitialValues }) {
+  const t = useTranslations("Profile");
   const [state, formAction, pending] = useActionState(updateProfileAction as never, null as unknown as { error?: string; success?: string; currentFullName?: string; currentEmail?: string; currentPhone?: string; currentAvatar?: string | null });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const v = state ?? initialValues;
@@ -33,36 +35,36 @@ export default function ProfileForm({ initialValues }: { initialValues: InitialV
           )}
         </div>
         <div>
-          <p className="text-xs font-semibold text-text-primary">Foto Profil</p>
-          <p className="mt-0.5 text-[10px] text-text-secondary">JPG, PNG, maks 2MB</p>
+          <p className="text-xs font-semibold text-text-primary">{t("avatar")}</p>
+          <p className="mt-0.5 text-[10px] text-text-secondary">{t("avatarHint")}</p>
           <input ref={fileInputRef} name="avatar" type="file" accept="image/jpeg,image/png" className="mt-1 hidden" id="avatar-input" />
           <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-1 flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark transition-colors">
             <IconPhoto size={12} stroke={2} color="#ffffff" />
-            Ganti Foto
+            {t("changePhoto")}
           </button>
         </div>
       </div>
 
       {/* Nama Lengkap */}
       <div>
-        <label htmlFor="nama" className="block text-[10px] font-semibold text-text-primary">Nama Lengkap</label>
-        <input id="nama" name="nama" type="text" required defaultValue={v.currentFullName ?? ""} placeholder="Masukkan nama lengkap Anda" className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-xs text-text-primary outline-none placeholder:text-text-secondary focus:border-primary" />
+        <label htmlFor="nama" className="block text-[10px] font-semibold text-text-primary">{t("name")}</label>
+        <input id="nama" name="nama" type="text" required defaultValue={v.currentFullName ?? ""} placeholder={t("namePh")} className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-xs text-text-primary outline-none placeholder:text-text-secondary focus:border-primary" />
       </div>
 
       {/* Email (read-only) */}
       <div>
-        <label htmlFor="email" className="block text-[10px] font-semibold text-text-primary">Alamat Email</label>
+        <label htmlFor="email" className="block text-[10px] font-semibold text-text-primary">{t("email")}</label>
         <input id="email" name="email" type="email" required defaultValue={v.currentEmail ?? ""} disabled className="mt-1.5 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-xs text-text-secondary outline-none cursor-not-allowed" />
       </div>
 
       {/* Nomor Telepon */}
       <div>
-        <label htmlFor="phone" className="block text-[10px] font-semibold text-text-primary">Nomor Telepon</label>
-        <input id="phone" name="phone" type="tel" defaultValue={v.currentPhone ?? ""} placeholder="081234567890" className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-xs text-text-primary outline-none placeholder:text-text-secondary focus:border-primary" />
+        <label htmlFor="phone" className="block text-[10px] font-semibold text-text-primary">{t("phone")}</label>
+        <input id="phone" name="phone" type="tel" defaultValue={v.currentPhone ?? ""} placeholder={t("phonePh")} className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-xs text-text-primary outline-none placeholder:text-text-secondary focus:border-primary" />
       </div>
 
       <button type="submit" disabled={pending} className="mt-3 flex w-full items-center justify-center rounded-lg bg-primary py-2.5 text-xs font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50">
-        {pending ? "Menyimpan..." : "Simpan Perubahan"}
+        {pending ? t("saving") : t("save")}
       </button>
     </form>
   );

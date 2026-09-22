@@ -1,7 +1,9 @@
-import { TipeKos, tipeStyles, getKetersediaanStatus, getStatusLabel, statusStyles } from "@/data/kos";
+"use client";
+import { getKetersediaanStatus, statusStyles, tipeStyles, type TipeKos } from "@/data/kos";
 import { formatHarga } from "@/lib/format";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 type KosCardProps = {
     id: string;
@@ -15,6 +17,18 @@ type KosCardProps = {
     stokTersedia: number; // total sisa unit kamar Tersedia
 };
 
+const tipeLabelKey: Record<string, string> = {
+    "Campur": "tipeCampur",
+    "Laki-laki": "tipeLaki",
+    "Perempuan": "tipePerempuan",
+};
+
+const availLabelKey = {
+    banyak: "availBanyak",
+    sedang: "availSedang",
+    sedikit: "availSedikit",
+} as const;
+
 export default function KosCard({
     id,
     nama,
@@ -26,8 +40,9 @@ export default function KosCard({
     kamarTotal,
     stokTersedia,
 }: KosCardProps) {
+    const t = useTranslations("KosCard");
+    const tc = useTranslations("Common");
     const availStatus = getKetersediaanStatus(kamarTotal, kamarTersedia);
-    const availLabel = getStatusLabel(availStatus);
 
     return (
         <div className="overflow-hidden rounded-2xl bg-surface shadow-sm transition-shadow hover:shadow-md">
@@ -48,16 +63,16 @@ export default function KosCard({
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${tipeStyles[tipe as TipeKos] ?? ""
                             }`}
                     >
-                        {tipe}
+                        {t(tipeLabelKey[tipe] ?? "tipeCampur")}
                     </span>
 
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusStyles[availStatus]}`}>
-                        {availLabel}
+                        {t(availLabelKey[availStatus])}
                     </span>
                 </div>
 
                 <p className="mt-1 font-body text-xs text-text-secondary">
-                    Tersisa {stokTersedia} kamar
+                    {t("remaining", { count: stokTersedia })}
                 </p>
 
                 <h3 className="mt-3 font-heading text-xl font-bold text-text-primary">
@@ -71,7 +86,7 @@ export default function KosCard({
                 <p className="mt-4 font-heading text-lg font-bold text-primary">
                     {formatHarga(harga)}
                     <span className="font-body text-sm font-normal text-text-secondary">
-                        {" "}/ bulan
+                        {" "}{tc("perMonth")}
                     </span>
                 </p>
 
@@ -79,7 +94,7 @@ export default function KosCard({
                     href={`/kos/${id}`}
                     className="mt-4 block w-full rounded-lg bg-primary py-2.5 text-center font-body font-semibold text-white transition-colors hover:bg-primary-dark"
                 >
-                    Lihat Detail
+                    {t("detail")}
                 </Link>
 
             </div>

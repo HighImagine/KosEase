@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { IconLayoutDashboard, IconUsers, IconShieldCheck, IconFileCheck } from "@tabler/icons-react";
+import { Link, usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { IconLayoutDashboard, IconHome, IconUsers, IconShieldCheck, IconFileCheck } from "@tabler/icons-react";
 import LogoutButton from "./LogoutButton";
+import SidebarLanguageSwitcher from "./SidebarLanguageSwitcher";
 
 type Props = {
     userName?: string | null;
@@ -12,16 +13,18 @@ type Props = {
     userEmail?: string | null;
 };
 
-const MENU = [
-    { href: "/dashboard/admin", label: "Beranda", icon: IconLayoutDashboard, exact: true },
-    { href: "/dashboard/admin/pengguna", label: "Kelola Pengguna", icon: IconUsers, exact: false },
-    { href: "/dashboard/admin/pengajuan", label: "Verifikasi Pemilik Kos", icon: IconShieldCheck, exact: false },
-    { href: "/dashboard/admin/kos", label: "Verifikasi Publikasi Kos", icon: IconFileCheck, exact: false },
-];
-
 export default function AdminSidebar({ userName, userAvatar, userEmail }: Props) {
     const pathname = usePathname();
-    const displayName = userName ?? "Admin";
+    const t = useTranslations("SidebarAdmin");
+    const displayName = userName ?? t("fallbackName");
+
+    const MENU = [
+        { href: "/dashboard/admin", label: t("home"), icon: IconLayoutDashboard, exact: true },
+        { href: "/", label: t("website"), icon: IconHome, exact: true },
+        { href: "/dashboard/admin/pengguna", label: t("users"), icon: IconUsers, exact: false },
+        { href: "/dashboard/admin/pengajuan", label: t("verifyOwner"), icon: IconShieldCheck, exact: false },
+        { href: "/dashboard/admin/kos", label: t("verifyPub"), icon: IconFileCheck, exact: false },
+    ];
 
     return (
         <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-surface">
@@ -53,8 +56,12 @@ export default function AdminSidebar({ userName, userAvatar, userEmail }: Props)
                 })}
             </nav>
 
+            <div className="mt-auto">
+                <SidebarLanguageSwitcher />
+            </div>
+
             {/* Bottom */}
-            <div className="mt-auto px-4 pb-6">
+            <div className="px-4 pb-6">
                 <div className="border-t border-border pt-4">
                     <Link href="/dashboard/profil" title="Profil saya" className="flex items-center gap-3 rounded-lg px-3 py-1 hover:bg-primary-light">
                         {userAvatar ? (

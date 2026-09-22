@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { IconLayoutDashboard, IconHome, IconBuildingStore, IconBed } from "@tabler/icons-react";
 import LogoutButton from "./LogoutButton";
+import SidebarLanguageSwitcher from "./SidebarLanguageSwitcher";
 
 type Props = {
     userName?: string | null;
@@ -12,16 +13,17 @@ type Props = {
     userEmail?: string | null;
 };
 
-const MENU = [
-    { href: "/dashboard", label: "Beranda", icon: IconLayoutDashboard, exact: true },
-    { href: "/", label: "Kembali ke Website", icon: IconHome, exact: true },
-    { href: "/dashboard/pemilik/kos", label: "Kelola Kos", icon: IconBuildingStore, exact: false },
-    { href: "/dashboard/pemilik/kamar", label: "Kelola Kamar", icon: IconBed, exact: false },
-];
-
 export default function PemilikSidebar({ userName, userAvatar, userEmail }: Props) {
     const pathname = usePathname();
-    const displayName = userName ?? "Pemilik";
+    const t = useTranslations("SidebarOwner");
+    const displayName = userName ?? t("fallbackName");
+
+    const MENU = [
+        { href: "/dashboard", label: t("home"), icon: IconLayoutDashboard, exact: true },
+        { href: "/", label: t("website"), icon: IconHome, exact: true },
+        { href: "/dashboard/pemilik/kos", label: t("kos"), icon: IconBuildingStore, exact: false },
+        { href: "/dashboard/pemilik/kamar", label: t("kamar"), icon: IconBed, exact: false },
+    ];
 
     return (
         <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-surface">
@@ -53,8 +55,12 @@ export default function PemilikSidebar({ userName, userAvatar, userEmail }: Prop
                 })}
             </nav>
 
+            <div className="mt-auto">
+                <SidebarLanguageSwitcher />
+            </div>
+
             {/* Bottom */}
-            <div className="mt-auto px-4 pb-6">
+            <div className="px-4 pb-6">
                 <div className="border-t border-border pt-4">
                     <Link href="/dashboard/profil" title="Profil saya" className="flex items-center gap-3 rounded-lg px-3 py-1 hover:bg-primary-light">
                         {userAvatar ? (

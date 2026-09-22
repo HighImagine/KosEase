@@ -1,4 +1,7 @@
-export default function Hero() {
+import { getTranslations } from "next-intl/server";
+
+export default async function Hero() {
+    const t = await getTranslations("Hero");
     return (
         <section className="relative min-h-120 flex items-center justify-center">
 
@@ -14,17 +17,16 @@ export default function Hero() {
             <div className="relative z-10 w-full max-w-4xl px-6 text-center text-white">
 
                 <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
-                    Temukan Kos Nyaman Tanpa
+                    {t("titleA")}
                     <br />
-                    Ribet dengan{" "}
+                    {t("titleB")}{" "}
                     <span className="text-accent">
                         KosEase
                     </span>
                 </h1>
 
                 <p className="mt-5 font-body text-lg text-white/90">
-                    Pencarian kos terpercaya, proses cepat, harga transparan,
-                    dan sesuai dengan kebutuhanmu.
+                    {t("subtitle")}
                 </p>
 
                 <div className="mt-10 rounded-2xl bg-surface p-5 text-left shadow-lg">
@@ -32,35 +34,35 @@ export default function Hero() {
                     <div className="flex flex-col gap-3 sm:flex-row">
                         <input
                             type="text"
-                            placeholder="Cari kos di kota mana? (e.g. Jakarta, Yogyakarta, Malang)"
+                            placeholder={t("searchPlaceholder")}
                             className="flex-1 rounded-lg bg-background px-4 py-3 text-text-primary outline-none"
                         />
 
                         <button className="rounded-lg bg-primary px-7 py-3 font-semibold text-white hover:bg-primary-dark">
-                            Cari
+                            {t("search")}
                         </button>
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-3">
 
                         <button className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-primary-light">
-                            Lokasi
+                            {t("filterLocation")}
                         </button>
 
                         <button className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-primary-light">
-                            Rentang Harga
+                            {t("filterPrice")}
                         </button>
 
                         <button className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-primary-light">
-                            Tipe Kos
+                            {t("filterType")}
                         </button>
 
                         <button className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-primary-light">
-                            Fasilitas
+                            {t("filterFacility")}
                         </button>
 
                         <button className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-primary-light">
-                            Kamar Tersedia
+                            {t("filterAvailable")}
                         </button>
 
                     </div>

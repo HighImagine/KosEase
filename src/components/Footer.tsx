@@ -1,7 +1,11 @@
-import Link from "next/link";
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import LanguageSwitcher from "./LanguageSwitcher";
 
-export default function Footer() {
+export default async function Footer() {
+    const t = await getTranslations("Footer");
+    const tc = await getTranslations("Common");
     return (
         <footer className="bg-surface px-10 py-8">
             <div className="mx-auto grid max-w-7xl grid-cols-4 gap-8">
@@ -17,44 +21,42 @@ export default function Footer() {
                     </div>
 
                     <p className="mt-3 max-w-sm text-xs leading-5 text-text-secondary">
-                        Platform pencarian kos modern di Indonesia yang
-                        mengutamakan kemudahan, kenyamanan, dan transparansi
-                        harga untuk para pelajar dan pekerja muda.
+                        {t("tagline")}
                     </p>
                 </div>
 
                 <div>
                     <h4 className="font-heading text-sm font-bold text-text-primary">
-                        KosEase
+                        {t("brandCol")}
                     </h4>
 
                     <div className="mt-3 space-y-2 text-xs text-text-secondary hover:text-primary">
-                        <Link href="tentang-kami">Tentang Kami
+                        <Link href="/tentang">{t("about")}
                         </Link>
                     </div>
                 </div>
 
                 <div>
                     <h4 className="font-heading text-sm font-bold text-text-primary">
-                        Layanan
+                        {t("services")}
                     </h4>
 
                     <div className="mt-3 flex flex-col gap-2 text-xs text-text-secondary">
                         <Link href="/cari-kos"
                             className="hover:text-primary"
-                        >Cari Kos</Link>
+                        >{t("search")}</Link>
                         <Link href="/"
                             className="hover:text-primary"
-                        >Syarat & Ketentuan</Link>
+                        >{t("terms")}</Link>
                         <Link href="/"
                             className="hover:text-primary"
-                        >Kebijakan Privasi</Link>
+                        >{t("privacy")}</Link>
                     </div>
                 </div>
 
                 <div>
                     <h4 className="font-heading text-sm font-bold text-text-primary">
-                        Hubungi Kami
+                        {t("contact")}
                     </h4>
 
                     <div className="mt-3 space-y-2 text-xs text-text-secondary">
@@ -67,14 +69,10 @@ export default function Footer() {
 
             <div className="mx-auto mt-8 flex max-w-7xl items-center justify-between border-t border-border pt-4">
                 <p className="text-[10px] text-text-secondary">
-                    © 2026 KosEase. Seluruh hak cipta dilindungi undang-undang.
+                    {tc("copyright")}
                 </p>
 
-                {/* <div className="flex gap-4 text-xs text-text-secondary">
-                    <span>◎</span>
-                    <span>f</span>
-                    <span>𝕏</span>
-                </div> */}
+                <LanguageSwitcher />
             </div>
         </footer>
     );

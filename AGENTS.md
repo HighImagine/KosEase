@@ -34,7 +34,12 @@ No test runner, no CI workflows, no pre-commit hooks configured.
 - `src/app/dashboard/admin/kos/page.tsx` — moderasi semua kos (takedown = set `draft`)
 - `src/lib/db/` — `types.ts` (tipe baris DB 1:1 dengan kolom SQL), `queries.ts` (baca publik/owner/admin), `compat.ts` (fallback `kosList` saat tabel kosong — hapus setelah data produksi terisi)
 - `src/lib/format.ts` — `formatHarga` (jangan import dari `@/data/kos` di kode baru)
-- `src/proxy.ts` — pengganti middleware (sudah migrasi Next 16); matcher `/dashboard/:path*`, `/admin/:path*`, `/login`, `/register`
+- `src/proxy.ts` — TUNGGAL untuk next-intl + auth guard; matcher luas next-intl (`/((?!api|trpc|_next|_vercel|.*\..*).*)`). Guard kupas prefix `/id|/en` dulu (`stripLocale`), redirect SELALU bawa prefix. Cookie sesi ditempel ke respons intl (`applyCookies`)
+- `src/i18n/` — `routing.ts` (`locales: [id,en]`, `localePrefix: "always"`, default `id`), `navigation.ts` (WAJIB untuk semua Link/redirect/router client), `request.ts`
+- `messages/{id,en}.json` — katalog string (~35 namespace); EN diterjemahkan AI, perlu koreksi manusia
+- Switcher bahasa di 4 titik: seksi "Bahasa" di dropdown avatar (`Navbar.tsx`, `router.replace` halaman sama — tanpa entri history), `SidebarLanguageSwitcher` di 3 sidebar, pil `LanguageSwitcher` hanya di Footer (dihapus dari navbar agar tak duplikat)
+- `src/lib/locale.ts` — `withLocale(path, locale)` + `formLocale(fd)` untuk redirect di server actions (redirect next-intl tidak dijamin di actions → pakai `next/navigation` + path berprefix)
+- Semua route di `src/app/[locale]/...`; root `app/layout.tsx` hanya passthrough (html/lang di `[locale]/layout.tsx` + `NextIntlClientProvider` + `setRequestLocale` + `generateStaticParams`)
 - `src/components/` — shared UI: `Navbar`, `NavbarWrapper`, `Footer`, `ProfileForm`, `DashboardNavbar`, `DashboardSidebarUser`, `DashboardSidebarUserWrapper`, `LogoutButton`
 - `src/data/kos.ts` — static data source: `kosList` (6 kos), `TipeKamar` has field `deskripsi: string`
 - `src/lib/supabase/` — `client.ts` (client-side), `server.ts` (server-side)
@@ -91,5 +96,8 @@ No test runner, no CI workflows, no pre-commit hooks configured.
 
 - `PRD.md` exists at root but is in `.gitignore` — not committed to repo
 - `src/data/kos.ts` tersisa sebagai fallback + helper murni (`tipeStyles`, `getKetersediaanStatus`, `statusStyles`); sumber baca utama kini Supabase
-- Plain `<form action={fn}>` untuk server action 2-argumen tidak lolos typecheck — bungkus: `action={async (fd: FormData) => { await fn(null, fd); }}` (lihat `KosListActions.tsx`), jangan `as any`
+- Plain `<form action={fn}>` untuk server action 2-argumen tidak lolos typecheck — bungkus: `action={async (fd: FormData) => { await fn(null, fd); }}` (lihat `KosListActions.tsx`), jangan `as any`. Inline wrapper HANYA di Client Component; di Server Component action harus referensi langsung
+- String UI baru WAJIB masuk `messages/id.json` + `en.json` (key hilang = runtime error next-intl). Pesan zod/error actions + isi DB (nama/deskripsi kos) masih Indonesia — Fase 2
+- `revalidatePath` HARUS per locale: pakai `revalidateKosPages()` di `kos/actions.ts` (revalidasi `/id` dan `/en` sekaligus)
+- `useSearchParams`/`notFound`/plain `redirect` tetap dari `next/navigation`; sisanya dari `@/i18n/navigation`
 - `next.config.ts` `images.remotePatterns` mencakup `.../storage/v1/object/public/kos-foto/**` — wajib untuk render foto galeri via `<Image>`

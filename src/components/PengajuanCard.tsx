@@ -1,5 +1,7 @@
+"use client";
 import Image from "next/image";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { IconArrowRight } from "@tabler/icons-react";
 
 type PengajuanCardProps = {
@@ -9,6 +11,7 @@ type PengajuanCardProps = {
 export default function PengajuanCard({
     status,
 }: PengajuanCardProps) {
+    const t = useTranslations("PengajuanCard");
     // Belum pernah mengajukan
     if (status === "belum_mengajukan") {
         return (
@@ -16,21 +19,20 @@ export default function PengajuanCard({
                 <div className="flex items-center justify-between gap-4">
                     <div>
                         <h2 className="font-heading text-base font-bold text-text-primary">
-                            Punya Kos?
+                            {t("ctaTitleA")}
                             <br />
-                            Ayo Daftarkan!
+                            {t("ctaTitleB")}
                         </h2>
 
                         <p className="mt-2 max-w-sm font-body text-xs leading-relaxed text-text-secondary">
-                            Daftarkan kos Anda di KosEase dan jangkau lebih
-                            banyak calon penyewa.
+                            {t("ctaDesc")}
                         </p>
 
                         <Link
                             href="/dashboard/pengajuan-pemilik"
                             className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-body text-xs text-white transition-colors hover:bg-primary-dark"
                         >
-                            Ajukan Sekarang
+                            {t("ctaButton")}
                             <IconArrowRight size={16} stroke={2} color="#ffffff" />
                         </Link>
                     </div>
@@ -56,17 +58,15 @@ export default function PengajuanCard({
                 <div className="flex items-center justify-between gap-4">
                     <div>
                         <h2 className="text-base font-body">
-                            Pengajuan Pemilik Kos
+                            {t("cardTitle")}
                         </h2>
 
                         <span className="mt-2 inline-block rounded-full bg-white/20 px-3 py-1 font-body text-[10px] font-semibold">
-                            Sedang Ditinjau Admin
+                            {t("pendingBadge")}
                         </span>
 
                         <p className="mt-3 max-w-sm font-body text-xs leading-relaxed text-white/80">
-                            Pengajuan Anda sedang ditinjau oleh Admin kami.
-                            Mohon tunggu sampai Admin selesai melakukan
-                            verifikasi dokumen Anda.
+                            {t("pendingDesc")}
                         </p>
                     </div>
 
@@ -89,23 +89,22 @@ export default function PengajuanCard({
         return (
             <div className="rounded-xl bg-primary-light p-5">
                 <h2 className="font-heading text-base font-bold text-text-primary">
-                    Pengajuan Pemilik Kos
+                    {t("cardTitle")}
                 </h2>
 
                 <span className="mt-2 inline-block rounded-full bg-success/10 px-3 py-1 font-body text-[10px] font-semibold text-success">
-                    Pengajuan Disetujui
+                    {t("approvedBadge")}
                 </span>
 
                 <p className="mt-3 font-body text-xs text-text-secondary">
-                    Selamat! Pengajuan Anda telah disetujui. Sekarang Anda
-                    dapat mulai mengelola kos Anda.
+                    {t("approvedDesc")}
                 </p>
 
                 <Link
                     href="/dashboard/pemilik"
                     className="mt-4 inline-flex rounded-lg bg-primary px-4 py-2 font-body text-xs font-semibold text-white transition-colors hover:bg-primary-dark"
                 >
-                    Dashboard Pemilik 
+                    {t("approvedCta")}
                 </Link>
             </div>
         );
@@ -115,23 +114,22 @@ export default function PengajuanCard({
     return (
         <div className="rounded-xl bg-surface p-5 ring-1 ring-error/20">
             <h2 className="font-heading text-base font-bold text-text-primary">
-                Pengajuan Pemilik Kos
+                {t("cardTitle")}
             </h2>
 
             <span className="mt-2 inline-block rounded-full bg-error/10 px-3 py-1 font-body text-[10px] font-semibold text-error">
-                Pengajuan Ditolak
+                {t("rejectedBadge")}
             </span>
 
             <p className="mt-3 font-body text-xs text-text-secondary">
-                Pengajuan Anda belum dapat disetujui. Silakan periksa kembali
-                dokumen dan baca kembali instruksi yang diberikan.
+                {t("rejectedDesc")}
             </p>
 
             <Link
                 href="/dashboard/pengajuan-pemilik"
                 className="mt-4 inline-flex rounded-lg bg-primary px-4 py-2 font-body text-xs font-semibold text-white transition-colors hover:bg-primary-dark"
             >
-                Ajukan Kembali
+                {t("rejectedCta")}
             </Link>
         </div>
     );

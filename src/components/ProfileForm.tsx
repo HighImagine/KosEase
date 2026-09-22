@@ -5,14 +5,14 @@ import Image from "next/image";
 import { IconUser, IconPhoto } from "@tabler/icons-react";
 
 type InitialValues = {
-    currentName?: string;
+    currentFullName?: string;
     currentEmail?: string;
     currentPhone?: string;
     currentAvatar?: string | null;
 };
 
 export default function ProfileForm({ initialValues }: { initialValues: InitialValues }) {
-  const [state, formAction, pending] = useActionState(updateProfileAction as never, null as unknown as { error?: string; success?: string; currentName?: string; currentEmail?: string; currentPhone?: string; currentAvatar?: string | null });
+  const [state, formAction, pending] = useActionState(updateProfileAction as never, null as unknown as { error?: string; success?: string; currentFullName?: string; currentEmail?: string; currentPhone?: string; currentAvatar?: string | null });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const v = state ?? initialValues;
 
@@ -46,7 +46,7 @@ export default function ProfileForm({ initialValues }: { initialValues: InitialV
       {/* Nama Lengkap */}
       <div>
         <label htmlFor="nama" className="block text-[10px] font-semibold text-text-primary">Nama Lengkap</label>
-        <input id="nama" name="nama" type="text" required defaultValue={v.currentName ?? ""} placeholder="Masukkan nama lengkap Anda" className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-xs text-text-primary outline-none placeholder:text-text-secondary focus:border-primary" />
+        <input id="nama" name="nama" type="text" required defaultValue={v.currentFullName ?? ""} placeholder="Masukkan nama lengkap Anda" className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-xs text-text-primary outline-none placeholder:text-text-secondary focus:border-primary" />
       </div>
 
       {/* Email (read-only) */}

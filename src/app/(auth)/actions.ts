@@ -29,7 +29,7 @@ export async function registerAction(_prev: unknown, formData: FormData) {
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { nama_lengkap: nama } },
+    options: { data: { full_name: nama } },
   });
   if (error) return { error: error.message };
   redirect("/login?registered=1");
@@ -64,7 +64,7 @@ export async function loginAction(_prev: unknown, formData: FormData) {
   // normalize: "user"/"pencari" dianggap "penyewa"
   const norm = role?.toLowerCase();
   if (norm === "pemilik" || norm === "pemilik_kos" || norm === "admin") redirect("/dashboard");
-  // penyewa/user -> homepage
+  // penyewa/ -> homepage
   redirect("/");
 }
 
@@ -105,12 +105,12 @@ export async function resetPasswordAction(_prev: unknown, formData: FormData) {
 export async function updateProfileAction(_prev: unknown, formData: FormData) {
   const raw = Object.fromEntries(formData) as Record<string, string>;
   const parsed = profileSchema.safeParse({ nama: raw.nama, phone: raw.phone ?? "" });
-  if (!parsed.success) return { error: parsed.error.issues[0].message, currentName: raw.nama ?? "", currentEmail: "", currentPhone: raw.phone ?? "", currentAvatar: null };
+  if (!parsed.success) return { error: parsed.error.issues[0].message, currentFullName: raw.nama ?? "", currentEmail: "", currentPhone: raw.phone ?? "", currentAvatar: null };
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const currentEmail = user?.email ?? "";
-  if (!user) return { error: "User tidak ditemukan", currentName: parsed.data.nama, currentEmail, currentPhone: parsed.data.phone ?? "", currentAvatar: null };
+  if (!user) return { error: "User tidak ditemukan", currentFullName: parsed.data.nama, currentEmail, currentPhone: parsed.data.phone ?? "", currentAvatar: null };
 
   const { nama, phone } = parsed.data;
   let avatarUrl: string | null = null;
@@ -126,10 +126,10 @@ export async function updateProfileAction(_prev: unknown, formData: FormData) {
     }
   }
 
-  const { error: profileError } = await supabase.from("profiles").update({ full_name: nama, nama_lengkap: nama, avatar_url: avatarUrl, phone }).eq("id", user.id).select().single();
-  if (profileError) return { error: profileError.message, currentName: nama, currentEmail, currentPhone: phone ?? "", currentAvatar: null };
+  const { error: profileError } = await supabase.from("profiles").update({ full_name: nama, avatar_url: avatarUrl, phone }).eq("id", user.id).select().single();
+  if (profileError) return { error: profileError.message, currentFullName: nama, currentEmail, currentPhone: phone ?? "", currentAvatar: null };
 
-  await supabase.auth.updateUser({ data: { nama_lengkap: nama } });
+  await supabase.auth.updateUser({ data: { full_name: nama } });
 
-  return { success: "Profil berhasil diperbarui", currentName: nama, currentEmail, currentPhone: phone ?? "", currentAvatar: avatarUrl };
+  return { success: "Profil berhasil diperbarui", currentFullName: nama, currentEmail, currentPhone: phone ?? "", currentAvatar: avatarUrl };
 }

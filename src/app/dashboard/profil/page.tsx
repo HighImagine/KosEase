@@ -11,17 +11,17 @@ export default async function ProfilPage() {
   let avatarUrl: string | null = null;
   let email: string | null = null;
   let userRole = "Penyewa";
-  let initialValues: { currentName?: string; currentEmail?: string; currentPhone?: string; currentAvatar?: string | null } = { currentAvatar: null };
+  let initialValues: { currentFullName?: string; currentEmail?: string; currentPhone?: string; currentAvatar?: string | null } = { currentAvatar: null };
 
 if (user) {
-    displayName = (user.user_metadata?.nama_lengkap as string) ?? user.email?.split("@")[0] ?? "Penyewa";
+    displayName = (user.user_metadata?.full_name as string) ?? user.email?.split("@")[0] ?? "Penyewa";
     avatarUrl = (user.user_metadata?.avatar_url as string) ?? null;
     email = user.email ?? null;
     let phoneFromProfile: string | null = null;
     try {
-      const { data } = await supabase.from("profiles").select("full_name, nama_lengkap, avatar_url, role, phone").eq("id", user.id).single();
+      const { data } = await supabase.from("profiles").select("full_name, avatar_url, role, phone").eq("id", user.id).single();
       if (data) {
-        displayName = (data.full_name as string) ?? (data.nama_lengkap as string) ?? displayName;
+        displayName = (data.full_name as string) ?? displayName;
         avatarUrl = (data.avatar_url as string) ?? avatarUrl;
         phoneFromProfile = (data.phone as string) ?? null;
         const r = (data.role as string)?.toLowerCase();
@@ -30,7 +30,7 @@ if (user) {
         else userRole = "Penyewa";
       }
     } catch {}
-    initialValues = { currentName: displayName ?? undefined, currentEmail: email ?? undefined, currentPhone: phoneFromProfile ?? undefined, currentAvatar: avatarUrl ?? null };
+    initialValues = { currentFullName: displayName ?? undefined, currentEmail: email ?? undefined, currentPhone: phoneFromProfile ?? undefined, currentAvatar: avatarUrl ?? null };
   }
 
   return (

@@ -10,7 +10,7 @@ export default async function NavbarWrapper() {
   let avatarUrl: string | null = null;
 
   if (user) {
-    displayName = (user.user_metadata?.nama_lengkap as string) ?? user.email?.split("@")[0] ?? null;
+    displayName = (user.user_metadata?.full_name as string) ?? user.email?.split("@")[0] ?? null;
     avatarUrl = (user.user_metadata?.avatar_url as string) ?? null;
     const { data } = await supabase.from("profiles").select("role, avatar_url").eq("id", user.id).single();
     role = (data?.role as string) ?? "penyewa";

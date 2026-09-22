@@ -28,7 +28,7 @@ export default function PengajuanCard({
 
                         <Link
                             href="/dashboard/pengajuan-pemilik"
-                            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-body text-xs font-semibold text-white transition-colors hover:bg-primary-dark"
+                            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-body text-xs text-white transition-colors hover:bg-primary-dark"
                         >
                             Ajukan Sekarang
                             <IconArrowRight size={16} stroke={2} color="#ffffff" />
@@ -55,7 +55,7 @@ export default function PengajuanCard({
             <div className="rounded-xl bg-primary p-5 text-white">
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <h2 className="font-heading text-base font-bold">
+                        <h2 className="text-base font-body">
                             Pengajuan Pemilik Kos
                         </h2>
 
@@ -105,7 +105,7 @@ export default function PengajuanCard({
                     href="/dashboard/pemilik"
                     className="mt-4 inline-flex rounded-lg bg-primary px-4 py-2 font-body text-xs font-semibold text-white transition-colors hover:bg-primary-dark"
                 >
-                    Kelola Kos
+                    Dashboard Pemilik 
                 </Link>
             </div>
         );

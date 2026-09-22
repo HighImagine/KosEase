@@ -56,7 +56,7 @@ export default async function DashboardPage() {
                         </div>
 
                         {/* Pengajuan Pemilik */}
-                        <PengajuanCard status="belum_mengajukan" />
+                        <PengajuanCard status="ditolak" />
 
                     </div>
 

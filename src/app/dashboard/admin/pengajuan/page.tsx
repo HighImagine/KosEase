@@ -1,20 +1,48 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
-import { approvePengajuanAction, rejectPengajuanAction } from "@/app/(auth)/actions";
+import { getPengajuanStatusCounts } from "@/lib/db/queries";
+
+function StatTile({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-background px-4 py-3 text-center">
+      <p className="font-heading text-xl font-bold text-primary">{value}</p>
+      <p className="mt-0.5 text-[10px] text-text-secondary">{label}</p>
+    </div>
+  );
+}
+
+type PengajuanRow = {
+  id: string;
+  nama_lengkap: string;
+  no_hp: string | null;
+  created_at: string;
+};
 
 async function getPendingPengajuan() {
   const supabase = await createClient();
   const { data } = await supabase
-    .from("pengajuan_pemilik_kos")
-    .select("*, profiles(full_name), users(email)")
+    .from("pengajuan_pemilik")
+    .select("id, nama_lengkap, no_hp, created_at")
     .eq("status", "menunggu_verifikasi")
     .order("created_at", { ascending: false });
-  return data;
+  return (data ?? []) as PengajuanRow[];
+}
+
+function formatTanggal(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+  } catch {
+    return "-";
+  }
 }
 
 export default async function AdminPengajuanPage() {
-  const pengajuanList = await getPendingPengajuan();
+  const [pengajuanList, counts] = await Promise.all([
+    getPendingPengajuan(),
+    getPengajuanStatusCounts(),
+  ]);
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -24,61 +52,49 @@ export default async function AdminPengajuanPage() {
         <DashboardNavbar title="Verifikasi Pengajuan Pemilik Kos" />
 
         <main className="flex-1 p-6">
-          <h2 className="font-heading text-xl font-bold text-text-primary mb-4">Pengajuan Pending</h2>
+          <h2 className="font-heading text-xl font-bold text-text-primary mb-4">Pengajuan</h2>
+
+          {/* Snapshot + dropdown daftar cepat (pola sama seperti Beranda admin) */}
+          <div className="mb-4 grid grid-cols-3 items-start gap-3">
+            <details className="rounded-xl border border-border bg-surface">
+              <summary title="Klik untuk lihat daftar" className="cursor-pointer list-none px-4 py-3 text-center [&::-webkit-details-marker]:hidden">
+                <p className="font-heading text-xl font-bold text-primary">{counts.menunggu}</p>
+                <p className="mt-0.5 text-[10px] text-text-secondary">Menunggu ▾</p>
+              </summary>
+              <div className="space-y-2 border-t border-border p-3">
+                {pengajuanList.length === 0 ? (
+                  <p className="text-center text-[11px] text-text-secondary">Tidak ada antrean.</p>
+                ) : (
+                  pengajuanList.map((p) => (
+                    <Link key={p.id} href={`/dashboard/admin/pengajuan/${p.id}`} className="block truncate rounded-lg bg-background px-3 py-2 text-[11px] font-semibold text-text-primary hover:text-primary">
+                      {p.nama_lengkap}
+                    </Link>
+                  ))
+                )}
+              </div>
+            </details>
+            <StatTile value={counts.disetujui} label="Disetujui" />
+            <StatTile value={counts.ditolak} label="Ditolak" />
+          </div>
 
           {pengajuanList && pengajuanList.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {pengajuanList.map((pengajuan) => (
-                <form key={pengajuan.id} className="rounded-xl border border-border bg-surface p-5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-text-primary">{pengajuan.profiles?.full_name ?? pengajuan.users?.email ?? "Nama tidak diketahui"}</p>
-                      <p className="text-xs text-text-secondary">{pengajuan.users?.email}</p>
-                    </div>
-                    <span className="rounded-full bg-warning px-3 py-1 text-[10px] font-semibold text-white">Menunggu Verifikasi</span>
+                <div key={pengajuan.id} className="flex items-center gap-4 rounded-xl border border-border bg-surface px-5 py-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-text-primary">{pengajuan.nama_lengkap}</p>
+                    <p className="mt-0.5 text-xs text-text-secondary">{pengajuan.no_hp ?? "-"} · Diajukan {formatTanggal(pengajuan.created_at)}</p>
                   </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <p className="text-[10px] font-semibold text-text-secondary">Nama</p>
-                      <p className="text-sm text-text-primary">{pengajuan.nama}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-semibold text-text-secondary">Nomor WhatsApp</p>
-                      <p className="text-sm text-text-primary">{pengajuan.phone}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-semibold text-text-secondary">Alamat</p>
-                      <p className="text-sm text-text-primary">{pengajuan.alamat}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-semibold text-text-secondary">Alasan</p>
-                      <p className="text-sm text-text-primary">{pengajuan.alasan}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] font-semibold text-text-secondary">Informasi Kos</p>
-                    <p className="text-sm text-text-primary">{pengajuan.info_kos}</p>
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <form action={approvePengajuanAction as any} className="inline">
-                      <input type="hidden" name="pengajuanId" value={pengajuan.id} />
-                      <button type="submit" className="rounded-lg bg-success px-4 py-2 text-xs font-semibold text-white hover:bg-green-600">Approve</button>
-                    </form>
-                    <form action={rejectPengajuanAction as any} className="inline">
-                      <input type="hidden" name="pengajuanId" value={pengajuan.id} />
-                      <input type="hidden" name="alasanTolak" value="Ditolak oleh admin" />
-                      <button type="submit" className="rounded-lg bg-error px-4 py-2 text-xs font-semibold text-white hover:bg-red-600">Reject</button>
-                    </form>
-                  </div>
-                </form>
+                  <span className="hidden shrink-0 rounded-full bg-warning px-3 py-1 text-[10px] font-semibold text-white sm:block">Menunggu Verifikasi</span>
+                  <Link href={`/dashboard/admin/pengajuan/${pengajuan.id}`} className="shrink-0 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-dark">
+                    Detail
+                  </Link>
+                </div>
               ))}
             </div>
           ) : (
             <div className="rounded-xl bg-surface p-8 text-center">
-              <p className="text-text-secondary">Tidak ada pengajuan pending.</p>
+              <p className="text-text-secondary">Tidak ada pengajuan menunggu.</p>
             </div>
           )}
         </main>

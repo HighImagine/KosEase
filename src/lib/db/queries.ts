@@ -160,6 +160,31 @@ export async function getFasilitasMaster(): Promise<{ id: string; nama: string }
   return (data ?? []) as { id: string; nama: string }[];
 }
 
+export type KamarMilik = {
+  id: string;
+  kos_id: string;
+  kos_nama: string;
+  nama: string;
+  harga: number;
+  stok: number;
+  ketersediaan: string;
+};
+
+// Semua kamar milik pemilik login (untuk /dashboard/pemilik/kamar).
+export async function getMyKamarList(): Promise<KamarMilik[]> {
+  const mine = await getMyKosList();
+  if (mine.length === 0) return [];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("kamar")
+    .select("id, kos_id, nama, harga, stok, ketersediaan")
+    .in("kos_id", mine.map((k) => k.id_kos))
+    .order("created_at", { ascending: true });
+  const rows = (data ?? []) as Omit<KamarMilik, "kos_nama">[];
+  const namaByKos = new Map(mine.map((k) => [k.id_kos, k.nama]));
+  return rows.map((r) => ({ ...r, kos_nama: namaByKos.get(r.kos_id) ?? "-" }));
+}
+
 export type PemilikStats = { total: number; tayang: number; draft: number; stokTersedia: number };
 
 // Agregat ringkas untuk panel dashboard pemilik.
@@ -181,6 +206,87 @@ export async function getPemilikKosStats(): Promise<PemilikStats> {
   };
 }
 
+export type PendingPengajuanItem = {
+  id: string;
+  nama_lengkap: string;
+  no_hp: string | null;
+  created_at: string;
+};
+
+// Antrean pengajuan terbaru untuk preview Beranda admin.
+export async function getRecentPendingPengajuan(limit = 3): Promise<PendingPengajuanItem[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pengajuan_pemilik")
+    .select("id, nama_lengkap, no_hp, created_at")
+    .eq("status", "menunggu_verifikasi")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []) as PendingPengajuanItem[];
+}
+
+export type UserRoleCounts = { total: number; penyewa: number; pemilik: number; admin: number };
+
+// Hitungan user per role untuk preview Kelola Pengguna.
+// Butuh RLS profiles yang mengizinkan admin membaca semua baris.
+export async function getUserRoleCounts(): Promise<UserRoleCounts> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("profiles").select("role");
+  const rows = (data ?? []) as { role: string | null }[];
+  let penyewa = 0;
+  let pemilik = 0;
+  let admin = 0;
+  for (const r of rows) {
+    const norm = (r.role ?? "").toLowerCase();
+    if (norm === "admin") admin += 1;
+    else if (norm === "pemilik" || norm === "pemilik_kos") pemilik += 1;
+    else penyewa += 1;
+  }
+  return { total: rows.length, penyewa, pemilik, admin };
+}
+
+export type PengajuanStatusCounts = { menunggu: number; disetujui: number; ditolak: number; total: number };
+
+// Hitungan pengajuan per status untuk snapshot halaman verifikasi.
+export async function getPengajuanStatusCounts(): Promise<PengajuanStatusCounts> {
+  const supabase = await createClient();
+  const [menunggu, disetujui, ditolak] = await Promise.all(
+    (["menunggu_verifikasi", "disetujui", "ditolak"] as const).map(
+      async (s) => {
+        const { count } = await supabase
+          .from("pengajuan_pemilik")
+          .select("id", { count: "exact", head: true })
+          .eq("status", s);
+        return count ?? 0;
+      }
+    )
+  );
+  return { menunggu, disetujui, ditolak, total: menunggu + disetujui + ditolak };
+}
+
+export type PengajuanDetail = {
+  id: string;
+  user_id: string;
+  nama_lengkap: string;
+  no_hp: string | null;
+  alamat: string | null;
+  alasan: string | null;
+  info_kos: string | null;
+  status: string;
+  diverifikasi_oleh: string | null;
+  diverifikasi_at: string | null;
+  alasan_tolak: string | null;
+  dokumen_url: string | null;
+  created_at: string;
+};
+
+// Satu pengajuan by id (untuk halaman detail admin).
+export async function getPengajuanDetail(id: string): Promise<PengajuanDetail | null> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("pengajuan_pemilik").select("*").eq("id", id).limit(1);
+  return (data?.[0] as PengajuanDetail | undefined) ?? null;
+}
+
 export type AdminStats = { total: number; tayang: number; draft: number; pengajuanPending: number };
 
 // Agregat ringkas untuk panel dashboard admin.
@@ -188,7 +294,7 @@ export async function getAdminKosStats(): Promise<AdminStats> {
   const all = await getAllKosForAdmin();
   const supabase = await createClient();
   const { count } = await supabase
-    .from("pengajuan_pemilik_kos")
+    .from("pengajuan_pemilik")
     .select("id", { count: "exact", head: true })
     .eq("status", "menunggu_verifikasi");
   return {

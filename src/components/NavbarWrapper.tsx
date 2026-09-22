@@ -19,7 +19,7 @@ export default async function NavbarWrapper() {
     role = (profileDatum?.role as string) ?? "penyewa";
     if (profileDatum?.avatar_url) avatarUrl = profileDatum.avatar_url as string;
     if (role === "admin") {
-      const { count } = await supabase.from("pengajuan_pemilik_kos").select("*", { count: "exact", head: true }).eq("status", "menunggu_verifikasi");
+      const { count } = await supabase.from("pengajuan_pemilik").select("*", { count: "exact", head: true }).eq("status", "menunggu_verifikasi");
       pendingCount = count ?? 0;
     }
   }

@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import DashboardSidebarUser from "./DashboardSidebarUser";
+import AdminSidebar from "./AdminSidebar";
+import PemilikSidebar from "./PemilikSidebar";
 
+// Satu wrapper untuk semua halaman dashboard: otomatis memakai sidebar sesuai
+// role (admin/pemilik/user), sehingga halaman tidak perlu wrapper terpisah.
 export default async function DashboardSidebarUserWrapper() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -21,6 +25,27 @@ export default async function DashboardSidebarUserWrapper() {
       }
     } catch {}
     if (!displayName) displayName = "Pengguna";
+  }
+
+  const normRole = (userRole ?? "").toLowerCase();
+  if (normRole === "admin") {
+    return (
+      <AdminSidebar
+        userName={displayName}
+        userAvatar={avatarUrl}
+        userEmail={user?.email ?? null}
+      />
+    );
+  }
+
+  if (normRole === "pemilik" || normRole === "pemilik_kos") {
+    return (
+      <PemilikSidebar
+        userName={displayName}
+        userAvatar={avatarUrl}
+        userEmail={user?.email ?? null}
+      />
+    );
   }
 
   return (

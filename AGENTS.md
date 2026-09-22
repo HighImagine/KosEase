@@ -62,13 +62,15 @@ No test runner, no CI workflows, no pre-commit hooks configured.
 - DB roles: `penyewa`, `pemilik`, `pemilik_kos` (keduanya pemilik), `admin`. Redirect login di `actions.ts:66-71`: pemilik → `/dashboard`, lainnya → `/`
 - `NavbarWrapper` (server component) fetches user from `auth.getUser()` + `profiles` table — **2 sequential Supabase queries per page**
 - Route guard: `src/proxy.ts` (bukan `middleware.ts` — tidak ada file itu). Belum login + akses `/dashboard/*` atau `/admin/*` → redirect `/login?next=...`; `/admin/*` wajib role `admin`
-- Sidebar role-aware: `Kelola Kos` untuk pemilik/admin, `Moderasi Kos` untuk admin (`DashboardSidebarUser.tsx`)
+- Sidebar: `DashboardSidebarUserWrapper` otomatis pakai sidebar sesuai role — `AdminSidebar` bila admin (menu: Beranda, Kelola Pengguna, Verifikasi Pemilik Kos, Verifikasi Publikasi Kos + Keluar merah), `PemilikSidebar` bila pemilik (menu: Beranda, Kembali ke Website, Kelola Kos, Kelola Kamar + profil-link + Keluar merah), selain itu `DashboardSidebarUser`. Desain acuan: `public/img/sidebar-ds-admin.png`
+- `/dashboard/pemilik/kamar` = daftar semua kamar milik pemilik (baca saja + link ke halaman kos; tambah/edit/hapus tetap di `[id]` kos)
+- Login admin mendarat di `/dashboard/admin` (Beranda admin: snapshot + 3 preview padat); `/dashboard/admin/pengguna` masih placeholder
 
 ## Database (Supabase, schema `public`)
 
-- 5 tabel, **tanpa FK constraint** (kesepakatan): `kos` (`id_kos` uuid PK, `id_pemilik` uuid → `profiles.id`), `kamar` + `galeri` (punya `kos_id` uuid), `fasilitas` (master: `id, nama, created_at`), `kos_fasilitas` (relasi: `kos_id, fasilitas_id`)
+- 6 tabel, **tanpa FK constraint** (kesepakatan): `kos` (`id_kos` uuid PK, `id_pemilik` uuid → `profiles.id`), `kamar` + `galeri` (punya `kos_id` uuid), `fasilitas` (master: `id, nama, created_at`), `kos_fasilitas` (relasi: `kos_id, fasilitas_id`), `pengajuan_pemilik` (`id, user_id, nama_lengkap, no_hp, alamat, alasan, info_kos, status, diverifikasi_oleh, diverifikasi_at, alasan_tolak, dokumen_url, created_at` — nama kolom ERD, beda dari nama field form `nama`/`phone`)
 - Selalu tulis skema lengkap dengan tipe data saat diskusi DB dengan user
-- RLS: publik baca hanya `status_publikasi='tayang'` (plus anaknya via `EXISTS` ke `kos`); tulis hanya `id_pemilik = auth.uid()` atau `is_admin()`; `fasilitas` tulis-admin-saja. Bucket: `avatars` + `kos-foto` (public read)
+- RLS: publik baca hanya `status_publikasi='tayang'` (plus anaknya via `EXISTS` ke `kos`); tulis hanya `id_pemilik = auth.uid()` atau `is_admin()`; `fasilitas` tulis-admin-saja. Bucket: `avatars` + `kos-foto` (public read), `dokumen-pengajuan` (**private** — KTP; baca via signed URL 1 jam, hanya owner + admin). `pengajuan_pemilik_kos.dokumen_url` menyimpan storage *path*, bukan URL
 - Konsekuensi tanpa cascade: `deleteKosAction` hapus manual berurutan (file bucket → `galeri` → `kamar` → `kos_fasilitas` → `kos`)
 - `kos.harga` = min harga kamar, dihitung ulang (`recalcHargaMin`) setiap kamar berubah; `kamar.ketersediaan` ditulis kode (`stok > 0 ? Tersedia : Penuh`)
 - Halaman baca (home, cari-kos, `kos/[id]`, pemesanan) query DB dulu, fallback ke `kosList` bila kosong (`compat.ts`); `kosId` kini uuid string (fallback numerik lama tetap didukung)

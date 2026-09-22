@@ -47,7 +47,7 @@ export async function proxy(request: NextRequest) {
     if (norm === "pemilik") {
       url.pathname = "/dashboard";
     } else if (norm === "admin") {
-      url.pathname = "/";
+      url.pathname = "/dashboard/admin";
     } else {
       url.pathname = "/";
     }

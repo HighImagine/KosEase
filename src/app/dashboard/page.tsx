@@ -34,7 +34,7 @@ export default async function DashboardPage() {
         if (roleLabel === "Penyewa") {
             try {
                 const { data } = await supabase
-                    .from("pengajuan_pemilik_kos")
+                    .from("pengajuan_pemilik")
                     .select("status")
                     .eq("user_id", user.id)
                     .order("created_at", { ascending: false })

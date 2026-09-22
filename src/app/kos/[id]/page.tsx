@@ -1,12 +1,13 @@
 import Footer from "@/components/Footer";
 import { tipeStyles, type TipeKos } from "@/data/kos";
 import { formatHarga } from "@/lib/format";
-import { getPublicKosDetail } from "@/lib/db/queries";
+import { getKosOwner, getPublicKosDetail } from "@/lib/db/queries";
 import { getFallbackKosDetail } from "@/lib/db/compat";
 import Image from "next/image";
 import Link from "next/link";
 
 const PLACEHOLDER = "/img/kos-placeholder.png";
+const PLACEHOLDER_AVATAR = "/img/avatar-default.png";
 
 type PageProps = {
     params: Promise<{
@@ -24,6 +25,7 @@ export default async function KosDetailPage({ params }: PageProps) {
     }
     const { kos, kamar, galeri, fasilitas } = detail;
     const cover = galeri[0]?.image_url ?? PLACEHOLDER;
+    const owner = await getKosOwner(kos.id_pemilik);
 
     return (
         <><main className="min-h-screen bg-background">
@@ -145,32 +147,52 @@ export default async function KosDetailPage({ params }: PageProps) {
                                     </p>
                                 </div>
 
-{kamar.map((k) => {
-    const isTersedia = k.ketersediaan === "Tersedia";
-    const badgeStyle = isTersedia ? "bg-success/10 text-success" : "bg-error/10 text-error";
-    return (
-    <div key={k.id} className="grid grid-cols-[1fr_auto_auto] items-center border-t border-border px-4 py-4 gap-4">
-        <div>
-            <p className="text-sm font-semibold text-text-primary">Kamar {k.nama}</p>
-            <p className="mt-0.5 text-xs text-text-secondary">{k.ukuran ?? "-"} · {k.stok} kamar</p>
-        </div>
-        <p className="text-sm font-semibold text-text-primary">{formatHarga(k.harga)}<span className="font-normal text-text-secondary"> / bulan</span></p>
-        <div className="flex items-center gap-2">
-            <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${badgeStyle}`}>{isTersedia ? "Tersedia" : "Penuh"}</span>
-            <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-semibold text-text-secondary border border-border">{k.stok}</span>
-        </div>
-    </div>
-    );
-})}
+                                {kamar.map((k) => {
+                                    const isTersedia = k.ketersediaan === "Tersedia";
+                                    const badgeStyle = isTersedia ? "bg-success/10 text-success" : "bg-error/10 text-error";
+                                    return (
+                                        <div key={k.id} className="grid grid-cols-[1fr_auto_auto] items-center border-t border-border px-4 py-4 gap-4">
+                                            <div>
+                                                <p className="text-sm font-semibold text-text-primary">Kamar {k.nama}</p>
+                                                <p className="mt-0.5 text-xs text-text-secondary">{k.ukuran ?? "-"} · {k.stok} kamar</p>
+                                            </div>
+                                            <p className="text-sm font-semibold text-text-primary">{formatHarga(k.harga)}<span className="font-normal text-text-secondary"> / bulan</span></p>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${badgeStyle}`}>{isTersedia ? "Tersedia" : "Penuh"}</span>
+                                                <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-semibold text-text-secondary border border-border">{k.stok}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
 
-                                 {/* Ringkasan */}
-                                 <div className="grid grid-cols-3 bg-background px-4 py-3 border-t border-border">
-                                     <p className="text-xs font-semibold text-text-secondary">Total</p>
-                                     <p className="text-xs font-semibold text-text-secondary"></p>
-                                     <p className="text-xs font-semibold text-text-secondary">{kamar.reduce((a,c)=>a+c.stok,0)} kamar</p>
-                                 </div>
+                                {/* Ringkasan */}
+                                <div className="grid grid-cols-3 bg-background px-4 py-3 border-t border-border">
+                                    <p className="text-xs font-semibold text-text-secondary">Total</p>
+                                    <p className="text-xs font-semibold text-text-secondary"></p>
+                                    <p className="text-xs font-semibold text-text-secondary">{kamar.reduce((a, c) => a + c.stok, 0)} kamar</p>
+                                </div>
 
                             </div>
+
+                        </div>
+
+                        {/* Dikelola oleh */}
+                        <div className="rounded-2xl p-6">
+                            <h2 className="font-heading text-xl font-bold text-text-primary">
+                                Dikelola oleh
+                            </h2>
+
+                            <div className="mt-4 flex items-center gap-4">
+                                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
+                                    <Image src={owner?.avatar_url ?? PLACEHOLDER_AVATAR} alt={owner?.nama ?? "Pemilik Kos"} fill sizes="56px" className="object-cover" />
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <p className="text-sm font-semibold text-text-primary">{owner?.nama ?? "Pemilik Kos"}</p>
+                                    </div>
+                                </div>
+                            </div>
+
 
                         </div>
                     </div>
@@ -201,29 +223,9 @@ export default async function KosDetailPage({ params }: PageProps) {
                                 </span>
                             </div>
 
-                            <div className="flex items-center justify-between">
-                                <span className="text-text-secondary">
-                                    Kamar Tersedia
-                                </span>
-
-                                <span className="font-semibold text-primary">
-                                    {kamar.filter((k)=>k.ketersediaan==="Tersedia").length} Kamar Kosong
-                                </span>
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <span className="text-text-secondary">
-                                    Biaya Tambahan
-                                </span>
-
-                                <span className="text-text-primary">
-                                    Sudah Termasuk Listrik
-                                </span>
-                            </div>
-
                         </div>
 
-{kamar.every((k) => k.ketersediaan === "Penuh") && <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">Kos ini sedang penuh — cek kembali nanti atau hubungi pemilik.</p>}
+                        {kamar.every((k) => k.ketersediaan === "Penuh") && <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">Kos ini sedang penuh — cek kembali nanti atau hubungi pemilik.</p>}
                         {kamar.length > 0 && kamar.every((k) => k.ketersediaan === "Penuh") ? (
                             <button disabled className="mt-5 w-full rounded-lg bg-gray-300 px-4 py-3 text-sm font-semibold text-gray-500">Penuh</button>
                         ) : (

@@ -24,7 +24,7 @@ export default function PemilikSidebar({ userName, userAvatar, userEmail }: Prop
     const displayName = userName ?? "Pemilik";
 
     return (
-        <aside className="flex h-screen w-60 flex-col border-r border-border bg-surface">
+        <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-surface">
             <div className="px-6 py-6">
                 <Link href="/dashboard" title="Beranda pemilik">
                     <Image

@@ -25,7 +25,7 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
     const linkCls = (active: boolean) =>
         `flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs ${active ? "bg-primary-light font-semibold text-primary" : "text-text-primary hover:bg-primary-light hover:text-primary"}`;
     return (
-        <aside className="flex h-screen w-60 flex-col border-r border-border bg-surface">
+        <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-surface">
             <div className="px-6 py-6">
                 <Link href="/" title="Kembali ke homepage">
                     <Image

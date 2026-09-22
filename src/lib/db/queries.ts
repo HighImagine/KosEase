@@ -5,6 +5,25 @@ import type { Galeri, Kamar, Kos, KosCardData, KosDetail } from "./types";
 
 const KOS_COVER_FALLBACK = "/img/kos-placeholder.png";
 
+// Normalisasi angka Nullable dari DB agar halaman publik tidak pernah crash
+// (mis. rating NULL -> .toFixed meledak). Terapkan di setiap query kos/kamar.
+function normKos(row: Kos): Kos {
+  return {
+    ...row,
+    harga: row.harga ?? 0,
+    rating: row.rating ?? 0,
+    ulasan: row.ulasan ?? 0,
+  };
+}
+
+function normKamar(row: Kamar): Kamar {
+  return {
+    ...row,
+    harga: row.harga ?? 0,
+    stok: row.stok ?? 0,
+  };
+}
+
 export async function getTayangKosCards(): Promise<KosCardData[]> {
   const supabase = await createClient();
   const { data: rows, error } = await supabase
@@ -13,7 +32,7 @@ export async function getTayangKosCards(): Promise<KosCardData[]> {
     .eq("status_publikasi", "tayang")
     .order("created_at", { ascending: false });
   if (error || !rows) return [];
-  const kosList = rows as Kos[];
+  const kosList = (rows as Kos[]).map(normKos);
   if (kosList.length === 0) return [];
   const ids = kosList.map((k) => k.id_kos);
 
@@ -55,8 +74,9 @@ export async function getPublicKosDetail(idKos: string): Promise<KosDetail | nul
     .eq("id_kos", idKos)
     .eq("status_publikasi", "tayang")
     .limit(1);
-  const kos = (kosRows?.[0] as Kos | undefined) ?? null;
-  if (!kos) return null;
+  const kosRaw = (kosRows?.[0] as Kos | undefined) ?? null;
+  if (!kosRaw) return null;
+  const kos = normKos(kosRaw);
 
   const [{ data: kamarRows }, { data: galeriRows }, { data: relRows }] = await Promise.all([
     supabase.from("kamar").select("*").eq("kos_id", idKos).order("harga", { ascending: true }),
@@ -75,7 +95,7 @@ export async function getPublicKosDetail(idKos: string): Promise<KosDetail | nul
 
   return {
     kos,
-    kamar: ((kamarRows ?? []) as Kamar[]),
+    kamar: ((kamarRows ?? []) as Kamar[]).map(normKamar),
     galeri: ((galeriRows ?? []) as Galeri[]),
     fasilitas,
   };
@@ -91,8 +111,9 @@ export async function getOwnedKosDetail(idKos: string): Promise<KosDetail | null
   if (!user) return null;
 
   const { data: kosRows } = await supabase.from("kos").select("*").eq("id_kos", idKos).limit(1);
-  const kos = (kosRows?.[0] as Kos | undefined) ?? null;
-  if (!kos) return null;
+  const kosRaw = (kosRows?.[0] as Kos | undefined) ?? null;
+  if (!kosRaw) return null;
+  const kos = normKos(kosRaw);
 
   let role: string | null = null;
   try {
@@ -118,7 +139,7 @@ export async function getOwnedKosDetail(idKos: string): Promise<KosDetail | null
 
   return {
     kos,
-    kamar: ((kamarRows ?? []) as Kamar[]),
+    kamar: ((kamarRows ?? []) as Kamar[]).map(normKamar),
     galeri: ((galeriRows ?? []) as Galeri[]),
     fasilitas,
   };
@@ -136,7 +157,7 @@ export async function getMyKosList(): Promise<Kos[]> {
     .select("*")
     .eq("id_pemilik", user.id)
     .order("created_at", { ascending: false });
-  return (data ?? []) as Kos[];
+  return ((data ?? []) as Kos[]).map(normKos);
 }
 
 // Semua kos untuk moderasi admin.
@@ -145,7 +166,7 @@ export async function getMyKosList(): Promise<Kos[]> {
 export async function getAllKosForAdmin(): Promise<(Kos & { owner_name: string | null })[]> {
   const supabase = await createClient();
   const { data } = await supabase.from("kos").select("*").order("created_at", { ascending: false });
-  const rows = (data ?? []) as Kos[];
+  const rows = ((data ?? []) as Kos[]).map(normKos);
   if (rows.length === 0) return [];
   const ownerIds = [...new Set(rows.map((r) => r.id_pemilik))];
   const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", ownerIds);
@@ -285,6 +306,23 @@ export async function getPengajuanDetail(id: string): Promise<PengajuanDetail | 
   const supabase = await createClient();
   const { data } = await supabase.from("pengajuan_pemilik").select("*").eq("id", id).limit(1);
   return (data?.[0] as PengajuanDetail | undefined) ?? null;
+}
+
+export type KosOwner = { nama: string | null; avatar_url: string | null };
+
+// Pemilik kos untuk kartu "Dikelola oleh" (nama + avatar saja, tanpa kontak).
+// Null bila tak terbaca — pemanggil wajib tampilkan fallback generik.
+export async function getKosOwner(idPemilik: string): Promise<KosOwner | null> {
+  if (!idPemilik) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("full_name, avatar_url")
+    .eq("id", idPemilik)
+    .limit(1);
+  const row = data?.[0] as { full_name?: string | null; avatar_url?: string | null } | undefined;
+  if (!row) return null;
+  return { nama: row.full_name ?? null, avatar_url: row.avatar_url ?? null };
 }
 
 export type AdminStats = { total: number; tayang: number; draft: number; pengajuanPending: number };

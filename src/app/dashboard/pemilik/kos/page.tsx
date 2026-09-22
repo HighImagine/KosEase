@@ -18,9 +18,6 @@ export default async function KelolaKosPage() {
         <main className="flex-1 p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-heading text-xl font-bold text-text-primary">Kos Saya</h2>
-            <Link href="/dashboard/pemilik/kos/tambah" className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-dark">
-              + Tambah Kos
-            </Link>
           </div>
 
           {kosList.length === 0 ? (

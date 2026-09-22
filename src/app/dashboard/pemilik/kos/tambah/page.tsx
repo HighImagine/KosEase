@@ -1,16 +1,13 @@
 import Link from "next/link";
 import DashboardNavbar from "@/components/DashboardNavbar";
-import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
 import { createKosAction } from "@/app/kos/actions";
 import KosForm from "../KosForm";
 
 export default function TambahKosPage() {
+  // Tanpa sidebar: halaman form fokus penuh.
   return (
-    <div className="flex min-h-screen bg-background">
-      <DashboardSidebarUserWrapper />
-
-      <div className="flex flex-1 flex-col">
-        <DashboardNavbar title="Tambah Kos" />
+    <div className="min-h-screen bg-background">
+      <DashboardNavbar title="Tambah Kos" />
 
         <main className="flex-1 p-6">
           <div className="mx-auto max-w-xl">
@@ -24,7 +21,6 @@ export default function TambahKosPage() {
             </div>
           </div>
         </main>
-      </div>
     </div>
   );
 }

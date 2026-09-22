@@ -1,6 +1,9 @@
 "use client";
 import { useActionState, useRef, useState } from "react";
 import { pengajuanPemilikAction, type PengajuanValues } from "@/app/(auth)/actions";
+import UploadPopup, { toMB } from "@/components/UploadPopup";
+
+const DOKUMEN_MAX_BYTES = 10 * 1024 * 1024; // 10MB, sama dengan batas server
 
 type FormState = { error?: string; values?: PengajuanValues } | null;
 
@@ -16,6 +19,22 @@ export default function PengajuanForm() {
   const [state, formAction, pending] = useActionState(pengajuanPemilikAction as never, null as FormState);
   const fileRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [oversize, setOversize] = useState<{ name: string; sizeMB: string } | null>(null);
+
+  const handleDokumenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setFileName(null);
+      return;
+    }
+    if (file.size > DOKUMEN_MAX_BYTES) {
+      setOversize({ name: file.name, sizeMB: toMB(file.size) });
+      e.target.value = "";
+      setFileName(null);
+      return;
+    }
+    setFileName(file.name);
+  };
   // Controlled: state hidup di client dan tidak di-reset saat action
   // mengembalikan error, jadi isian user tetap ada.
   const [vals, setVals] = useState<PengajuanValues>(EMPTY);
@@ -62,7 +81,7 @@ export default function PengajuanForm() {
               accept=".pdf,.jpg,.png,.jpeg"
               className="hidden"
               id="dokumen-input"
-              onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
+              onChange={handleDokumenChange}
             />
             {fileName && (
               <p className="mt-2 truncate text-[11px] font-semibold text-primary">📎 {fileName}</p>
@@ -79,6 +98,14 @@ export default function PengajuanForm() {
           <button type="button" className="rounded-lg border border-border bg-surface px-5 py-2.5 text-xs font-semibold text-text-primary hover:text-primary">Batal</button>
         </div>
       </div>
+
+      <UploadPopup
+        open={oversize !== null}
+        fileName={oversize?.name ?? ""}
+        sizeMB={oversize?.sizeMB ?? ""}
+        maxMB={10}
+        onClose={() => setOversize(null)}
+      />
     </form>
   );
 }

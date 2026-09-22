@@ -1,8 +1,11 @@
 "use client";
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useState } from "react";
 import Image from "next/image";
 import { deleteGaleriAction, uploadGaleriAction } from "@/app/kos/actions";
+import UploadPopup, { toMB } from "@/components/UploadPopup";
 import type { Galeri } from "@/lib/db/types";
+
+const MAX_BYTES = 2 * 1024 * 1024; // 2MB, sama dengan batas server
 
 type FormState = { error?: string; success?: string } | null;
 
@@ -28,6 +31,15 @@ function GaleriItem({ foto }: { foto: Galeri }) {
 export default function GaleriManager({ kosId, galeri }: { kosId: string; galeri: Galeri[] }) {
   const [state, formAction, pending] = useActionState(uploadGaleriAction as never, null as FormState);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [oversize, setOversize] = useState<{ name: string; sizeMB: string } | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.size > MAX_BYTES) {
+      setOversize({ name: file.name, sizeMB: toMB(file.size) });
+      e.target.value = ""; // batalkan pilihan agar tidak ikut ter-submit
+    }
+  };
 
   return (
     <div className="space-y-3">
@@ -38,7 +50,7 @@ export default function GaleriManager({ kosId, galeri }: { kosId: string; galeri
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <span className="block text-[10px] font-semibold text-text-primary">Foto (JPG/PNG/WebP, maks 2MB)</span>
-            <input ref={fileRef} name="foto" type="file" accept="image/jpeg,image/png,image/webp" required className="mt-1 w-full text-xs text-text-secondary" />
+            <input ref={fileRef} name="foto" type="file" accept="image/jpeg,image/png,image/webp" required onChange={handleFileChange} className="mt-1 w-full text-xs text-text-secondary" />
           </div>
           <div>
             <label className="block text-[10px] font-semibold text-text-primary">Caption (opsional)</label>
@@ -49,6 +61,14 @@ export default function GaleriManager({ kosId, galeri }: { kosId: string; galeri
           {pending ? "Mengunggah..." : "Upload Foto"}
         </button>
       </form>
+
+      <UploadPopup
+        open={oversize !== null}
+        fileName={oversize?.name ?? ""}
+        sizeMB={oversize?.sizeMB ?? ""}
+        maxMB={2}
+        onClose={() => setOversize(null)}
+      />
 
       {galeri.length === 0 ? (
         <p className="text-xs text-text-secondary">Belum ada foto. Foto pertama menjadi sampul kos.</p>

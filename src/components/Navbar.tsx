@@ -4,13 +4,15 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useCallback } from "react";
 import LogoutButton from "./LogoutButton";
+import NotificationBell from "./NotificationBell";
 
 type NavbarProps = {
   user: { email: string; displayName: string | null; role: string | null } | null;
   avatarUrl?: string | null;
+  pendingCount?: number;
 };
 
-export default function Navbar({ user, avatarUrl }: NavbarProps) {
+export default function Navbar({ user, avatarUrl, pendingCount = 0 }: NavbarProps) {
   const pathname = usePathname();
   const role = user?.role ?? "penyewa";
   const [render, setRender] = useState(false);
@@ -48,6 +50,7 @@ export default function Navbar({ user, avatarUrl }: NavbarProps) {
           </div>
         ) : (
           <div className="relative flex items-center gap-3">
+            {user?.role === "admin" && <NotificationBell count={pendingCount} />}
             <button onClick={toggleDropdown} className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 hover:bg-background">
               <Image src={avatarUrl ?? "/img/avatar-default.png"} alt={user.displayName ?? "User"} width={28} height={28} className="rounded-full object-cover" />
                <span className="hidden sm:block text-xs font-semibold text-text-primary">{user.displayName}</span>
@@ -58,6 +61,7 @@ export default function Navbar({ user, avatarUrl }: NavbarProps) {
               >
                 <Link href="/dashboard" onClick={closeDropdown} className="block rounded-lg px-3 py-2 text-xs hover:bg-background">Dashboard</Link>
                 {role === "pemilik" && <Link href="/dashboard/pemilik" onClick={closeDropdown} className="block rounded-lg px-3 py-2 text-xs hover:bg-background">Kelola Kos</Link>}
+                {role === "admin" && <Link href="/dashboard/admin/pengajuan" onClick={closeDropdown} className="block rounded-lg px-3 py-2 text-xs hover:bg-background">Pengajuan</Link>}
                 <LogoutButton variant="dropdown" />
               </div>
             )}

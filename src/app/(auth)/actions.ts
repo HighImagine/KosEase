@@ -62,9 +62,36 @@ export async function loginAction(_prev: unknown, formData: FormData) {
     }
   } catch {}
   // normalize: "user"/"pencari" dianggap "penyewa"
-  const norm = role?.toLowerCase();
-  if (norm === "pemilik" || norm === "pemilik_kos" || norm === "admin") redirect("/dashboard");
-  // penyewa/ -> homepage
+const norm = role?.toLowerCase();
+    if (norm === "pemilik") redirect("/dashboard");
+    if (norm === "pemilik_kos") redirect("/dashboard");
+    if (norm === "admin") redirect("/");
+    // penyewa/ -> homepage
+    redirect("/");
+}
+
+export async function adminLoginAction(_prev: unknown, formData: FormData) {
+  const raw = Object.fromEntries(formData) as Record<string, string>;
+  const parsed = loginSchema.safeParse(raw);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
+  if (error) return { error: "Email atau kata sandi salah" };
+  let role: string | null = null;
+  try {
+    const userId = data.user?.id;
+    if (userId) {
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).single();
+      role = (profile?.role as string) ?? null;
+    }
+  } catch {}
+  if (role !== "admin") {
+    await supabase.auth.signOut();
+    return { error: "Akses hanya untuk admin" };
+  }
   redirect("/");
 }
 
@@ -92,14 +119,56 @@ const resetSchema = z.object({
   confirm: z.string(),
 }).refine((d) => d.password === d.confirm, { message: "Konfirmasi tidak cocok", path: ["confirm"] });
 
+const pengajuanSchema = z.object({
+  nama: z.string().min(2, "Nama minimal 2 karakter"),
+  phone: z.string().min(5, "Nomor minimal 5 digit"),
+  alamat: z.string().min(5, "Alamat minimal 5 karakter"),
+  alasan: z.string().min(5, "Alasan minimal 5 karakter"),
+  info_kos: z.string().min(5, "Informasi kos minimal 5 karakter"),
+});
+
 export async function resetPasswordAction(_prev: unknown, formData: FormData) {
   const raw = Object.fromEntries(formData) as Record<string, string>;
   const parsed = resetSchema.safeParse(raw);
-  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  if (!parsed.success) return { error: parsed.error.issues[0].message, currentFullName: "", currentEmail: "", currentPhone: "", currentAvatar: null };
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) return { error: error.message };
   redirect("/login?reset=1");
+}
+
+export async function pengajuanPemilikAction(_prev: unknown, formData: FormData) {
+  const raw = Object.fromEntries(formData) as Record<string, string>;
+  const parsed = pengajuanSchema.safeParse(raw);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { nama, phone, alamat, alasan, info_kos } = parsed.data;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "User tidak ditemukan" };
+  const { error } = await supabase.from("pengajuan_pemilik_kos").insert({ user_id: user.id, nama, phone, alamat, alasan, info_kos, status: "menunggu_verifikasi" });
+  if (error) return { error: error.message };
+  redirect("/dashboard/pengajuan-pemilik?success=1");
+}
+
+export async function approvePengajuanAction(_prev: unknown, formData: FormData) {
+  const pengajuanId = formData.get("pengajuanId") as string;
+  const supabase = await createClient();
+  const { data: pengajuan } = await supabase.from("pengajuan_pemilik_kos").select("user_id").eq("id", pengajuanId).single();
+  if (pengajuan?.user_id) {
+    await supabase.from("profiles").update({ role: "pemilik" }).eq("id", pengajuan.user_id).select().single();
+  }
+  const { error } = await supabase.from("pengajuan_pemilik_kos").update({ status: "disetujui" }).eq("id", pengajuanId).select().single();
+  if (error) return { error: error.message };
+  redirect("/dashboard/admin/pengajuan");
+}
+
+export async function rejectPengajuanAction(_prev: unknown, formData: FormData) {
+  const pengajuanId = formData.get("pengajuanId") as string;
+  const alasanTolak = formData.get("alasanTolak") as string;
+  const supabase = await createClient();
+  const { error } = await supabase.from("pengajuan_pemilik_kos").update({ status: "ditolak", alasanTolak: alasanTolak }).eq("id", pengajuanId).select().single();
+  if (error) return { error: error.message };
+  redirect("/dashboard/admin/pengajuan");
 }
 
 export async function updateProfileAction(_prev: unknown, formData: FormData) {

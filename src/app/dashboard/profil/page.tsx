@@ -14,7 +14,7 @@ export default async function ProfilPage() {
   let initialValues: { currentFullName?: string; currentEmail?: string; currentPhone?: string; currentAvatar?: string | null } = { currentAvatar: null };
 
 if (user) {
-    displayName = (user.user_metadata?.full_name as string) ?? user.email?.split("@")[0] ?? "Penyewa";
+    displayName = (user.user_metadata?.full_name as string)?.split(" ")[0] ?? "Penyewa";
     avatarUrl = (user.user_metadata?.avatar_url as string) ?? null;
     email = user.email ?? null;
     let phoneFromProfile: string | null = null;

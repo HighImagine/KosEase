@@ -19,7 +19,7 @@ export default async function DashboardSidebarUserWrapper() {
         userRole = (data.role as string) ?? null;
       }
     } catch {}
-    if (!displayName) displayName = user.email?.split("@")[0] ?? "Pengguna";
+    if (!displayName) displayName = "Pengguna";
   }
 
   return (

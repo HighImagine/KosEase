@@ -25,17 +25,17 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
+  const isAdmin = request.nextUrl.pathname.startsWith("/admin");
   const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
   const isAuth = ["/login", "/register"].includes(request.nextUrl.pathname);
 
-  if (!user && isDashboard) {
+  if (!user && (isDashboard || isAdmin)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(url);
   }
   if (user && isAuth) {
-    // PRD 3 aktor: penyewa/user, pemilik kos, admin
     let role: string | null = null;
     try {
       const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
@@ -43,15 +43,32 @@ export async function middleware(request: NextRequest) {
     } catch {}
     const url = request.nextUrl.clone();
     const norm = role?.toLowerCase();
-    if (norm === "pemilik" || norm === "pemilik_kos" || norm === "admin") url.pathname = "/dashboard";
-    else url.pathname = "/";
+    if (norm === "pemilik") {
+      url.pathname = "/dashboard";
+    } else if (norm === "admin") {
+      url.pathname = "/";
+    } else {
+      url.pathname = "/";
+    }
     url.search = "";
     return NextResponse.redirect(url);
+  }
+  if (user && isAdmin) {
+    let role: string | null = null;
+    try {
+      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+      role = (data?.role as string) ?? null;
+    } catch {}
+    if (role !== "admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/login", "/register"],
 };

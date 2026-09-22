@@ -38,8 +38,9 @@ export async function proxy(request: NextRequest) {
   if (user && isAuth) {
     let role: string | null = null;
     try {
-      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-      role = (data?.role as string) ?? null;
+      const { data: profileData } = await supabase.from("profiles").select("role").eq("id", user.id).limit(1);
+      const profileDatum = profileData?.[0];
+      role = (profileDatum?.role as string) ?? null;
     } catch {}
     const url = request.nextUrl.clone();
     const norm = role?.toLowerCase();
@@ -56,8 +57,9 @@ export async function proxy(request: NextRequest) {
   if (user && isAdmin) {
     let role: string | null = null;
     try {
-      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-      role = (data?.role as string) ?? null;
+      const { data: profileData } = await supabase.from("profiles").select("role").eq("id", user.id).limit(1);
+      const profileDatum = profileData?.[0];
+      role = (profileDatum?.role as string) ?? null;
     } catch {}
     if (role !== "admin") {
       const url = request.nextUrl.clone();

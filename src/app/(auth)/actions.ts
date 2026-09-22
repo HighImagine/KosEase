@@ -57,8 +57,9 @@ export async function loginAction(_prev: unknown, formData: FormData) {
   try {
     const userId = data.user?.id;
     if (userId) {
-      const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).single();
-      role = (profile?.role as string) ?? null;
+      const { data: profileData } = await supabase.from("profiles").select("role").eq("id", userId).limit(1);
+      const profileDatum = profileData?.[0];
+      role = (profileDatum?.role as string) ?? null;
     }
   } catch {}
   // normalize: "user"/"pencari" dianggap "penyewa"
@@ -84,8 +85,9 @@ export async function adminLoginAction(_prev: unknown, formData: FormData) {
   try {
     const userId = data.user?.id;
     if (userId) {
-      const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).single();
-      role = (profile?.role as string) ?? null;
+      const { data: profileData } = await supabase.from("profiles").select("role").eq("id", userId).limit(1);
+      const profileDatum = profileData?.[0];
+      role = (profileDatum?.role as string) ?? null;
     }
   } catch {}
   if (role !== "admin") {
@@ -153,11 +155,12 @@ export async function pengajuanPemilikAction(_prev: unknown, formData: FormData)
 export async function approvePengajuanAction(_prev: unknown, formData: FormData) {
   const pengajuanId = formData.get("pengajuanId") as string;
   const supabase = await createClient();
-  const { data: pengajuan } = await supabase.from("pengajuan_pemilik_kos").select("user_id").eq("id", pengajuanId).single();
-  if (pengajuan?.user_id) {
-    await supabase.from("profiles").update({ role: "pemilik" }).eq("id", pengajuan.user_id).select().single();
+  const { data: pengajuan } = await supabase.from("pengajuan_pemilik_kos").select("user_id").eq("id", pengajuanId).limit(1);
+  const pengajuanDatum = pengajuan?.[0];
+  if (pengajuanDatum?.user_id) {
+    await supabase.from("profiles").update({ role: "pemilik" }).eq("id", pengajuanDatum.user_id).select().limit(1);
   }
-  const { error } = await supabase.from("pengajuan_pemilik_kos").update({ status: "disetujui" }).eq("id", pengajuanId).select().single();
+  const { error } = await supabase.from("pengajuan_pemilik_kos").update({ status: "disetujui" }).eq("id", pengajuanId).select().limit(1);
   if (error) return { error: error.message };
   redirect("/dashboard/admin/pengajuan");
 }
@@ -166,7 +169,7 @@ export async function rejectPengajuanAction(_prev: unknown, formData: FormData) 
   const pengajuanId = formData.get("pengajuanId") as string;
   const alasanTolak = formData.get("alasanTolak") as string;
   const supabase = await createClient();
-  const { error } = await supabase.from("pengajuan_pemilik_kos").update({ status: "ditolak", alasanTolak: alasanTolak }).eq("id", pengajuanId).select().single();
+  const { error } = await supabase.from("pengajuan_pemilik_kos").update({ status: "ditolak", alasanTolak: alasanTolak }).eq("id", pengajuanId).select().limit(1);
   if (error) return { error: error.message };
   redirect("/dashboard/admin/pengajuan");
 }
@@ -195,7 +198,7 @@ export async function updateProfileAction(_prev: unknown, formData: FormData) {
     }
   }
 
-  const { error: profileError } = await supabase.from("profiles").update({ full_name: nama, avatar_url: avatarUrl, phone }).eq("id", user.id).select().single();
+  const { error: profileError } = await supabase.from("profiles").update({ full_name: nama, avatar_url: avatarUrl, phone }).eq("id", user.id).select().limit(1);
   if (profileError) return { error: profileError.message, currentFullName: nama, currentEmail, currentPhone: phone ?? "", currentAvatar: null };
 
   await supabase.auth.updateUser({ data: { full_name: nama } });

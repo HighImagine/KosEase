@@ -14,9 +14,10 @@ export default async function NavbarWrapper() {
   if (user) {
     displayName = (user.user_metadata?.full_name as string)?.split(" ")[0] ?? null;
     avatarUrl = (user.user_metadata?.avatar_url as string) ?? null;
-    const { data: profileData } = await supabase.from("profiles").select("role, avatar_url").eq("id", user.id).single();
-    role = (profileData?.role as string) ?? "penyewa";
-    if (profileData?.avatar_url) avatarUrl = profileData.avatar_url as string;
+    const { data: profileData } = await supabase.from("profiles").select("role, avatar_url").eq("id", user.id).limit(1);
+    const profileDatum = profileData?.[0];
+    role = (profileDatum?.role as string) ?? "penyewa";
+    if (profileDatum?.avatar_url) avatarUrl = profileDatum.avatar_url as string;
     if (role === "admin") {
       const { count } = await supabase.from("pengajuan_pemilik_kos").select("*", { count: "exact", head: true }).eq("status", "menunggu_verifikasi");
       pendingCount = count ?? 0;

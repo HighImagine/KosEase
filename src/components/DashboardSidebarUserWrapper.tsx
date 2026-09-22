@@ -12,11 +12,12 @@ export default async function DashboardSidebarUserWrapper() {
     displayName = (user.user_metadata?.full_name as string) ?? null;
     avatarUrl = (user.user_metadata?.avatar_url as string) ?? null;
     try {
-      const { data } = await supabase.from("profiles").select("full_name, avatar_url, role").eq("id", user.id).single();
-      if (data) {
-        displayName = (data.full_name as string) ?? displayName;
-        if (data.avatar_url) avatarUrl = data.avatar_url as string;
-        userRole = (data.role as string) ?? null;
+      const { data: profileData } = await supabase.from("profiles").select("full_name, avatar_url, role").eq("id", user.id).limit(1);
+      const profileDatum = profileData?.[0];
+      if (profileDatum) {
+        displayName = (profileDatum.full_name as string) ?? displayName;
+        if (profileDatum.avatar_url) avatarUrl = profileDatum.avatar_url as string;
+        userRole = (profileDatum.role as string) ?? null;
       }
     } catch {}
     if (!displayName) displayName = "Pengguna";

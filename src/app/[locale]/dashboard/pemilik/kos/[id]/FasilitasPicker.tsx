@@ -1,7 +1,8 @@
 "use client";
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { setKosFasilitasAction } from "@/app/[locale]/kos/actions";
+import { useScrollToMessage } from "@/hooks/useScrollToMessage";
 
 type FormState = { error?: string; success?: string } | null;
 
@@ -16,6 +17,8 @@ export default function FasilitasPicker({
 }) {
   const t = useTranslations("FasilitasPicker");
   const [state, formAction, pending] = useActionState(setKosFasilitasAction as never, null as FormState);
+  const msgRef = useRef<HTMLDivElement>(null);
+  useScrollToMessage(state, msgRef);
 
   if (master.length === 0) {
     return <p className="text-xs text-text-secondary">{t("empty")}</p>;
@@ -23,8 +26,10 @@ export default function FasilitasPicker({
 
   return (
     <form action={formAction} className="space-y-3">
-      {state?.error && <p className="rounded-md bg-error/10 px-3 py-2 text-xs text-error">{state.error}</p>}
-      {state?.success && <p className="rounded-md bg-success/10 px-3 py-2 text-xs text-success">{state.success}</p>}
+      <div ref={msgRef}>
+        {state?.error && <p className="rounded-md bg-error/10 px-3 py-2 text-xs text-error">{state.error}</p>}
+        {state?.success && <p className="rounded-md bg-success/10 px-3 py-2 text-xs text-success">{state.success}</p>}
+      </div>
       <input type="hidden" name="kosId" value={kosId} />
       <div className="flex flex-wrap gap-2">
         {master.map((f) => (

@@ -248,25 +248,6 @@ export default async function KosDetailPage({ params }: PageProps) {
                             <Link href={`/pemesanan?kosId=${kos.id_kos}`} className="mt-5 block w-full rounded-lg bg-accent px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-orange-600">{t("order")}</Link>
                         )}
 
-                        {/* Simpan & Bagikan */}
-                        <div className="mt-3 grid grid-cols-2 gap-2">
-
-                            <button
-                                type="button"
-                                className="rounded-lg bg-background px-3 py-2 text-xs font-semibold text-text-secondary transition-colors hover:bg-border"
-                            >
-                                {t("save")}
-                            </button>
-
-                            <button
-                                type="button"
-                                className="rounded-lg bg-background px-3 py-2 text-xs font-semibold text-text-secondary transition-colors hover:bg-border"
-                            >
-                                {t("share")}
-                            </button>
-
-                        </div>
-
                     </div>
 
                 </section>

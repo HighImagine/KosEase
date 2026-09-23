@@ -46,7 +46,7 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
                 <Link
                     href="/dashboard"
                     title="Halaman utama dashboard"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs ${pathname === "/dashboard" ? "bg-primary-light font-semibold text-primary" : "text-text-primary hover:bg-primary-light hover:text-primary"}`}
+                    className={linkCls(pathname === "/dashboard")}
                 >
                     <IconLayoutDashboard size={16} stroke={2} />
                     {t("home")}
@@ -54,7 +54,7 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
 
                 <Link
                     href="/"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs text-text-primary hover:bg-primary-light hover:text-primary"
+                    className={linkCls(pathname === "/")}
                 >
                     <IconHome size={16} stroke={2} />
                     {t("website")}
@@ -62,7 +62,7 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
 
                 <Link
                     href="/cari-kos"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs text-text-primary hover:bg-primary-light hover:text-primary"
+                    className={linkCls(pathname === "/cari-kos")}
                 >
                     <IconSearch size={16} stroke={2} />
                     {t("search")}
@@ -92,7 +92,7 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
 
                 <Link
                     href="/dashboard/reservasi"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs text-text-primary hover:bg-primary-light hover:text-primary"
+                    className={linkCls(pathname.startsWith("/dashboard/reservasi"))}
                 >
                     <Image
                         src="/img/calendar.svg"
@@ -105,7 +105,7 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
 
                 <Link
                     href="/dashboard/status"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs text-text-primary hover:bg-primary-light hover:text-primary"
+                    className={linkCls(pathname.startsWith("/dashboard/status"))}
                 >
                     <Image
                         src="/img/clock.svg"
@@ -118,7 +118,7 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
 
                 <Link
                     href="/dashboard/riwayat"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs text-text-primary hover:bg-primary-light hover:text-primary"
+                    className={linkCls(pathname.startsWith("/dashboard/riwayat"))}
                 >
                     <Image
                         src="/img/bed.svg"
@@ -159,7 +159,7 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
 
                 <Link
                     href="/dashboard/pengajuan-pemilik"
-                    className="flex items-center gap-3 rounded-lg bg-primary-light px-3 py-2.5 text-xs font-semibold text-primary"
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold ${pathname.startsWith("/dashboard/pengajuan-pemilik") ? "bg-primary font-semibold text-white" : "bg-primary-light text-primary"}`}
                 >
                     <Image
                         src="/img/briefcase.svg"

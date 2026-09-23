@@ -83,8 +83,6 @@
     "fullMsg": "This kos is currently full — check back later or contact the owner.",
     "full": "Full",
     "order": "Request Booking",
-    "save": "♡ Save",
-    "share": "↗ Share",
     "available": "Available",
     "unavailable": "Full",
     "ownerTitle": "Managed by",
@@ -202,6 +200,28 @@
     "ctaButton": "Find Kos Now",
     "contactHint": "Need help? Contact support@kosease.com"
   },
+  "Reservasi": {
+    "reservasiTitle": "My Reservations",
+    "reservasiEmpty": "No reservations yet.",
+    "reservasiDesc": "Every booking request you make will be recorded here for easy tracking.",
+    "howTitle": "How to book a kos",
+    "howStep1": "Find a suitable kos in Find Kos.",
+    "howStep2": "Fill in the short booking form.",
+    "howStep3": "Wait for confirmation from the kos owner.",
+    "cta": "Find Kos",
+    "statusTitle": "Booking Status",
+    "statusDesc": "Track your booking stages here.",
+    "step1": "Submitted",
+    "step1d": "The booking form is sent to the kos owner.",
+    "step2": "Confirmed",
+    "step2d": "The owner confirms room availability.",
+    "step3": "Active",
+    "step3d": "The rental period is running. Pay the owner directly.",
+    "trackingEmpty": "No bookings to track yet.",
+    "riwayatTitle": "History",
+    "riwayatDesc": "Completed bookings will be archived here.",
+    "riwayatEmpty": "No booking history yet."
+  },
   "Footer": {
     "tagline": "A modern kos search platform in Indonesia focused on ease, comfort, and price transparency for students and young professionals.",
     "brandCol": "KosEase",
@@ -232,7 +252,7 @@
     "website": "Back to Website",
     "users": "Manage Users",
     "verifyOwner": "Verify Kos Owners",
-    "verifyPub": "Verify Kos Listings",
+    "verifyPub": "Moderate Kos Listings",
     "fallbackName": "Admin"
   },
   "SidebarOwner": {
@@ -259,7 +279,10 @@
     "statPending": "Pending Applications",
     "statPenyewa": "Renters",
     "statPemilik": "Owners",
-    "statAdmin": "Admins"
+    "statAdmin": "Admins",
+    "noBooking": "No active reservations.",
+    "noBookingDesc": "Ongoing reservations will appear here.",
+    "noBookingCta": "Find Kos"
   },
   "PengajuanCard": {
     "ctaTitleA": "Own a Kos?",
@@ -400,6 +423,8 @@
     "photo": "Photo (JPG/PNG/WebP, max 2MB)",
     "caption": "Caption (optional)",
     "captionPh": "Front view of the kos",
+    "choosePhoto": "Choose Photo",
+    "changePhoto": "Change Photo",
     "upload": "Upload Photo",
     "uploading": "Uploading...",
     "delete": "Delete",
@@ -441,7 +466,7 @@
     "pendingCount": "{n} awaiting verification.",
     "waiting": "Pending",
     "noPending": "No pending applications.",
-    "pubTitle": "Verify Kos Listings",
+    "pubTitle": "Moderate Kos Listings",
     "moderate": "Moderate",
     "allTayang": "All kos published.",
     "draftCount": "{n} kos in draft.",
@@ -449,7 +474,7 @@
     "verifyAll": "Verify all →"
   },
   "AdminKos": {
-    "title": "Kos Moderation",
+    "title": "Listing Moderation",
     "heading": "All Kos ({n})",
     "empty": "No kos registered yet.",
     "owner": "Owner: {name}",

@@ -2,7 +2,6 @@ import Image from "next/image";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
 import PengajuanCard from "@/components/PengajuanCard";
-import ActiveBookingCard from "@/components/ActiveBookingCard";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminKosStats, getPemilikKosStats, getTayangKosCards } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
@@ -134,18 +133,20 @@ export default async function DashboardPage() {
 
                     </div>
 
-                    {/* Reservasi Aktif */}
-                    <div className="mt-6 rounded-xl bg-surface overflow-hidden">
-                        <ActiveBookingCard
-                            gambar="/img/kos-placeholder.png"
-                            namaKos="Kos Putri Sakinah"
-                            kamarNama="Kamar A3"
-                            kamarDetail="3x4m • Kamar Mandi Dalam"
-                            tanggalMasuk="1 Februari 2026"
-                            harga={1200000}
-                            status="Menunggu"
-                        />
+                    {/* Reservasi Aktif — khusus penyewa. Pemilik/admin tidak melihatnya;
+                        panel "Reservasi Masuk" pemilik menyusul bersama backend booking. */}
+                    {!isPemilik && !isAdmin && (
+                    <div className="mt-6 rounded-xl bg-surface p-8 text-center">
+                        <p className="text-sm font-semibold text-text-primary">{t("noBooking")}</p>
+                        <p className="mx-auto mt-1 max-w-md text-xs text-text-secondary">{t("noBookingDesc")}</p>
+                        <Link
+                            href="/cari-kos"
+                            className="mt-4 inline-block rounded-lg bg-primary px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-primary-dark"
+                        >
+                            {t("noBookingCta")}
+                        </Link>
                     </div>
+                    )}
                 </main>
             </div>
         </div>

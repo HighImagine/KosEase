@@ -1,7 +1,8 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { deleteKamarAction, upsertKamarAction } from "@/app/[locale]/kos/actions";
+import { useScrollToMessage } from "@/hooks/useScrollToMessage";
 import { formatHarga } from "@/lib/format";
 import type { Kamar } from "@/lib/db/types";
 
@@ -16,9 +17,11 @@ function KamarRow({ kosId, kamar }: { kosId: string; kamar: Kamar }) {
   const [open, setOpen] = useState(false);
   const [editState, editAction, editPending] = useActionState(upsertKamarAction as never, null as FormState);
   const [delState, delAction, delPending] = useActionState(deleteKamarAction as never, null as FormState);
+  const msgRef = useRef<HTMLDivElement>(null);
+  useScrollToMessage(editState ?? delState, msgRef);
 
   return (
-    <div className="rounded-xl border border-border p-4">
+    <div ref={msgRef} className="rounded-xl border border-border p-4 scroll-mt-4">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-text-primary">{kamar.nama}</p>
@@ -83,6 +86,8 @@ export default function KamarManager({ kosId, kamar }: { kosId: string; kamar: K
   const t = useTranslations("KamarManager");
   const [adding, setAdding] = useState(kamar.length === 0);
   const [state, formAction, pending] = useActionState(upsertKamarAction as never, null as FormState);
+  const addMsgRef = useRef<HTMLDivElement>(null);
+  useScrollToMessage(state, addMsgRef);
 
   return (
     <div className="space-y-3">
@@ -96,8 +101,10 @@ export default function KamarManager({ kosId, kamar }: { kosId: string; kamar: K
         </button>
       ) : (
         <form action={formAction} className="grid gap-3 rounded-xl border border-border p-4 sm:grid-cols-2">
-          {state?.error && <p className="rounded-md bg-error/10 px-3 py-2 text-xs text-error sm:col-span-2">{state.error}</p>}
-          {state?.success && <p className="rounded-md bg-success/10 px-3 py-2 text-xs text-success sm:col-span-2">{state.success}</p>}
+          <div ref={addMsgRef} className="sm:col-span-2">
+            {state?.error && <p className="rounded-md bg-error/10 px-3 py-2 text-xs text-error">{state.error}</p>}
+            {state?.success && <p className="rounded-md bg-success/10 px-3 py-2 text-xs text-success">{state.success}</p>}
+          </div>
           <input type="hidden" name="kosId" value={kosId} />
           <div>
             <label className={labelCls}>{t("name")}</label>

@@ -3,6 +3,7 @@ import { useActionState, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { deleteGaleriAction, uploadGaleriAction } from "@/app/[locale]/kos/actions";
+import { useScrollToMessage } from "@/hooks/useScrollToMessage";
 import UploadPopup, { toMB } from "@/components/UploadPopup";
 import type { Galeri } from "@/lib/db/types";
 
@@ -35,25 +36,43 @@ export default function GaleriManager({ kosId, galeri }: { kosId: string; galeri
   const [state, formAction, pending] = useActionState(uploadGaleriAction as never, null as FormState);
   const fileRef = useRef<HTMLInputElement>(null);
   const [oversize, setOversize] = useState<{ name: string; sizeMB: string } | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const msgRef = useRef<HTMLDivElement>(null);
+  useScrollToMessage(state, msgRef);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.size > MAX_BYTES) {
+    if (!file) {
+      setFileName(null);
+      return;
+    }
+    if (file.size > MAX_BYTES) {
       setOversize({ name: file.name, sizeMB: toMB(file.size) });
       e.target.value = ""; // batalkan pilihan agar tidak ikut ter-submit
+      setFileName(null);
+      return;
     }
+    setFileName(file.name);
   };
 
   return (
     <div className="space-y-3">
       <form action={formAction} className="rounded-xl border border-border p-4">
-        {state?.error && <p className="mb-2 rounded-md bg-error/10 px-3 py-2 text-xs text-error">{state.error}</p>}
-        {state?.success && <p className="mb-2 rounded-md bg-success/10 px-3 py-2 text-xs text-success">{state.success}</p>}
+        <div ref={msgRef}>
+          {state?.error && <p className="mb-2 rounded-md bg-error/10 px-3 py-2 text-xs text-error">{state.error}</p>}
+          {state?.success && <p className="mb-2 rounded-md bg-success/10 px-3 py-2 text-xs text-success">{state.success}</p>}
+        </div>
         <input type="hidden" name="kosId" value={kosId} />
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <span className="block text-[10px] font-semibold text-text-primary">{t("photo")}</span>
-            <input ref={fileRef} name="foto" type="file" accept="image/jpeg,image/png,image/webp" required onChange={handleFileChange} className="mt-1 w-full text-xs text-text-secondary" />
+            <input ref={fileRef} name="foto" type="file" accept="image/jpeg,image/png,image/webp" required onChange={handleFileChange} className="hidden" />
+            {fileName && (
+              <p className="mt-1.5 truncate text-[11px] font-semibold text-primary">📎 {fileName}</p>
+            )}
+            <button type="button" onClick={() => fileRef.current?.click()} className="mt-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-[11px] font-semibold text-text-primary hover:border-primary hover:text-primary">
+              {fileName ? t("changePhoto") : t("choosePhoto")}
+            </button>
           </div>
           <div>
             <label className="block text-[10px] font-semibold text-text-primary">{t("caption")}</label>

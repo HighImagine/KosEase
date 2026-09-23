@@ -83,8 +83,6 @@
     "fullMsg": "Kos ini sedang penuh — cek kembali nanti atau hubungi pemilik.",
     "full": "Penuh",
     "order": "Ajukan Pemesanan",
-    "save": "♡ Simpan",
-    "share": "↗ Bagikan",
     "available": "Tersedia",
     "unavailable": "Penuh",
     "ownerTitle": "Dikelola oleh",
@@ -202,6 +200,28 @@
     "ctaButton": "Cari Kos Sekarang",
     "contactHint": "Butuh bantuan? Hubungi support@kosease.com"
   },
+  "Reservasi": {
+    "reservasiTitle": "Reservasi Saya",
+    "reservasiEmpty": "Belum ada reservasi.",
+    "reservasiDesc": "Setiap pengajuan pemesanan yang kamu buat akan tercatat di sini agar mudah dipantau.",
+    "howTitle": "Cara memesan kos",
+    "howStep1": "Temukan kos yang cocok di Cari Kos.",
+    "howStep2": "Isi formulir pemesanan singkat.",
+    "howStep3": "Tunggu konfirmasi dari pemilik kos.",
+    "cta": "Cari Kos",
+    "statusTitle": "Status Pemesanan",
+    "statusDesc": "Pantau tahapan pemesananmu di sini.",
+    "step1": "Diajukan",
+    "step1d": "Formulir pemesanan dikirim ke pemilik kos.",
+    "step2": "Dikonfirmasi",
+    "step2d": "Pemilik mengonfirmasi ketersediaan kamar.",
+    "step3": "Aktif",
+    "step3d": "Masa sewa berjalan. Bayar langsung kepada pemilik.",
+    "trackingEmpty": "Belum ada pemesanan untuk dilacak.",
+    "riwayatTitle": "Riwayat",
+    "riwayatDesc": "Pemesanan yang sudah selesai akan tercatat di sini sebagai arsip.",
+    "riwayatEmpty": "Belum ada riwayat pemesanan."
+  },
   "Footer": {
     "tagline": "Platform pencarian kos modern di Indonesia yang mengutamakan kemudahan, kenyamanan, dan transparansi harga untuk para pelajar dan pekerja muda.",
     "brandCol": "KosEase",
@@ -232,7 +252,7 @@
     "website": "Kembali ke Website",
     "users": "Kelola Pengguna",
     "verifyOwner": "Verifikasi Pemilik Kos",
-    "verifyPub": "Verifikasi Publikasi Kos",
+    "verifyPub": "Moderasi Publikasi Kos",
     "fallbackName": "Admin"
   },
   "SidebarOwner": {
@@ -259,7 +279,10 @@
     "statPending": "Pengajuan Pending",
     "statPenyewa": "Penyewa",
     "statPemilik": "Pemilik",
-    "statAdmin": "Admin"
+    "statAdmin": "Admin",
+    "noBooking": "Belum ada reservasi aktif.",
+    "noBookingDesc": "Reservasi yang sedang berjalan akan tampil di sini.",
+    "noBookingCta": "Cari Kos"
   },
   "PengajuanCard": {
     "ctaTitleA": "Punya Kos?",
@@ -400,6 +423,8 @@
     "photo": "Foto (JPG/PNG/WebP, maks 2MB)",
     "caption": "Caption (opsional)",
     "captionPh": "Tampak depan kos",
+    "choosePhoto": "Pilih Foto",
+    "changePhoto": "Ganti Foto",
     "upload": "Upload Foto",
     "uploading": "Mengunggah...",
     "delete": "Hapus",
@@ -441,7 +466,7 @@
     "pendingCount": "{n} menunggu verifikasi.",
     "waiting": "Menunggu",
     "noPending": "Belum ada pengajuan menunggu.",
-    "pubTitle": "Verifikasi Publikasi Kos",
+    "pubTitle": "Moderasi Publikasi Kos",
     "moderate": "Moderasi",
     "allTayang": "Semua kos tayang.",
     "draftCount": "{n} kos berstatus draft.",
@@ -449,7 +474,7 @@
     "verifyAll": "Verifikasi semua →"
   },
   "AdminKos": {
-    "title": "Moderasi Kos",
+    "title": "Moderasi Publikasi Kos",
     "heading": "Semua Kos ({n})",
     "empty": "Belum ada kos terdaftar.",
     "owner": "Pemilik: {name}",

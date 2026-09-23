@@ -48,7 +48,10 @@ export default async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const isAdminPath = path.startsWith("/admin");
+  // Area admin = /dashboard/admin/* SAJA. Halaman /admin (login admin)
+  // diperlakukan publik seperti /login — kalau ikut dijaga, terjadi
+  // ayam-telur: buka login admin malah dibuang ke /login.
+  const isAdminPath = path.startsWith("/dashboard/admin");
   const isDashboard = path.startsWith("/dashboard");
   const isAuth = ["/login", "/register"].includes(path);
 

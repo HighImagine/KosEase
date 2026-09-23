@@ -132,7 +132,8 @@
     "submit": "Log In",
     "submitting": "Processing...",
     "noAccount": "Don't have an account?",
-    "registerNow": "Sign Up Now!"
+    "registerNow": "Sign Up Now!",
+    "adminAlt": "Log in as Admin"
   },
   "Register": {
     "title": "Create a New Account",

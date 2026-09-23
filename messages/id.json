@@ -132,7 +132,8 @@
     "submit": "Masuk",
     "submitting": "Memproses...",
     "noAccount": "Belum punya akun?",
-    "registerNow": "Daftar Sekarang!"
+    "registerNow": "Daftar Sekarang!",
+    "adminAlt": "Masuk sebagai Admin"
   },
   "Register": {
     "title": "Buat Akun Baru",

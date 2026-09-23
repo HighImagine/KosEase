@@ -66,7 +66,7 @@ No test runner, no CI workflows, no pre-commit hooks configured.
 
 - DB roles: `penyewa`, `pemilik`, `pemilik_kos` (keduanya pemilik), `admin`. Redirect login di `actions.ts:66-71`: pemilik → `/dashboard`, lainnya → `/`
 - `NavbarWrapper` (server component) fetches user from `auth.getUser()` + `profiles` table — **2 sequential Supabase queries per page**
-- Route guard: `src/proxy.ts` (bukan `middleware.ts` — tidak ada file itu). Belum login + akses `/dashboard/*` atau `/admin/*` → redirect `/login?next=...`; `/admin/*` wajib role `admin`
+- Route guard: `src/proxy.ts` (bukan `middleware.ts` — tidak ada file itu). Belum login + akses `/dashboard/*` → redirect `/login?next=...`; `/dashboard/admin/*` wajib role `admin`. Halaman `/admin` (login admin) itu PUBLIK — jangan ikut dijaga (pernah bug ayam-telur)
 - Sidebar: `DashboardSidebarUserWrapper` otomatis pakai sidebar sesuai role — `AdminSidebar` bila admin (menu: Beranda, Kembali ke Website, Kelola Pengguna, Verifikasi Pemilik Kos, Moderasi Publikasi Kos + Keluar merah). Model moderasi: pemilik langsung tayang, admin takedown reaktif via `draft` (bukan approval), `PemilikSidebar` bila pemilik (menu: Beranda, Kembali ke Website, Kelola Kos, Kelola Kamar + profil-link + Keluar merah), selain itu `DashboardSidebarUser`. Desain acuan: `public/img/sidebar-ds-admin.png`
 - `/dashboard/pemilik/kamar` = daftar semua kamar milik pemilik (baca saja + link ke halaman kos; tambah/edit/hapus tetap di `[id]` kos)
 - Login admin mendarat di `/dashboard/admin` (Beranda admin: snapshot + 3 preview padat); `/dashboard/admin/pengguna` masih placeholder

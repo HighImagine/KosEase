@@ -52,6 +52,15 @@ export default async function LoginPage() {
                         </Link>
                     </p>
 
+                    <p className="mt-2 text-center text-[10px] text-text-secondary">
+                        <Link
+                            href="/admin"
+                            className="hover:text-primary"
+                        >
+                            {t("adminAlt")} →
+                        </Link>
+                    </p>
+
                 </div>
             </section>
 

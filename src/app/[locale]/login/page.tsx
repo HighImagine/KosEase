@@ -57,7 +57,7 @@ export default async function LoginPage() {
                             href="/admin"
                             className="hover:text-primary"
                         >
-                            {t("adminAlt")} →
+                            {t("adminAlt")}
                         </Link>
                     </p>
 

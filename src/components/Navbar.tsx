@@ -44,7 +44,7 @@ export default function Navbar({ user, avatarUrl, pendingCount = 0 }: NavbarProp
   }, [locale, pathname, router, closeDropdown]);
 
   return (
-    <nav className="relative z-50 h-17 bg-white border-b border-gray-200">
+    <nav className="sticky top-0 z-50 h-17 bg-white border-b border-gray-200">
       <div className="max-w-7xl h-full mx-auto flex items-center justify-between px-6">
         <Link href="/"><Image src="/img/logo.png" alt="KosEase" width={120} height={36} /></Link>
 

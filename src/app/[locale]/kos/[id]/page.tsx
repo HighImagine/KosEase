@@ -163,7 +163,7 @@ export default async function KosDetailPage({ params }: PageProps) {
     return (
     <div key={k.id} className="grid grid-cols-[1fr_auto_auto] items-center border-t border-border px-4 py-4 gap-4">
         <div>
-            <p className="text-sm font-semibold text-text-primary">{t("roomPrefix")}{k.nama}</p>
+            <p className="text-sm font-semibold text-text-primary">{k.nama}</p>
             <p className="mt-0.5 text-xs text-text-secondary">{k.ukuran ?? "-"} · {k.stok} {t("roomsUnit")}</p>
         </div>
         <p className="text-sm font-semibold text-text-primary">{formatHarga(k.harga)}<span className="font-normal text-text-secondary"> {tc("perMonth")}</span></p>

@@ -37,7 +37,7 @@ export default async function KelolaKamarPage() {
                   <div key={k.id} className="flex items-center gap-4 rounded-xl border border-border bg-surface px-5 py-4">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-text-primary">
-                        {k.kos_nama} — {t("roomPrefix")}{k.nama}
+                        {k.kos_nama} — {k.nama}
                       </p>
                       <p className="mt-0.5 text-xs text-text-secondary">
                         {formatHarga(k.harga)}{tc("perMonthShort")} · stok {k.stok}

@@ -34,6 +34,7 @@ No test runner, no CI workflows, no pre-commit hooks configured.
 - `src/app/dashboard/admin/kos/page.tsx` — moderasi semua kos (takedown = set `draft`)
 - `src/lib/db/` — `types.ts` (tipe baris DB 1:1 dengan kolom SQL), `queries.ts` (baca publik/owner/admin), `compat.ts` (fallback `kosList` saat tabel kosong — hapus setelah data produksi terisi)
 - `src/lib/format.ts` — `formatHarga` (jangan import dari `@/data/kos` di kode baru)
+- `src/lib/assets.ts` — file konstanta path aset (saat ini TIDAK dipakai; path `/img/...` ditulis mentah di tiap komponen — hasil revert eksperimen, lihat riwayat). Kalau diaktifkan lagi: ganti file gambar → nama berversi + ubah 1 konstanta
 - `src/proxy.ts` — TUNGGAL untuk next-intl + auth guard; matcher luas next-intl (`/((?!api|trpc|_next|_vercel|.*\..*).*)`). Guard kupas prefix `/id|/en` dulu (`stripLocale`), redirect SELALU bawa prefix. Cookie sesi ditempel ke respons intl (`applyCookies`)
 - `src/i18n/` — `routing.ts` (`locales: [id,en]`, `localePrefix: "always"`, default `id`), `navigation.ts` (WAJIB untuk semua Link/redirect/router client), `request.ts`
 - `messages/{id,en}.json` — katalog string (~35 namespace); EN diterjemahkan AI, perlu koreksi manusia

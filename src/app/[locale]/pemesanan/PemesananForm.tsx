@@ -1,19 +1,25 @@
 "use client";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useActionState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { createPemesananAction } from "./actions";
 import { formatHarga } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
+
+type FormState = { error?: string; success?: string } | null;
 
 type Props = {
     kos: {
         id: string;
         nama: string;
-        kamar: { nama: string; ukuran: string | null; harga: number; ketersediaan: string; stok: number; deskripsi: string | null }[];
+        kamar: { id: string; nama: string; ukuran: string | null; harga: number; ketersediaan: string; stok: number; deskripsi: string | null }[];
     } | null;
 };
 
 export default function PemesananForm({ kos }: Props) {
     const t = useTranslations("Booking");
+    const locale = useLocale();
+    const [state, formAction, pending] = useActionState(createPemesananAction as never, null as FormState);
     const availableKamar = kos?.kamar.filter((k) => k.ketersediaan === "Tersedia") ?? [];
     const [selectedKamar, setSelectedKamar] = useState<string>(availableKamar[0]?.nama ?? "");
     const [nama, setNama] = useState("");
@@ -36,8 +42,14 @@ export default function PemesananForm({ kos }: Props) {
     }
 
     return (
-        <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+        <form action={formAction} className="grid gap-6 lg:grid-cols-[1fr_380px]">
+            <input type="hidden" name="kosId" value={kos.id} />
+            <input type="hidden" name="kamarId" value={selected?.id ?? ""} />
+            <input type="hidden" name="locale" value={locale} />
             <div className="space-y-4">
+                {state?.error && (
+                    <p className="rounded-md bg-error/10 px-3 py-2 text-xs text-error">{state.error}</p>
+                )}
                 <div>
                     <label className="text-sm font-semibold text-text-primary">{t("roomType")}</label>
                     <select value={selectedKamar} onChange={(e) => setSelectedKamar(e.target.value)} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary">
@@ -51,20 +63,20 @@ export default function PemesananForm({ kos }: Props) {
 
                 <div>
                     <label className="text-sm font-semibold text-text-primary">{t("renterName")}</label>
-                    <input value={nama} onChange={(e) => setNama(e.target.value)} placeholder={t("renterPh")} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none placeholder:text-text-secondary focus:border-primary" />
+                    <input name="nama" value={nama} onChange={(e) => setNama(e.target.value)} placeholder={t("renterPh")} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none placeholder:text-text-secondary focus:border-primary" />
                 </div>
                 <div>
                     <label className="text-sm font-semibold text-text-primary">{t("wa")}</label>
-                    <input value={wa} onChange={(e) => setWa(e.target.value)} placeholder={t("waPh")} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none placeholder:text-text-secondary focus:border-primary" />
+                    <input name="wa" value={wa} onChange={(e) => setWa(e.target.value)} placeholder={t("waPh")} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none placeholder:text-text-secondary focus:border-primary" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="text-sm font-semibold text-text-primary">{t("startDate")}</label>
-                        <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" />
+                        <input name="tanggal" type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" />
                     </div>
                     <div>
                         <label className="text-sm font-semibold text-text-primary">{t("duration")}</label>
-                        <select value={durasi} onChange={(e) => setDurasi(Number(e.target.value))} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary">
+                        <select name="durasi" value={durasi} onChange={(e) => setDurasi(Number(e.target.value))} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary">
                             <option value={1}>{t("durationOption", { n: 1 })}</option>
                             <option value={3}>{t("durationOption", { n: 3 })}</option>
                             <option value={6}>{t("durationOption", { n: 6 })}</option>
@@ -74,7 +86,7 @@ export default function PemesananForm({ kos }: Props) {
                 </div>
                 <div>
                     <label className="text-sm font-semibold text-text-primary">{t("notes")}</label>
-                    <textarea value={catatan} onChange={(e) => setCatatan(e.target.value)} placeholder={t("notesPh")} rows={3} className="mt-1.5 w-full resize-none rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none placeholder:text-text-secondary focus:border-primary" />
+                    <textarea name="catatan" value={catatan} onChange={(e) => setCatatan(e.target.value)} placeholder={t("notesPh")} rows={3} className="mt-1.5 w-full resize-none rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none placeholder:text-text-secondary focus:border-primary" />
                 </div>
             </div>
 
@@ -91,9 +103,9 @@ export default function PemesananForm({ kos }: Props) {
                 <div className="rounded-lg bg-blue-50 px-3 py-3 text-xs leading-5 text-blue-700 border border-blue-200">
                     <p>{t("info")}</p>
                 </div>
-                <button type="button" onClick={() => alert(t("submitAlert", { nama, kamar: selected?.nama ?? "-", durasi, total: formatHarga(total) }))} className="mt-2 w-full rounded-lg bg-accent py-3 text-sm font-semibold text-white hover:bg-orange-600 transition-colors">{t("submit")}</button>
+                <button type="submit" disabled={pending} className="mt-2 w-full rounded-lg bg-accent py-3 text-sm font-semibold text-white hover:bg-orange-600 transition-colors disabled:opacity-50">{pending ? t("submitting") : t("submit")}</button>
                 <Link href="/" className="mt-2 block w-full rounded-lg border border-border bg-surface py-3 text-center text-xs font-semibold text-text-secondary hover:bg-background">{t("backHome")}</Link>
             </div>
-        </div>
+        </form>
     );
 }

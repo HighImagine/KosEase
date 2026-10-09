@@ -325,6 +325,78 @@ export async function getKosOwner(idPemilik: string): Promise<KosOwner | null> {
   return { nama: row.full_name ?? null, avatar_url: row.avatar_url ?? null };
 }
 
+export type StatusPemesanan = "menunggu" | "dikonfirmasi" | "ditolak" | "dibatalkan";
+
+export type Pemesanan = {
+  id: string;
+  user_id: string;
+  kos_id: string;
+  kamar_id: string;
+  nama_pemesan: string;
+  no_wa: string;
+  tanggal_mulai: string; // date
+  durasi: number; // bulan
+  total_harga: number;
+  catatan: string | null;
+  status: StatusPemesanan;
+  created_at: string;
+};
+
+export type PemesananTampil = Pemesanan & {
+  kos_nama: string;
+  kamar_nama: string;
+  kamar_harga: number;
+};
+
+async function withNamaKosKamar(rows: Pemesanan[]): Promise<PemesananTampil[]> {
+  if (rows.length === 0) return [];
+  const supabase = await createClient();
+  const kosIds = [...new Set(rows.map((r) => r.kos_id))];
+  const kamarIds = [...new Set(rows.map((r) => r.kamar_id))];
+  const [{ data: kosRows }, { data: kamarRows }] = await Promise.all([
+    supabase.from("kos").select("id_kos, nama").in("id_kos", kosIds),
+    supabase.from("kamar").select("id, nama, harga").in("id", kamarIds),
+  ]);
+  const kosById = new Map(((kosRows ?? []) as { id_kos: string; nama: string }[]).map((k) => [k.id_kos, k.nama]));
+  const kamarById = new Map(
+    ((kamarRows ?? []) as { id: string; nama: string; harga: number }[]).map((k) => [k.id, { nama: k.nama, harga: k.harga ?? 0 }])
+  );
+  return rows.map((r) => ({
+    ...r,
+    kos_nama: kosById.get(r.kos_id) ?? "-",
+    kamar_nama: kamarById.get(r.kamar_id)?.nama ?? "-",
+    kamar_harga: kamarById.get(r.kamar_id)?.harga ?? 0,
+  }));
+}
+
+// Pesanan milik user login (untuk /dashboard/reservasi).
+export async function getMyPemesanan(): Promise<PemesananTampil[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data } = await supabase
+    .from("pemesanan")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+  return withNamaKosKamar((data ?? []) as Pemesanan[]);
+}
+
+// Pesanan masuk ke kos milik pemilik login (untuk Reservasi Masuk).
+export async function getMasukReservasi(): Promise<PemesananTampil[]> {
+  const mine = await getMyKosList();
+  if (mine.length === 0) return [];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pemesanan")
+    .select("*")
+    .in("kos_id", mine.map((k) => k.id_kos))
+    .order("created_at", { ascending: false });
+  return withNamaKosKamar((data ?? []) as Pemesanan[]);
+}
+
 export type AdminStats = { total: number; tayang: number; draft: number; pengajuanPending: number };
 
 // Agregat ringkas untuk panel dashboard admin.

@@ -116,6 +116,7 @@
     "sumTotal": "Estimated Total",
     "info": "ⓘ Your booking will be confirmed by the owner. Pay the owner directly.",
     "submit": "Request Booking",
+    "submitting": "Submitting...",
     "backHome": "Back to Home",
     "dash": "-",
     "submitAlert": "Booking request: {nama} | {kamar} | {durasi} Months | Total {total}"
@@ -210,6 +211,15 @@
     "howStep2": "Fill in the short booking form.",
     "howStep3": "Wait for confirmation from the kos owner.",
     "cta": "Find Kos",
+    "bookedAt": "Booked {date}",
+    "moveIn": "Move in {date} · {n} months",
+    "cancel": "Cancel Booking",
+    "cancelling": "...",
+    "cancelConfirm": "Cancel this booking? The room becomes available again.",
+    "statusMenunggu": "Pending",
+    "statusDikonfirmasi": "Confirmed",
+    "statusDitolak": "Rejected",
+    "statusDibatalkan": "Cancelled",
     "statusTitle": "Booking Status",
     "statusDesc": "Track your booking stages here.",
     "step1": "Submitted",
@@ -222,6 +232,17 @@
     "riwayatTitle": "History",
     "riwayatDesc": "Completed bookings will be archived here.",
     "riwayatEmpty": "No booking history yet."
+  },
+  "ReservasiMasuk": {
+    "title": "Incoming Reservations",
+    "desc": "Booking requests from prospective renters for your kos. Confirm or reject them here.",
+    "empty": "No incoming bookings yet.",
+    "confirm": "Confirm",
+    "confirming": "...",
+    "reject": "Reject",
+    "rejecting": "...",
+    "renter": "Renter",
+    "moveIn": "Move in {date} · {n} months"
   },
   "Footer": {
     "tagline": "A modern kos search platform in Indonesia focused on ease, comfort, and price transparency for students and young professionals.",
@@ -347,7 +368,11 @@
     "kosTitle": "Registered Kos",
     "manage": "Manage",
     "empty": "No kos registered yet.",
-    "perMonth": "/mo"
+    "perMonth": "/mo",
+    "reservasiTitle": "Incoming Reservations",
+    "reservasiWaiting": "{n} awaiting confirmation",
+    "reservasiEmpty": "No incoming bookings yet.",
+    "reservasiCta": "View All"
   },
   "KelolaKos": {
     "title": "Manage Kos",

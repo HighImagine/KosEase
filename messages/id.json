@@ -116,6 +116,7 @@
     "sumTotal": "Total Estimasi",
     "info": "ⓘ Pemesanan akan dikonfirmasi pemilik. Bayar langsung kepada pemilik.",
     "submit": "Ajukan Pemesanan",
+    "submitting": "Mengirim...",
     "backHome": "Kembali ke Beranda",
     "dash": "-",
     "submitAlert": "Ajukan Pemesanan: {nama} | {kamar} | {durasi} Bulan | Total {total}"
@@ -210,6 +211,15 @@
     "howStep2": "Isi formulir pemesanan singkat.",
     "howStep3": "Tunggu konfirmasi dari pemilik kos.",
     "cta": "Cari Kos",
+    "bookedAt": "Dipesan {date}",
+    "moveIn": "Masuk {date} · {n} bulan",
+    "cancel": "Batalkan Pesanan",
+    "cancelling": "...",
+    "cancelConfirm": "Batalkan pesanan ini? Kamar kembali tersedia.",
+    "statusMenunggu": "Menunggu",
+    "statusDikonfirmasi": "Dikonfirmasi",
+    "statusDitolak": "Ditolak",
+    "statusDibatalkan": "Dibatalkan",
     "statusTitle": "Status Pemesanan",
     "statusDesc": "Pantau tahapan pemesananmu di sini.",
     "step1": "Diajukan",
@@ -222,6 +232,17 @@
     "riwayatTitle": "Riwayat",
     "riwayatDesc": "Pemesanan yang sudah selesai akan tercatat di sini sebagai arsip.",
     "riwayatEmpty": "Belum ada riwayat pemesanan."
+  },
+  "ReservasiMasuk": {
+    "title": "Reservasi Masuk",
+    "desc": "Pesanan dari calon penyewa untuk kos milik Anda. Konfirmasi atau tolak dari sini.",
+    "empty": "Belum ada pesanan masuk.",
+    "confirm": "Konfirmasi",
+    "confirming": "...",
+    "reject": "Tolak",
+    "rejecting": "...",
+    "renter": "Pemesan",
+    "moveIn": "Masuk {date} · {n} bulan"
   },
   "Footer": {
     "tagline": "Platform pencarian kos modern di Indonesia yang mengutamakan kemudahan, kenyamanan, dan transparansi harga untuk para pelajar dan pekerja muda.",
@@ -347,7 +368,11 @@
     "kosTitle": "Kos yang Terdaftar",
     "manage": "Kelola",
     "empty": "Belum ada kos yang terdaftar.",
-    "perMonth": "/bln"
+    "perMonth": "/bln",
+    "reservasiTitle": "Reservasi Masuk",
+    "reservasiWaiting": "{n} menunggu konfirmasi",
+    "reservasiEmpty": "Belum ada pesanan masuk.",
+    "reservasiCta": "Lihat Semua"
   },
   "KelolaKos": {
     "title": "Kelola Kos",

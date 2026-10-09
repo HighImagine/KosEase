@@ -80,7 +80,8 @@ No test runner, no CI workflows, no pre-commit hooks configured.
 - Konsekuensi tanpa cascade: `deleteKosAction` hapus manual berurutan (file bucket → `galeri` → `kamar` → `kos_fasilitas` → `kos`)
 - `kos.harga` = min harga kamar, dihitung ulang (`recalcHargaMin`) setiap kamar berubah; `kamar.ketersediaan` ditulis kode (`stok > 0 ? Tersedia : Penuh`)
 - Halaman baca (home, cari-kos, `kos/[id]`, pemesanan) query DB dulu, fallback ke `kosList` bila kosong (`compat.ts`); `kosId` kini uuid string (fallback numerik lama tetap didukung)
-- `/dashboard/{reservasi,status,riwayat}` = shell jujur (empty state, tanpa data). Backend booking belum ada (`PemesananForm` masih `alert()` stub). Saat dibangun: tabel `pemesanan` (`id, user_id, kos_id, kamar_id, tanggal_mulai, durasi, total, status, created_at`) + submit simpan beneran → 3 halaman tinggal ganti empty state dengan query. Blok reservasi di `/dashboard` hanya untuk penyewa; pemilik nanti dapat panel sendiri **"Reservasi Masuk"** (pemesan kos miliknya)
+- Backend booking ADA: tabel `pemesanan` (`id, user_id, kos_id, kamar_id, nama_pemesan, no_wa, tanggal_mulai, durasi, total_harga, catatan, status, created_at`; status: menunggu/dikonfirmasi/ditolak/dibatalkan; tanpa FK). RLS: insert/select own, cancel own hanya `menunggu→dibatalkan` (policy, bukan cuma UI), owner kelola via `EXISTS` ke `kos`, admin semua
+- Submit (`pemesanan/actions.ts: createPemesananAction`) hitung ulang total di server + tolak kamar penuh/kos tak tayang; form kirim `kamar_id` (bukan nama). `/dashboard/reservasi` baca data + batalkan; `/dashboard/pemilik/reservasi` = Reservasi Masuk (konfirmasi/tolak) + preview di `/dashboard/pemilik`. Status/riwayat masih shell. Blok reservasi di `/dashboard` hanya penyewa
 
 ## Avatar Handling
 

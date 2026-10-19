@@ -3,6 +3,7 @@ import { getFasilitasMaster, getOwnedKosDetail } from "@/lib/db/queries";
 import { updateKosAction } from "@/app/[locale]/kos/actions";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { IconArrowLeft } from "@tabler/icons-react";
 import KosForm from "../KosForm";
 import { DeleteKosButton, PublikasiToggle } from "../KosListActions";
 import KamarManager from "./KamarManager";
@@ -37,7 +38,10 @@ export default async function KelolaKosDetailPage({ params }: PageProps) {
         <main className="flex-1 p-6">
           <div className="rounded-xl bg-surface p-8 text-center">
             <p className="text-sm text-text-secondary">{tc("noAccess")}</p>
-            <Link href="/dashboard/pemilik/kos" className="mt-3 inline-block text-xs font-semibold text-primary hover:text-primary-dark">{t("backToList")}</Link>
+            <Link href="/dashboard/pemilik/kos" className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-dark">
+              <IconArrowLeft size={14} stroke={2} />
+              {t("backToList")}
+            </Link>
           </div>
         </main>
       </div>
@@ -54,7 +58,10 @@ export default async function KelolaKosDetailPage({ params }: PageProps) {
 
         <main className="flex-1 p-6">
           <div className="mx-auto max-w-2xl space-y-4">
-            <Link href="/dashboard/pemilik/kos" className="text-xs font-semibold text-primary hover:text-primary-dark">{t("backToList")}</Link>
+            <Link href="/dashboard/pemilik/kos" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-dark">
+              <IconArrowLeft size={14} stroke={2} />
+              {t("backToList")}
+            </Link>
 
             <Section title={tk("dataTitle")} desc={tk("dataDesc")}>
               <KosForm kos={kos} action={updateKosAction} />

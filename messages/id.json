@@ -6,7 +6,7 @@
   "Common": {
     "backToHome": "← Kembali ke Beranda",
     "backHome": "Kembali ke Beranda",
-    "backToList": "← Kembali ke daftar",
+    "backToList": "Kembali ke daftar",
     "copyright": "© 2026 KosEase. Seluruh hak cipta dilindungi undang-undang.",
     "perMonth": "/ bulan",
     "perMonthShort": "/bln",
@@ -379,7 +379,7 @@
     "heading": "Kos Saya",
     "add": "+ Tambah Kos",
     "addTitle": "Tambah Kos",
-    "backToList": "← Kembali ke daftar",
+    "backToList": "Kembali ke daftar",
     "empty": "Belum ada kos. Tambahkan kos pertama Anda.",
     "manage": "Kelola",
     "viewPublic": "Lihat Publik",
@@ -534,9 +534,9 @@
     "submitted": "Diajukan {date}"
   },
   "ReviewActions": {
-    "approve": "Approve",
+    "approve": "Setuju",
     "approving": "...",
-    "reject": "Reject",
+    "reject": "Tolak",
     "rejecting": "...",
     "reasonPh": "Alasan penolakan (wajib diisi)",
     "confirmReject": "Tolak",

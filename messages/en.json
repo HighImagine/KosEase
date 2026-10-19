@@ -6,7 +6,7 @@
   "Common": {
     "backToHome": "← Back to Home",
     "backHome": "Back to Home",
-    "backToList": "← Back to list",
+    "backToList": "Back to list",
     "copyright": "© 2026 KosEase. All rights reserved.",
     "perMonth": "/ month",
     "perMonthShort": "/mo",
@@ -379,7 +379,7 @@
     "heading": "My Kos",
     "add": "+ Add Kos",
     "addTitle": "Add Kos",
-    "backToList": "← Back to list",
+    "backToList": "Back to list",
     "empty": "No kos yet. Add your first kos.",
     "manage": "Manage",
     "viewPublic": "View Public",

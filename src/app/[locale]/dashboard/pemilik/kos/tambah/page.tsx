@@ -2,6 +2,7 @@ import DashboardNavbar from "@/components/DashboardNavbar";
 import { createKosAction } from "@/app/[locale]/kos/actions";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { IconArrowLeft } from "@tabler/icons-react";
 import KosForm from "../KosForm";
 
 export default async function TambahKosPage() {
@@ -14,7 +15,10 @@ export default async function TambahKosPage() {
 
         <main className="flex-1 p-6">
           <div className="mx-auto max-w-xl">
-            <Link href="/dashboard/pemilik/kos" className="text-xs font-semibold text-primary hover:text-primary-dark">{tk("backToList")}</Link>
+            <Link href="/dashboard/pemilik/kos" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-dark">
+              <IconArrowLeft size={14} stroke={2} />
+              {tk("backToList")}
+            </Link>
             <div className="mt-3 rounded-2xl bg-surface p-6 shadow-sm">
               <h2 className="font-heading text-xl font-bold text-text-primary">{t("newTitle")}</h2>
               <p className="mt-1 text-xs text-text-secondary">{t("newDesc")}</p>

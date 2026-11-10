@@ -5,7 +5,6 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { IconLayoutDashboard, IconHome, IconBuildingStore, IconBed } from "@tabler/icons-react";
 import LogoutButton from "./LogoutButton";
-import SidebarLanguageSwitcher from "./SidebarLanguageSwitcher";
 
 type Props = {
     userName?: string | null;
@@ -20,7 +19,6 @@ export default function PemilikSidebar({ userName, userAvatar, userEmail }: Prop
 
     const MENU = [
         { href: "/dashboard", label: t("home"), icon: IconLayoutDashboard, exact: true },
-        { href: "/", label: t("website"), icon: IconHome, exact: true },
         { href: "/dashboard/pemilik/kos", label: t("kos"), icon: IconBuildingStore, exact: false },
         { href: "/dashboard/pemilik/kamar", label: t("kamar"), icon: IconBed, exact: false },
     ];
@@ -56,7 +54,14 @@ export default function PemilikSidebar({ userName, userAvatar, userEmail }: Prop
             </nav>
 
             <div className="mt-auto">
-                <SidebarLanguageSwitcher />
+                <Link
+                    href="/"
+                    title={t("website")}
+                    className={`mx-4 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm ${pathname === "/" ? "bg-primary-light font-semibold text-primary" : "text-text-primary hover:bg-primary-light hover:text-primary"}`}
+                >
+                    <IconHome size={18} stroke={2} />
+                    {t("website")}
+                </Link>
             </div>
 
             {/* Bottom */}

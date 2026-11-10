@@ -4,9 +4,8 @@ import Image from "next/image";
 import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { IconLayoutDashboard, IconSearch, IconHome, IconBuildingStore, IconShieldCheck } from '@tabler/icons-react';
+import { IconLayoutDashboard, IconHome, IconBuildingStore, IconShieldCheck } from '@tabler/icons-react';
 import LogoutButton from "./LogoutButton";
-import SidebarLanguageSwitcher from "./SidebarLanguageSwitcher";
 
 
 
@@ -50,22 +49,6 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
                 >
                     <IconLayoutDashboard size={16} stroke={2} />
                     {t("home")}
-                </Link>
-
-                <Link
-                    href="/"
-                    className={linkCls(pathname === "/")}
-                >
-                    <IconHome size={16} stroke={2} />
-                    {t("website")}
-                </Link>
-
-                <Link
-                    href="/cari-kos"
-                    className={linkCls(pathname === "/cari-kos")}
-                >
-                    <IconSearch size={16} stroke={2} />
-                    {t("search")}
                 </Link>
 
                 {(isPemilik || isAdmin) && (
@@ -131,7 +114,13 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
             </nav>
 
             <div className="mt-auto">
-                <SidebarLanguageSwitcher />
+                <Link
+                    href="/"
+                    className={linkCls(pathname === "/")}
+                >
+                    <IconHome size={16} stroke={2} />
+                    {t("website")}
+                </Link>
             </div>
 
             {/* Bottom */}

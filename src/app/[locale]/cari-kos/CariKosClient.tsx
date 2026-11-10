@@ -18,7 +18,8 @@ export default function CariKosClient({ initial }: { initial: KosCardData[] }) {
     setOnlyAvailable(v);
     const params = new URLSearchParams(sp.toString());
     if (v) params.set("available", "1"); else params.delete("available");
-    router.replace(`/cari-kos?${params.toString()}`, { scroll: false });
+    const query = params.toString();
+    router.replace(query ? `/?${query}` : "/", { scroll: false });
   };
 
   const filtered = initial.filter(({ kos, kamarTersedia }) => {

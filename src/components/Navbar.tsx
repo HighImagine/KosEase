@@ -49,8 +49,8 @@ export default function Navbar({ user, avatarUrl, pendingCount = 0 }: NavbarProp
         <Link href="/"><Image src="/img/logo.png" alt="KosEase" width={120} height={36} /></Link>
 
         <div className="hidden md:flex items-center gap-8">
-          <Link href="/" className={pathname === "/" ? "text-primary font-semibold" : "text-text-primary hover:text-primary"}>{t("home")}</Link>
-          <Link href="/cari-kos" className={pathname === "/cari-kos" ? "text-primary font-semibold" : "text-text-primary hover:text-primary"}>{t("search")}</Link>
+          <Link href="/beranda" className={pathname === "/beranda" ? "text-primary font-semibold" : "text-text-primary hover:text-primary"}>{t("home")}</Link>
+          <Link href="/" className={pathname === "/" ? "text-primary font-semibold" : "text-text-primary hover:text-primary"}>{t("search")}</Link>
           <Link href="/tentang" className={pathname === "/tentang" ? "text-primary font-semibold" : "text-text-primary hover:text-primary"}>{t("about")}</Link>
         </div>
 

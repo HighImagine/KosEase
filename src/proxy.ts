@@ -46,6 +46,12 @@ export default async function proxy(request: NextRequest) {
     return res;
   };
 
+  if (path === "/cari-kos") {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${locale}`;
+    return applyCookies(NextResponse.redirect(url));
+  }
+
   const { data: { user } } = await supabase.auth.getUser();
 
   // Area admin = /dashboard/admin/* SAJA. Halaman /admin (login admin)

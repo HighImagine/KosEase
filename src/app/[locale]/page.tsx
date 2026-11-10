@@ -1,14 +1,5 @@
-import NavbarWrapper from "@/components/NavbarWrapper";
-import Hero from "@/components/Hero";
-import KosSection from "@/components/KosSection";
+import CariKosPage from "./CariKosPage";
 
 export default function Home() {
-  return (
-    <>
-      <NavbarWrapper />
-      <Hero />
-      
-      <KosSection />
-    </>
-  );
+  return <CariKosPage />;
 }

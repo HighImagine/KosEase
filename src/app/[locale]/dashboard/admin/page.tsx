@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import DashboardNavbar from "@/components/DashboardNavbar";
-import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
+import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
 import { createClient } from "@/lib/supabase/server";
 import {
   getAdminKosStats,

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import DashboardNavbar from "@/components/DashboardNavbar";
-import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
+import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
 import PengajuanCard from "@/components/PengajuanCard";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminKosStats, getPemilikKosStats, getTayangKosCards } from "@/lib/db/queries";

@@ -1,5 +1,5 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
-import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
+import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
 import { getPengajuanStatusCounts } from "@/lib/db/queries";
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";

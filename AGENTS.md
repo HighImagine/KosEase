@@ -38,7 +38,7 @@ No test runner, no CI workflows, no pre-commit hooks configured.
 - `src/proxy.ts` — TUNGGAL untuk next-intl + auth guard; matcher luas next-intl (`/((?!api|trpc|_next|_vercel|.*\..*).*)`). Guard kupas prefix `/id|/en` dulu (`stripLocale`), redirect SELALU bawa prefix. Cookie sesi ditempel ke respons intl (`applyCookies`)
 - `src/i18n/` — `routing.ts` (`locales: [id,en]`, `localePrefix: "always"`, default `id`), `navigation.ts` (WAJIB untuk semua Link/redirect/router client), `request.ts`
 - `messages/{id,en}.json` — katalog string (~35 namespace); EN diterjemahkan AI, perlu koreksi manusia
-- Switcher bahasa di 4 titik: seksi "Bahasa" di dropdown avatar (`Navbar.tsx`, `router.replace` halaman sama — tanpa entri history), `SidebarLanguageSwitcher` di 3 sidebar, pil `LanguageSwitcher` hanya di Footer (dihapus dari navbar agar tak duplikat)
+- Switcher bahasa ada di 2 titik: seksi "Bahasa" di dropdown avatar (`Navbar.tsx`, `router.replace` halaman sama — tanpa entri history) dan pil `LanguageSwitcher` di Footer (dihapus dari navbar agar tak duplikat). `SidebarLanguageSwitcher` sudah dihapus; posisi bawah ketiga sidebar dashboard sekarang berisi link Website menuju `/`.
 - `src/lib/locale.ts` — `withLocale(path, locale)` + `formLocale(fd)` untuk redirect di server actions (redirect next-intl tidak dijamin di actions → pakai `next/navigation` + path berprefix)
 - Semua route di `src/app/[locale]/...`; root `app/layout.tsx` hanya passthrough (html/lang di `[locale]/layout.tsx` + `NextIntlClientProvider` + `setRequestLocale` + `generateStaticParams`)
 - `src/components/` — shared UI: `Navbar`, `NavbarWrapper`, `Footer`, `ProfileForm`, `DashboardNavbar`, `DashboardSidebarUser`, `DashboardSidebarUserWrapper`, `LogoutButton`

@@ -1,5 +1,5 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
-import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
+import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { IconRadar } from "@tabler/icons-react";

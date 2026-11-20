@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import DashboardNavbar from "@/components/DashboardNavbar";
-import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
+import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
 import ProfileForm from "@/components/ProfileForm";
 import { getTranslations } from "next-intl/server";
 

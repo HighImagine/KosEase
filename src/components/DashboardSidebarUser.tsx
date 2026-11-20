@@ -116,9 +116,10 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
             <div className="mt-auto">
                 <Link
                     href="/"
-                    className={linkCls(pathname === "/")}
+                    title={t("website")}
+                    className={`mx-4 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm ${pathname === "/" ? "bg-primary-light font-semibold text-primary" : "text-text-primary hover:bg-primary-light hover:text-primary"}`}
                 >
-                    <IconHome size={16} stroke={2} />
+                    <IconHome size={18} stroke={2} />
                     {t("website")}
                 </Link>
             </div>

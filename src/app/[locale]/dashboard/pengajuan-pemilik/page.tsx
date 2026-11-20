@@ -1,6 +1,6 @@
 import Image from "next/image";
 import DashboardNavbar from "@/components/DashboardNavbar";
-import DashboardSidebarUserWrapper from "@/components/DashboardSidebarUserWrapper";
+import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
 import { getTranslations } from "next-intl/server";
 import PengajuanForm from "./PengajuanForm";
 

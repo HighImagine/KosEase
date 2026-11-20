@@ -126,42 +126,44 @@ export default function DashboardSidebarUser({ userName, userAvatar, userEmail, 
 
             {/* Bottom */}
             <div className="px-4 pb-6">
-                <Link href="/dashboard/profil" className="flex items-center gap-3 px-3">
-                    <div className="mb-4 flex items-center gap-3">
-                        {hasAvatar ? (
-                            <Image src={userAvatar} alt={displayName} width={32} height={32} className="rounded-full object-cover" />
-                        ) : (
-                            <Image src="/img/avatar-default.png" alt={displayName} width={32} height={32} className="rounded-full object-cover" />
-                        )}
-                        <div className="min-w-0">
-                            <p className="truncate text-xs font-semibold text-text-primary">
-                                {displayName}
-                            </p>
-                            {userEmail && (
-                                <p className="truncate text-[10px] text-text-secondary">{userEmail}</p>
+                <div className="border-t border-border pt-4">
+                    <Link href="/dashboard/profil" className="flex items-center gap-3 px-3">
+                        <div className="mb-4 flex items-center gap-3">
+                            {hasAvatar ? (
+                                <Image src={userAvatar} alt={displayName} width={32} height={32} className="rounded-full object-cover" />
+                            ) : (
+                                <Image src="/img/avatar-default.png" alt={displayName} width={32} height={32} className="rounded-full object-cover" />
                             )}
-                            {roleLabel && (
-                                <p className="truncate text-[10px] font-semibold text-primary">{roleLabel}</p>
-                            )}
+                            <div className="min-w-0">
+                                <p className="truncate text-xs font-semibold text-text-primary">
+                                    {displayName}
+                                </p>
+                                {userEmail && (
+                                    <p className="truncate text-[10px] text-text-secondary">{userEmail}</p>
+                                )}
+                                {roleLabel && (
+                                    <p className="truncate text-[10px] font-semibold text-primary">{roleLabel}</p>
+                                )}
+                            </div>
                         </div>
+                    </Link>
+
+                    <Link
+                        href="/dashboard/pengajuan-pemilik"
+                        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold ${pathname.startsWith("/dashboard/pengajuan-pemilik") ? "bg-primary font-semibold text-white" : "bg-primary-light text-primary"}`}
+                    >
+                        <Image
+                            src="/img/briefcase.svg"
+                            alt=""
+                            width={16}
+                            height={16}
+                        />
+                        {t("applyOwner")}
+                    </Link>
+
+                    <div className="mt-3">
+                        <LogoutButton variant="sidebar" />
                     </div>
-                </Link>
-
-                <Link
-                    href="/dashboard/pengajuan-pemilik"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold ${pathname.startsWith("/dashboard/pengajuan-pemilik") ? "bg-primary font-semibold text-white" : "bg-primary-light text-primary"}`}
-                >
-                    <Image
-                        src="/img/briefcase.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                    />
-                    {t("applyOwner")}
-                </Link>
-
-                <div className="mt-3">
-                    <LogoutButton variant="sidebar" />
                 </div>
             </div>
         </aside>

@@ -186,25 +186,36 @@ export async function pengajuanPemilikAction(_prev: unknown, formData: FormData)
 }
 
 export async function approvePengajuanAction(_prev: unknown, formData: FormData) {
-  const pengajuanId = formData.get("pengajuanId") as string;
+  const pengajuanId = z.string().uuid().safeParse(formData.get("pengajuanId"));
+  if (!pengajuanId.success) return { error: "ID pengajuan tidak valid" };
   const supabase = await createClient();
   const { data: { user: admin } } = await supabase.auth.getUser();
-  const { data: pengajuan } = await supabase.from("pengajuan_pemilik").select("user_id").eq("id", pengajuanId).limit(1);
-  const pengajuanDatum = pengajuan?.[0];
-  if (pengajuanDatum?.user_id) {
-    await supabase.from("profiles").update({ role: "pemilik" }).eq("id", pengajuanDatum.user_id).select().limit(1);
-  }
-  const { error } = await supabase.from("pengajuan_pemilik").update({ status: "disetujui", diverifikasi_oleh: admin?.id ?? null, diverifikasi_at: new Date().toISOString() }).eq("id", pengajuanId).select().limit(1);
+  if (!admin) return { error: "Anda harus masuk sebagai admin" };
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", admin.id).single();
+  if (profile?.role !== "admin") return { error: "Hanya admin yang dapat menyetujui pengajuan" };
+
+  const { error } = await supabase.rpc("approve_pengajuan_pemilik", { p_pengajuan_id: pengajuanId.data });
   if (error) return { error: error.message };
   redirect(withLocale("/dashboard/admin/pengajuan", formLocale(formData)));
 }
 
 export async function rejectPengajuanAction(_prev: unknown, formData: FormData) {
-  const pengajuanId = formData.get("pengajuanId") as string;
+  const pengajuanId = z.string().uuid().safeParse(formData.get("pengajuanId"));
+  if (!pengajuanId.success) return { error: "ID pengajuan tidak valid" };
   const alasanTolak = String(formData.get("alasanTolak") ?? "Ditolak oleh admin");
   const supabase = await createClient();
   const { data: { user: admin } } = await supabase.auth.getUser();
-  const { error } = await supabase.from("pengajuan_pemilik").update({ status: "ditolak", alasan_tolak: alasanTolak, diverifikasi_oleh: admin?.id ?? null, diverifikasi_at: new Date().toISOString() }).eq("id", pengajuanId).select().limit(1);
+  if (!admin) return { error: "Anda harus masuk sebagai admin" };
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", admin.id).single();
+  if (profile?.role !== "admin") return { error: "Hanya admin yang dapat menolak pengajuan" };
+
+  const { error } = await supabase
+    .from("pengajuan_pemilik")
+    .update({ status: "ditolak", alasan_tolak: alasanTolak, diverifikasi_oleh: admin.id, diverifikasi_at: new Date().toISOString() })
+    .eq("id", pengajuanId.data)
+    .eq("status", "menunggu_verifikasi")
+    .select()
+    .limit(1);
   if (error) return { error: error.message };
   redirect(withLocale("/dashboard/admin/pengajuan", formLocale(formData)));
 }

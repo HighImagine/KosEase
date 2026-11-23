@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import LanguageSwitcher from "./LanguageSwitcher";
 
 export default async function Footer() {
     const t = await getTranslations("Footer");
@@ -71,8 +70,6 @@ export default async function Footer() {
                 <p className="text-[10px] text-text-secondary">
                     {tc("copyright")}
                 </p>
-
-                <LanguageSwitcher />
             </div>
         </footer>
     );

@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { IconBuilding, IconMapPin, IconTag } from "@tabler/icons-react";
 import KosCard from "@/components/KosCard";
 import SearchDropdown from "@/components/SearchDropdown";
@@ -13,10 +12,7 @@ type OpenPanel = "location" | "facility" | "price" | null;
 
 export default function CariKosClient({ initial }: { initial: KosCardData[] }) {
   const t = useTranslations("Search");
-  const router = useRouter();
   const sp = useSearchParams();
-  const initialOnly = sp.get("available") === "1";
-  const [onlyAvailable, setOnlyAvailable] = useState(initialOnly);
   const [q, setQ] = useState(sp.get("q") ?? "");
   const [lokasi, setLokasi] = useState("");
   const [fasilitas, setFasilitas] = useState<string[]>([]);
@@ -40,26 +36,17 @@ export default function CariKosClient({ initial }: { initial: KosCardData[] }) {
     setFasilitas((prev) => (prev.includes(nama) ? prev.filter((n) => n !== nama) : [...prev, nama]));
   };
 
-  const toggleOnlyAvailable = (v: boolean) => {
-    setOnlyAvailable(v);
-    const params = new URLSearchParams(sp.toString());
-    if (v) params.set("available", "1"); else params.delete("available");
-    const query = params.toString();
-    router.replace(query ? `/?${query}` : "/", { scroll: false });
-  };
-
   const resetFilters = () => {
     setLokasi("");
     setFasilitas([]);
     setMaxHarga(hargaMax);
   };
 
-  const filtered = initial.filter(({ kos, kamarTersedia, fasilitas: kosFasilitas }) => {
+  const filtered = initial.filter(({ kos, fasilitas: kosFasilitas }) => {
     if (q && !`${kos.nama} ${kos.lokasi}`.toLowerCase().includes(q.toLowerCase())) return false;
     if (lokasi && kos.lokasi !== lokasi) return false;
     if (fasilitas.length > 0 && !(kosFasilitas ?? []).every((f) => fasilitas.includes(f))) return false;
     if (kos.harga < hargaMin || kos.harga > maxHarga) return false;
-    if (onlyAvailable && kamarTersedia === 0) return false;
     return true;
   });
 
@@ -157,10 +144,6 @@ export default function CariKosClient({ initial }: { initial: KosCardData[] }) {
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2.5 text-xs cursor-pointer">
-            <input type="checkbox" checked={onlyAvailable} onChange={(e) => toggleOnlyAvailable(e.target.checked)} className="accent-primary" />
-            {t("onlyAvailable")}
-          </label>
           <span className="text-xs text-text-secondary">{t("showing", { a: filtered.length, b: initial.length })}</span>
           {hasActiveFilters && (
             <button type="button" onClick={resetFilters} className="ml-auto rounded-lg border border-border px-4 py-2.5 text-xs text-text-secondary hover:bg-primary-light">

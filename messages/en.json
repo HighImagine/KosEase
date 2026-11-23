@@ -58,7 +58,7 @@
   "Search": {
     "title": "Find Kos",
     "desc": "Find a kos that fits your needs.",
-    "placeholder": "Search by name or location...",
+    "placeholder": "Search by name, area or location",
     "onlyAvailable": "Available only",
     "showing": "Showing {a} of {b} kos",
     "empty": "No available kos match this filter. Turn off the toggle to see full kos.",

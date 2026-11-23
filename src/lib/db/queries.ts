@@ -52,6 +52,17 @@ export async function getTayangKosCards(): Promise<KosCardData[]> {
     if (!coverByKos.has(g.kos_id) && g.image_url) coverByKos.set(g.kos_id, g.image_url);
   }
 
+  const { data: relRows } = await supabase.from("kos_fasilitas").select("kos_id, fasilitas_id").in("kos_id", ids);
+  const fasilitasMaster = await getFasilitasMaster();
+  const fasilitasNameById = new Map(fasilitasMaster.map((f) => [f.id, f.nama]));
+  const fasilitasByKos = new Map<string, string[]>();
+  for (const r of (relRows ?? []) as { kos_id: string; fasilitas_id: string }[]) {
+    const list = fasilitasByKos.get(r.kos_id) ?? [];
+    const nama = fasilitasNameById.get(r.fasilitas_id);
+    if (nama) list.push(nama);
+    fasilitasByKos.set(r.kos_id, list);
+  }
+
   return kosList.map((kos) => {
     const km = kamar.filter((k) => k.kos_id === kos.id_kos);
     const tersedia = km.filter((k) => k.ketersediaan === "Tersedia");
@@ -61,6 +72,7 @@ export async function getTayangKosCards(): Promise<KosCardData[]> {
       kamarTersedia: tersedia.length,
       kamarTotal: km.length,
       stokTersedia: tersedia.reduce((a, k) => a + (k.stok ?? 0), 0),
+      fasilitas: fasilitasByKos.get(kos.id_kos) ?? [],
     };
   });
 }

@@ -54,6 +54,7 @@ export type KosCardData = {
   kamarTersedia: number; // jumlah tipe kamar dengan ketersediaan Tersedia
   kamarTotal: number;
   stokTersedia: number; // total stok kamar Tersedia
+  fasilitas?: string[]; // nama fasilitas yang dimiliki kos (via kos_fasilitas; opsional untuk fallback statis)
 };
 
 // Bentuk agregat untuk halaman detail.

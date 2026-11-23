@@ -1,19 +1,30 @@
 "use client";
 import { useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { IconLogout } from "@tabler/icons-react";
+import { IconLogout, IconAlertCircle } from "@tabler/icons-react";
 
 type Props = {
   variant?: "sidebar" | "dropdown";
+  onClose?: () => void;
 };
 
-export default function LogoutButton({ variant = "sidebar" }: Props) {
+export default function LogoutButton({ variant = "sidebar", onClose }: Props) {
   const t = useTranslations("Logout");
   const [confirm, setConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+
+  const openConfirm = () => {
+    setConfirm(true);
+  };
+
+  const handleCancel = () => {
+    setConfirm(false);
+    onClose?.();
+  };
 
   const handleLogout = () => {
     startTransition(async () => {
@@ -29,7 +40,7 @@ export default function LogoutButton({ variant = "sidebar" }: Props) {
       return (
         <button
           type="button"
-          onClick={() => setConfirm(true)}
+          onClick={openConfirm}
           className="w-full text-left rounded-lg px-3 py-2 text-xs text-error hover:bg-background"
         >
           {t("logout")}
@@ -39,7 +50,7 @@ export default function LogoutButton({ variant = "sidebar" }: Props) {
     return (
       <button
         type="button"
-        onClick={() => setConfirm(true)}
+        onClick={openConfirm}
         className="flex w-full items-center gap-3 px-3 py-2.5 text-xs text-error hover:opacity-80"
       >
         <IconLogout size={16} stroke={2} />
@@ -48,28 +59,44 @@ export default function LogoutButton({ variant = "sidebar" }: Props) {
     );
   }
 
-  // confirm state
-  return (
-    <div className="rounded-lg border border-border bg-background p-3">
-      <p className="text-xs font-semibold text-text-primary">{t("confirm")}</p>
-      <div className="mt-3 flex gap-2">
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={handleLogout}
-          className="flex-1 rounded-lg bg-error px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
-        >
-          {isPending ? "..." : t("yes")}
-        </button>
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => setConfirm(false)}
-          className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-xs font-semibold text-text-primary hover:bg-background"
-        >
-          {t("cancel")}
-        </button>
+  // confirm state — centered modal popup (tengah halaman + backdrop blur)
+  const modal = (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+      onClick={handleCancel}
+    >
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        className="flex w-full max-w-sm aspect-square flex-col items-center justify-center rounded-2xl bg-surface p-6 text-center shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex flex-col items-center">
+          <IconAlertCircle size={128} stroke={2} className="text-error" />
+          <p className="mt-3 text-xs font-semibold text-text-primary">{t("confirm")}</p>
+        </div>
+        <div className="mt-3 flex w-full justify-center gap-2">
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={handleLogout}
+            className="flex-1 rounded-lg bg-error px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+          >
+            {isPending ? "..." : t("yes")}
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={handleCancel}
+            className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-xs font-semibold text-text-primary hover:bg-background disabled:opacity-50"
+          >
+            {t("cancel")}
+          </button>
+        </div>
       </div>
     </div>
   );
+
+  // Portal ke document.body agar positioning fixed mengacu viewport (bukan induk bertransform)
+  return createPortal(modal, document.body);
 }

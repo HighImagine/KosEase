@@ -66,7 +66,7 @@ export default function Navbar({ user, avatarUrl, pendingCount = 0 }: NavbarProp
                 <Link href="/dashboard" onClick={closeDropdown} className="block rounded-lg px-3 py-2 text-xs hover:bg-background">{t("dashboard")}</Link>
                 {(role === "pemilik" || role === "pemilik_kos") && <Link href="/dashboard/pemilik" onClick={closeDropdown} className="block rounded-lg px-3 py-2 text-xs hover:bg-background">{t("manageKos")}</Link>}
                 {role === "admin" && <Link href="/dashboard/admin/pengajuan" onClick={closeDropdown} className="block rounded-lg px-3 py-2 text-xs hover:bg-background">{t("pengajuan")}</Link>}
-                <LogoutButton variant="dropdown" />
+                <LogoutButton variant="dropdown" onClose={closeDropdown} />
               </div>
             )}
           </div>

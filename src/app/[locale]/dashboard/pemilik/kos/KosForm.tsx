@@ -1,6 +1,7 @@
 "use client";
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import Modal from "@/components/Modal";
 import { useScrollToMessage } from "@/hooks/useScrollToMessage";
 import type { Kos } from "@/lib/db/types";
 
@@ -14,16 +15,22 @@ const labelCls = "block text-[10px] font-semibold text-text-primary";
 export default function KosForm({ kos, action }: { kos?: Kos | null; action: KosAction }) {
   const t = useTranslations("KosForm");
   const locale = useLocale();
-  const [state, formAction, pending] = useActionState(action as never, null as FormState);
+  const [dismissedFor, setDismissedFor] = useState<string | null>(null);
+  const wrappedAction = async (prev: unknown, formData: FormData) => {
+    setDismissedFor(null);
+    return await action(prev, formData);
+  };
+  const [state, formAction, pending] = useActionState(wrappedAction as never, null as FormState);
+  const error = state?.error ?? null;
   const msgRef = useRef<HTMLDivElement>(null);
   useScrollToMessage(state, msgRef);
 
   return (
     <form action={formAction} className="space-y-4">
       <div ref={msgRef}>
-        {state?.error && <p className="rounded-md bg-error/10 px-3 py-2 text-xs text-error">{state.error}</p>}
         {state?.success && <p className="rounded-md bg-success/10 px-3 py-2 text-xs text-success">{state.success}</p>}
       </div>
+      {error && dismissedFor !== error && <Modal open message={error} onClose={() => setDismissedFor(error)} />}
       {kos && <input type="hidden" name="kosId" value={kos.id_kos} />}
       <input type="hidden" name="locale" value={locale} />
 

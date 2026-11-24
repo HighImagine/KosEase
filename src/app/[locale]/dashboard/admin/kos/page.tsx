@@ -5,12 +5,25 @@ import { formatHarga } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DeleteKosButton, PublikasiToggle } from "@/app/[locale]/dashboard/pemilik/kos/KosListActions";
+import AdminKosFilter from "./AdminKosFilter";
 
-export default async function AdminKosPage() {
+type PageProps = {
+  searchParams: Promise<{ q?: string; status?: string }>;
+};
+
+export default async function AdminKosPage({ searchParams }: PageProps) {
+  const { q, status } = await searchParams;
   const t = await getTranslations("AdminKos");
   const tk = await getTranslations("KelolaKos");
   const tc = await getTranslations("Common");
   const kosList = await getAllKosForAdmin();
+  const filtered = kosList.filter((k) => {
+    const statusMatch = !status || status === "semua" || k.status_publikasi === status;
+    const kw = (q ?? "").trim().toLowerCase();
+    const haystack = [k.nama, k.lokasi, k.tipe, k.owner_name ?? ""].map((f) => f.toLowerCase());
+    const queryMatch = !kw || haystack.some((f) => f.includes(kw));
+    return statusMatch && queryMatch;
+  });
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -20,15 +33,16 @@ export default async function AdminKosPage() {
         <DashboardNavbar title={t("title")} />
 
         <main className="flex-1 p-6">
-          <h2 className="font-heading text-xl font-bold text-text-primary mb-4">{t("heading", { n: kosList.length })}</h2>
+          <AdminKosFilter />
+          <h2 className="font-heading text-xl font-bold text-text-primary mb-4">{t("heading", { n: filtered.length })}</h2>
 
-          {kosList.length === 0 ? (
+          {filtered.length === 0 ? (
             <div className="rounded-xl bg-surface p-8 text-center">
               <p className="text-sm text-text-secondary">{t("empty")}</p>
             </div>
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">
-              {kosList.map((kos) => (
+              {filtered.map((kos) => (
                 <div key={kos.id_kos} className="rounded-xl bg-surface p-5 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div>

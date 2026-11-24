@@ -68,6 +68,15 @@ export default async function PemilikPage() {
             )}
           </div>
 
+          {/* Kelola Kamar */}
+          <div className="mb-6 rounded-xl bg-surface p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-heading text-base font-bold text-text-primary">{t("kamarTitle")}</h3>
+              <Link href="/dashboard/pemilik/kamar" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("manage")}</Link>
+            </div>
+            <p className="text-sm text-text-secondary">{t("kamarDesc")}</p>
+          </div>
+
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Profil Info */}
             <div className="rounded-xl bg-surface p-6 shadow-sm">

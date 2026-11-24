@@ -426,3 +426,31 @@ export async function getAdminKosStats(): Promise<AdminStats> {
     pengajuanPending: count ?? 0,
   };
 }
+
+export type AdminDashboardData = {
+  stats: AdminStats;
+  allKos: (Kos & { owner_name: string | null })[];
+  pending: PendingPengajuanItem[];
+};
+
+// Gabungan data untuk Beranda admin: agregat stat + daftar kos + antrean
+// pengajuan pending dalam satu respons, tanpa query ganda ke tabel kos.
+export async function getAdminDashboardData(): Promise<AdminDashboardData> {
+  const allKos = await getAllKosForAdmin();
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("pengajuan_pemilik")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "menunggu_verifikasi");
+  const pending = await getRecentPendingPengajuan(3);
+  return {
+    stats: {
+      total: allKos.length,
+      tayang: allKos.filter((k) => k.status_publikasi === "tayang").length,
+      draft: allKos.filter((k) => k.status_publikasi !== "tayang").length,
+      pengajuanPending: count ?? 0,
+    },
+    allKos,
+    pending,
+  };
+}

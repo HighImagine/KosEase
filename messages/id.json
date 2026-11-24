@@ -379,7 +379,9 @@
     "reservasiTitle": "Reservasi Masuk",
     "reservasiWaiting": "{n} menunggu konfirmasi",
     "reservasiEmpty": "Belum ada pesanan masuk.",
-    "reservasiCta": "Lihat Semua"
+    "reservasiCta": "Lihat Semua",
+    "kamarTitle": "Kelola Kamar",
+    "kamarDesc": "Kelola kamar dan pantau stok penyewa dari kos Anda."
   },
   "KelolaKos": {
     "title": "Kelola Kos",
@@ -511,7 +513,12 @@
     "heading": "Semua Kos ({n})",
     "empty": "Belum ada kos terdaftar.",
     "owner": "Pemilik: {name}",
-    "viewPublic": "Lihat Publik"
+    "viewPublic": "Lihat Publik",
+    "search": "Cari nama, lokasi, atau pemilik",
+    "statusAll": "Semua",
+    "statusDraft": "Draft",
+    "statusTayang": "Tayang",
+    "filter": "Terapkan"
   },
   "AdminPengajuan": {
     "title": "Verifikasi Pengajuan Pemilik Kos",

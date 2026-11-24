@@ -2,12 +2,7 @@ import { redirect } from "next/navigation";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getAdminKosStats,
-  getAllKosForAdmin,
-  getRecentPendingPengajuan,
-  getUserRoleCounts,
-} from "@/lib/db/queries";
+import { getAdminDashboardData, getUserRoleCounts } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -73,12 +68,13 @@ export default async function AdminBerandaPage() {
   } catch {}
   if (role !== "admin") redirect("/");
 
-  const [stats, roleCounts, pending, allKos] = await Promise.all([
-    getAdminKosStats(),
+  const [data, roleCounts] = await Promise.all([
+    getAdminDashboardData(),
     getUserRoleCounts(),
-    getRecentPendingPengajuan(3),
-    getAllKosForAdmin(),
   ]);
+  const stats = data.stats;
+  const pending = data.pending;
+  const allKos = data.allKos;
   const draftKos = allKos.filter((k) => k.status_publikasi !== "tayang").slice(0, 3);
 
   return (
@@ -89,7 +85,7 @@ export default async function AdminBerandaPage() {
         <DashboardNavbar title={t("title")} />
 
         <main className="flex-1 p-6">
-          <div className="mx-auto max-w-3xl space-y-4">
+          <div className="mx-auto max-w-5xl space-y-4">
             {/* 1. Snapshot platform */}
             <section className="rounded-2xl bg-surface p-6 shadow-sm">
               <h2 className="font-heading text-base font-bold text-text-primary">{t("snapshot")}</h2>

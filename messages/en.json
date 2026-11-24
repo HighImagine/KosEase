@@ -379,7 +379,9 @@
     "reservasiTitle": "Incoming Reservations",
     "reservasiWaiting": "{n} awaiting confirmation",
     "reservasiEmpty": "No incoming bookings yet.",
-    "reservasiCta": "View All"
+    "reservasiCta": "View All",
+    "kamarTitle": "Manage Rooms",
+    "kamarDesc": "Manage rooms and monitor renter stock for your kos."
   },
   "KelolaKos": {
     "title": "Manage Kos",
@@ -511,7 +513,12 @@
     "heading": "All Kos ({n})",
     "empty": "No kos registered yet.",
     "owner": "Owner: {name}",
-    "viewPublic": "View Public"
+    "viewPublic": "View Public",
+    "search": "Search by name, location, or owner",
+    "statusAll": "All",
+    "statusDraft": "Draft",
+    "statusTayang": "Published",
+    "filter": "Apply"
   },
   "AdminPengajuan": {
     "title": "Verify Kos Owner Applications",

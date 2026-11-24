@@ -78,8 +78,9 @@ const kosSchema = z.object({
 export async function createKosAction(_prev: unknown, formData: FormData): Promise<ActionResult> {
   const { supabase, user, role } = await getSession();
   if (!user) return { error: "Harus login terlebih dahulu" };
-  if (role !== "admin" && !PEMILIK_ROLES.includes(role ?? "")) {
-    return { error: "Hanya pemilik kos atau admin yang dapat menambah kos" };
+  if (!PEMILIK_ROLES.includes(role ?? "")) {
+    // Admin tidak dapat membuat kos; itu hanya tugas pemilik kos.
+    return { error: "Hanya pemilik kos yang dapat menambah kos" };
   }
   const raw = Object.fromEntries(formData) as Record<string, string>;
   const parsed = kosSchema.safeParse(raw);
@@ -113,6 +114,15 @@ export async function updateKosAction(_prev: unknown, formData: FormData): Promi
   const raw = Object.fromEntries(formData) as Record<string, string>;
   const parsed = kosSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  // Admin tidak dapat mengedit kos; itu hanya tugas pemilik kos (moderasi
+  // dilakukan lewat alur publish/takedown di /dashboard/admin).
+  if (access.role === "admin") return { error: "Admin tidak dapat mengedit kos" };
+  const { data: currentKos } = await access.supabase.from("kos").select("status_publikasi").eq("id_kos", kosId).limit(1);
+  const currentStatus = (currentKos?.[0] as { status_publikasi?: string } | undefined)?.status_publikasi ?? null;
+  // Pemilik non-admin tidak boleh menarik kos tayang menjadi draft; butuh persetujuan admin.
+  if (access.role !== "admin" && currentStatus === "tayang" && parsed.data.status_publikasi === "draft") {
+    return { error: "Menarik kos dari publik memerlukan persetujuan admin" };
+  }
   const { error } = await access.supabase
     .from("kos")
     .update({
@@ -136,6 +146,14 @@ export async function setPublikasiAction(_prev: unknown, formData: FormData): Pr
   if (status !== "draft" && status !== "tayang") return { error: "Status tidak valid" };
   const access = await assertKosAccess(kosId);
   if ("error" in access) return { error: access.error };
+  const { supabase, role } = access;
+  const { data: currentKos } = await supabase.from("kos").select("status_publikasi").eq("id_kos", kosId).limit(1);
+  const currentStatus = (currentKos?.[0] as { status_publikasi?: string } | undefined)?.status_publikasi ?? null;
+  // Pemilik non-admin tidak boleh menarik kos tayang menjadi draft.
+  // Butuh persetujuan admin lewat alur moderasi (/dashboard/admin).
+  if (role !== "admin" && currentStatus === "tayang" && status === "draft") {
+    return { error: "Menarik kos dari publik memerlukan persetujuan admin" };
+  }
   const { error } = await access.supabase.from("kos").update({ status_publikasi: status }).eq("id_kos", kosId);
   if (error) return { error: error.message };
   revalidateKosPages(kosId);

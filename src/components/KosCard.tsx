@@ -45,14 +45,17 @@ export default function KosCard({
     const availStatus = getKetersediaanStatus(kamarTotal, kamarTersedia);
 
     return (
-        <div className="overflow-hidden rounded-2xl bg-surface shadow-sm transition-shadow hover:shadow-md">
+        <Link
+            href={`/kos/${id}`}
+            className="group block cursor-pointer overflow-hidden rounded-2xl bg-surface shadow-sm transition-shadow hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
+        >
             <div className="relative h-52">
                 <Image
                     src={gambar}
                     alt={nama}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
             </div>
 
@@ -90,14 +93,7 @@ export default function KosCard({
                     </span>
                 </p>
 
-                <Link
-                    href={`/kos/${id}`}
-                    className="mt-4 block w-full rounded-lg bg-primary py-2.5 text-center font-body font-semibold text-white transition-colors hover:bg-primary-dark"
-                >
-                    {t("detail")}
-                </Link>
-
             </div>
-        </div>
+        </Link>
     );
 }

@@ -42,6 +42,7 @@ export default function AdminKosFilter() {
         <option value="semua">{t("statusAll")}</option>
         <option value="draft">{t("statusDraft")}</option>
         <option value="tayang">{t("statusTayang")}</option>
+        <option value="penarikan">{t("statusPenarikan")}</option>
       </select>
       <button type="submit" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">
         {t("filter")}

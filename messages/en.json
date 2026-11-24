@@ -398,7 +398,15 @@
     "toTayang": "Publish",
     "delete": "Delete",
     "deleteConfirm": "Delete this kos along with its rooms, photos, and facilities? This cannot be undone.",
-    "manageTitle": "Manage: {name}"
+    "manageTitle": "Manage: {name}",
+    "withdraw": "Request Unpublish",
+    "withdrawTitle": "Request Unpublish",
+    "withdrawDesc": "Explain why you want to unpublish. An admin will review before the kos is removed from public.",
+    "withdrawReason": "Reason",
+    "withdrawPlaceholder": "Example: the kos will undergo major renovation...",
+    "withdrawSubmit": "Send Request",
+    "withdrawSending": "Sending...",
+    "withdrawPending": "Awaiting admin approval"
   },
   "KosForm": {
     "newTitle": "New Kos",
@@ -413,6 +421,7 @@
     "price": "Lowest Price / Month (IDR)",
     "priceHint": "Automatically follows the cheapest room price when rooms change.",
     "status": "Publication Status",
+    "statusHint": "Change the status using the buttons on the manage page.",
     "draftOpt": "Draft (hidden from public)",
     "tayangOpt": "Published (visible to public)",
     "desc": "Description",
@@ -506,7 +515,10 @@
     "allTayang": "All kos published.",
     "draftCount": "{n} kos in draft.",
     "noDraft": "No draft kos right now.",
-    "verifyAll": "Verify all →"
+    "verifyAll": "Verify all →",
+    "withdrawTitle": "Unpublish Requests ({n})",
+    "withdrawDesc": "Owners requested to unpublish. Open moderation to read the reason and process.",
+    "withdrawUnknownKos": "Unknown kos"
   },
   "AdminKos": {
     "title": "Listing Moderation",
@@ -518,6 +530,10 @@
     "statusAll": "All",
     "statusDraft": "Draft",
     "statusTayang": "Published",
+    "statusPenarikan": "Unpublish Requests",
+    "withdrawRequest": "Unpublish Request",
+    "approveWithdraw": "Approve & Unpublish",
+    "rejectWithdraw": "Reject",
     "filter": "Apply"
   },
   "AdminPengajuan": {

@@ -7,6 +7,9 @@ export const routing = defineRouting({
   localePrefix: "always",
   // Default bila negosiasi gagal
   defaultLocale: "id",
+  // Jangan deteksi dari Accept-Language/cookie: kunjungan pertama ke "/"
+  // selalu diarahkan ke /id. Pengguna tetap bisa pilih English lewat switcher.
+  localeDetection: false,
 });
 
 export type Locale = (typeof routing.locales)[number];

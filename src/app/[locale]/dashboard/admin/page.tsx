@@ -75,7 +75,9 @@ export default async function AdminBerandaPage() {
   const stats = data.stats;
   const pending = data.pending;
   const allKos = data.allKos;
+  const penarikan = data.penarikan;
   const draftKos = allKos.filter((k) => k.status_publikasi !== "tayang").slice(0, 3);
+  const namaKosById = new Map(allKos.map((k) => [k.id_kos, k.nama]));
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -86,6 +88,40 @@ export default async function AdminBerandaPage() {
 
         <main className="flex-1 p-6">
           <div className="mx-auto max-w-5xl space-y-4">
+            {/* 0. Notifikasi pengajuan penarikan (hanya muncul bila ada) */}
+            {penarikan.length > 0 && (
+              <section className="rounded-2xl border border-warning/40 bg-warning/10 p-6 shadow-sm">
+                <h2 className="font-heading text-base font-bold text-text-primary">
+                  <Link
+                    href="/dashboard/admin/kos?status=penarikan"
+                    className="underline decoration-2 underline-offset-2 hover:text-primary"
+                  >
+                    {t("withdrawTitle", { n: penarikan.length })}
+                  </Link>
+                </h2>
+                <p className="mt-1 text-xs text-text-secondary">{t("withdrawDesc")}</p>
+                <div className="mt-3 space-y-2">
+                  {penarikan.map((p) => (
+                    <Link
+                      key={p.id}
+                      href="/dashboard/admin/kos?status=penarikan"
+                      className="flex items-start justify-between gap-3 rounded-xl border border-warning/30 bg-surface px-4 py-2.5 hover:border-primary"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-text-primary">
+                          {namaKosById.get(p.kos_id) ?? t("withdrawUnknownKos")}
+                        </p>
+                        <p className="mt-0.5 truncate text-[10px] text-text-secondary">{p.alasan}</p>
+                      </div>
+                      <span className="shrink-0 rounded-full bg-warning px-3 py-1 text-[10px] font-semibold text-white">
+                        {t("waiting")}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* 1. Snapshot platform */}
             <section className="rounded-2xl bg-surface p-6 shadow-sm">
               <h2 className="font-heading text-base font-bold text-text-primary">{t("snapshot")}</h2>

@@ -1,11 +1,12 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
-import { getAllKosForAdmin } from "@/lib/db/queries";
+import { getAllKosForAdmin, getPendingPenarikan } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DeleteKosButton, PublikasiToggle } from "@/app/[locale]/dashboard/pemilik/kos/KosListActions";
 import AdminKosFilter from "./AdminKosFilter";
+import PenarikanActions from "./PenarikanActions";
 
 type PageProps = {
   searchParams: Promise<{ q?: string; status?: string }>;
@@ -16,9 +17,13 @@ export default async function AdminKosPage({ searchParams }: PageProps) {
   const t = await getTranslations("AdminKos");
   const tk = await getTranslations("KelolaKos");
   const tc = await getTranslations("Common");
-  const kosList = await getAllKosForAdmin();
+  const [kosList, pendingPenarikan] = await Promise.all([getAllKosForAdmin(), getPendingPenarikan()]);
+  const pendingByKos = new Map(pendingPenarikan.map((p) => [p.kos_id, p]));
   const filtered = kosList.filter((k) => {
-    const statusMatch = !status || status === "semua" || k.status_publikasi === status;
+    const statusMatch =
+      !status ||
+      status === "semua" ||
+      (status === "penarikan" ? pendingByKos.has(k.id_kos) : k.status_publikasi === status);
     const kw = (q ?? "").trim().toLowerCase();
     const haystack = [k.nama, k.lokasi, k.tipe, k.owner_name ?? ""].map((f) => f.toLowerCase());
     const queryMatch = !kw || haystack.some((f) => f.includes(kw));
@@ -42,7 +47,9 @@ export default async function AdminKosPage({ searchParams }: PageProps) {
             </div>
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">
-              {filtered.map((kos) => (
+              {filtered.map((kos) => {
+                const penarikan = pendingByKos.get(kos.id_kos);
+                return (
                 <div key={kos.id_kos} className="rounded-xl bg-surface p-5 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -56,17 +63,25 @@ export default async function AdminKosPage({ searchParams }: PageProps) {
                       {kos.status_publikasi === "tayang" ? tk("tayang") : tk("draft")}
                     </span>
                   </div>
+                  {penarikan && (
+                    <div className="mt-4 rounded-xl border border-warning/40 bg-warning/10 p-3">
+                      <p className="text-[10px] font-bold text-warning">{t("withdrawRequest")}</p>
+                      <p className="mt-1 text-xs text-text-primary">{penarikan.alasan}</p>
+                      <PenarikanActions penarikanId={penarikan.id} kosId={kos.id_kos} />
+                    </div>
+                  )}
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     {kos.status_publikasi === "tayang" && (
                       <Link href={`/kos/${kos.id_kos}`} className="rounded-lg border border-border px-3 py-1.5 text-[10px] font-semibold text-text-secondary hover:text-primary">
                         {t("viewPublic")}
                       </Link>
                     )}
-                    <PublikasiToggle kosId={kos.id_kos} status={kos.status_publikasi} />
+                    {!penarikan && <PublikasiToggle kosId={kos.id_kos} status={kos.status_publikasi} />}
                     <DeleteKosButton kosId={kos.id_kos} />
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </main>

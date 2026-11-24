@@ -5,6 +5,19 @@
 export type TipeKos = "Campur" | "Laki-laki" | "Perempuan";
 export type StatusPublikasi = "draft" | "tayang";
 export type Ketersediaan = "Tersedia" | "Penuh";
+export type StatusPenarikan = "menunggu" | "disetujui" | "ditolak";
+
+// Pengajuan penarikan kos oleh pemilik (menunggu persetujuan admin).
+export type PengajuanPenarikan = {
+  id: string; // uuid
+  kos_id: string; // uuid -> kos.id_kos (tanpa FK)
+  id_pemilik: string; // uuid -> profiles.id (tanpa FK)
+  alasan: string;
+  status: StatusPenarikan;
+  diproses_oleh: string | null; // uuid admin
+  diproses_at: string | null; // timestamptz
+  created_at: string; // timestamptz
+};
 
 export type Kos = {
   id_kos: string; // uuid

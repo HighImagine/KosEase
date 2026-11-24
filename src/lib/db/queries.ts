@@ -1,7 +1,7 @@
 // Query baca kos dari Supabase. Semua query publik hanya menyentuh
 // kos dengan status_publikasi = 'tayang' (diperkuat juga oleh RLS).
 import { createClient } from "@/lib/supabase/server";
-import type { Galeri, Kamar, Kos, KosCardData, KosDetail } from "./types";
+import type { Galeri, Kamar, Kos, KosCardData, KosDetail, PengajuanPenarikan } from "./types";
 
 const KOS_COVER_FALLBACK = "/img/kos-placeholder.png";
 
@@ -409,6 +409,20 @@ export async function getMasukReservasi(): Promise<PemesananTampil[]> {
   return withNamaKosKamar((data ?? []) as Pemesanan[]);
 }
 
+// Pengajuan penarikan yang masih menunggu persetujuan admin.
+// RLS membatasi: pemilik hanya melihat miliknya, admin melihat semua.
+// Tabel bisa belum ada di lingkungan lama -> kembalikan [] agar halaman aman.
+export async function getPendingPenarikan(): Promise<PengajuanPenarikan[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("pengajuan_penarikan")
+    .select("*")
+    .eq("status", "menunggu")
+    .order("created_at", { ascending: false });
+  if (error) return [];
+  return (data ?? []) as PengajuanPenarikan[];
+}
+
 export type AdminStats = { total: number; tayang: number; draft: number; pengajuanPending: number };
 
 // Agregat ringkas untuk panel dashboard admin.
@@ -431,6 +445,7 @@ export type AdminDashboardData = {
   stats: AdminStats;
   allKos: (Kos & { owner_name: string | null })[];
   pending: PendingPengajuanItem[];
+  penarikan: PengajuanPenarikan[];
 };
 
 // Gabungan data untuk Beranda admin: agregat stat + daftar kos + antrean
@@ -442,7 +457,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     .from("pengajuan_pemilik")
     .select("id", { count: "exact", head: true })
     .eq("status", "menunggu_verifikasi");
-  const pending = await getRecentPendingPengajuan(3);
+  const [pending, penarikan] = await Promise.all([getRecentPendingPengajuan(3), getPendingPenarikan()]);
   return {
     stats: {
       total: allKos.length,
@@ -452,5 +467,6 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     },
     allKos,
     pending,
+    penarikan,
   };
 }

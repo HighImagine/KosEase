@@ -398,7 +398,15 @@
     "toTayang": "Tayangkan",
     "delete": "Hapus",
     "deleteConfirm": "Hapus kos ini beserta kamar, foto, dan fasilitasnya? Tindakan tidak bisa dibatalkan.",
-    "manageTitle": "Kelola: {name}"
+    "manageTitle": "Kelola: {name}",
+    "withdraw": "Ajukan Penarikan",
+    "withdrawTitle": "Ajukan Penarikan Kos",
+    "withdrawDesc": "Jelaskan alasan penarikan. Admin akan meninjau sebelum kos ditarik dari publik.",
+    "withdrawReason": "Alasan penarikan",
+    "withdrawPlaceholder": "Contoh: kos akan direnovasi total...",
+    "withdrawSubmit": "Kirim Pengajuan",
+    "withdrawSending": "Mengirim...",
+    "withdrawPending": "Menunggu persetujuan admin"
   },
   "KosForm": {
     "newTitle": "Kos Baru",
@@ -413,6 +421,7 @@
     "price": "Harga Termurah / Bulan (Rp)",
     "priceHint": "Otomatis ikut harga kamar termurah saat kamar diubah.",
     "status": "Status Publikasi",
+    "statusHint": "Ubah status lewat tombol di halaman kelola.",
     "draftOpt": "Draft (tidak tampil publik)",
     "tayangOpt": "Tayang (tampil publik)",
     "desc": "Deskripsi",
@@ -506,7 +515,10 @@
     "allTayang": "Semua kos tayang.",
     "draftCount": "{n} kos berstatus draft.",
     "noDraft": "Tidak ada kos draft saat ini.",
-    "verifyAll": "Verifikasi semua →"
+    "verifyAll": "Verifikasi semua →",
+    "withdrawTitle": "Pengajuan Penarikan Kos ({n})",
+    "withdrawDesc": "Pemilik mengajukan penarikan. Buka moderasi untuk membaca alasan dan memproses.",
+    "withdrawUnknownKos": "Kos tidak dikenal"
   },
   "AdminKos": {
     "title": "Moderasi Publikasi Kos",
@@ -518,6 +530,10 @@
     "statusAll": "Semua",
     "statusDraft": "Draft",
     "statusTayang": "Tayang",
+    "statusPenarikan": "Pengajuan Penarikan",
+    "withdrawRequest": "Pengajuan Penarikan Kos",
+    "approveWithdraw": "Setujui & Tarik",
+    "rejectWithdraw": "Tolak",
     "filter": "Terapkan"
   },
   "AdminPengajuan": {

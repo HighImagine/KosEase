@@ -12,7 +12,9 @@ type ActionResult = { error?: string; success?: string };
 // Revalidasi KEDUA locale (path publik maupun dashboard ada di /id dan /en).
 function revalidateKosPages(kosId?: string) {
   for (const loc of ["id", "en"]) {
+    revalidatePath(`/${loc}/dashboard/pemilik`);
     revalidatePath(`/${loc}/dashboard/pemilik/kos`);
+    revalidatePath(`/${loc}/dashboard/admin`);
     revalidatePath(`/${loc}/dashboard/admin/kos`);
     revalidatePath(`/${loc}`);
     revalidatePath(`/${loc}/cari-kos`);
@@ -24,6 +26,14 @@ function revalidateKosPages(kosId?: string) {
 }
 
 const PEMILIK_ROLES = ["pemilik", "pemilik_kos"];
+
+// Pesan ramah bila tabel pengajuan_penarikan belum dimigrasikan di lingkungan ini.
+function penarikanErrorMessage(message: string): string {
+  if (/pengajuan_penarikan/i.test(message) && /(does not exist|tidak ada)/i.test(message)) {
+    return "Fitur penarikan belum aktif. Jalankan migrasi pengajuan_penarikan terlebih dahulu.";
+  }
+  return message;
+}
 
 async function getSession() {
   const supabase = await createClient();
@@ -160,6 +170,92 @@ export async function setPublikasiAction(_prev: unknown, formData: FormData): Pr
   return { success: status === "tayang" ? "Kos ditayangkan" : "Kos dikembalikan ke draft" };
 }
 
+// Pemilik mengajukan penarikan kos tayang beserta alasannya. Status kos TIDAK
+// langsung berubah; admin yang memproses lewat /dashboard/admin/kos.
+export async function ajukanPenarikanAction(_prev: unknown, formData: FormData): Promise<ActionResult> {
+  const kosId = String(formData.get("kosId") ?? "");
+  const alasan = String(formData.get("alasan") ?? "").trim();
+  if (alasan.length < 5) return { error: "Alasan penarikan minimal 5 karakter" };
+  if (alasan.length > 1000) return { error: "Alasan penarikan maksimal 1000 karakter" };
+  const access = await assertKosAccess(kosId);
+  if ("error" in access) return { error: access.error };
+  if (access.role === "admin") return { error: "Admin tidak dapat mengajukan penarikan kos" };
+
+  const { data: kosRows, error: kosError } = await access.supabase
+    .from("kos")
+    .select("status_publikasi")
+    .eq("id_kos", kosId)
+    .limit(1);
+  if (kosError) return { error: kosError.message };
+  if ((kosRows?.[0] as { status_publikasi?: string } | undefined)?.status_publikasi !== "tayang") {
+    return { error: "Hanya kos yang sedang tayang yang dapat diajukan penarikan" };
+  }
+
+  const { data: existing, error: existingError } = await access.supabase
+    .from("pengajuan_penarikan")
+    .select("id")
+    .eq("kos_id", kosId)
+    .eq("status", "menunggu")
+    .limit(1);
+  if (existingError) return { error: penarikanErrorMessage(existingError.message) };
+  if ((existing ?? []).length > 0) {
+    return { error: "Pengajuan penarikan untuk kos ini masih menunggu persetujuan admin" };
+  }
+
+  const { error } = await access.supabase
+    .from("pengajuan_penarikan")
+    .insert({ kos_id: kosId, id_pemilik: access.user.id, alasan });
+  if (error) return { error: penarikanErrorMessage(error.message) };
+  revalidateKosPages(kosId);
+  return { success: "Pengajuan penarikan dikirim. Menunggu persetujuan admin." };
+}
+
+// Admin memproses pengajuan: setujui -> kos jadi draft, tolak -> kos tetap tayang.
+export async function prosesPenarikanAction(_prev: unknown, formData: FormData): Promise<ActionResult> {
+  const penarikanId = String(formData.get("penarikanId") ?? "");
+  const kosId = String(formData.get("kosId") ?? "");
+  const aksi = String(formData.get("aksi") ?? "");
+  if (aksi !== "setujui" && aksi !== "tolak") return { error: "Aksi tidak valid" };
+
+  const { supabase, user, role } = await getSession();
+  if (!user) return { error: "Harus login terlebih dahulu" };
+  if (role !== "admin") return { error: "Hanya admin yang dapat memproses pengajuan penarikan" };
+
+  const { data, error: readError } = await supabase
+    .from("pengajuan_penarikan")
+    .select("id, kos_id, status")
+    .eq("id", penarikanId)
+    .limit(1);
+  if (readError) return { error: readError.message };
+  const row = data?.[0] as { id: string; kos_id: string; status: string } | undefined;
+  if (!row || row.status !== "menunggu") return { error: "Pengajuan tidak ditemukan atau sudah diproses" };
+  const targetKosId = row.kos_id || kosId;
+
+  if (aksi === "setujui") {
+    const { error } = await supabase
+      .from("kos")
+      .update({ status_publikasi: "draft" })
+      .eq("id_kos", targetKosId);
+    if (error) return { error: error.message };
+  }
+
+  const { error } = await supabase
+    .from("pengajuan_penarikan")
+    .update({
+      status: aksi === "setujui" ? "disetujui" : "ditolak",
+      diproses_oleh: user.id,
+      diproses_at: new Date().toISOString(),
+    })
+    .eq("id", penarikanId)
+    .eq("status", "menunggu");
+  if (error) return { error: error.message };
+
+  revalidateKosPages(targetKosId);
+  return {
+    success: aksi === "setujui" ? "Penarikan disetujui. Kos kini berstatus draft." : "Pengajuan penarikan ditolak.",
+  };
+}
+
 // Hapus manual berurutan (tanpa cascade FK): file bucket -> galeri -> kamar ->
 // relasi fasilitas -> kos.
 export async function deleteKosAction(_prev: unknown, formData: FormData): Promise<ActionResult> {
@@ -178,6 +274,7 @@ export async function deleteKosAction(_prev: unknown, formData: FormData): Promi
   await supabase.from("galeri").delete().eq("kos_id", kosId);
   await supabase.from("kamar").delete().eq("kos_id", kosId);
   await supabase.from("kos_fasilitas").delete().eq("kos_id", kosId);
+  await supabase.from("pengajuan_penarikan").delete().eq("kos_id", kosId);
   const { error } = await supabase.from("kos").delete().eq("id_kos", kosId);
   if (error) return { error: error.message };
 

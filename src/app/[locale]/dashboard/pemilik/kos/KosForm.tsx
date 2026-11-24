@@ -66,11 +66,22 @@ export default function KosForm({ kos, action }: { kos?: Kos | null; action: Kos
           <p className="mt-1 text-[10px] text-text-secondary">{t("priceHint")}</p>
         </div>
         <div>
-          <label htmlFor="status_publikasi" className={labelCls}>{t("status")}</label>
-          <select id="status_publikasi" name="status_publikasi" defaultValue={kos?.status_publikasi ?? "draft"} className={inputCls}>
-            <option value="draft">{t("draftOpt")}</option>
-            <option value="tayang">{t("tayangOpt")}</option>
-          </select>
+          <span className={labelCls}>{t("status")}</span>
+          {kos ? (
+            <>
+              {/* Status tidak diubah lewat form edit; pakai tombol publikasi/penarikan. */}
+              <input type="hidden" name="status_publikasi" value={kos.status_publikasi} />
+              <p className="mt-1.5 text-xs font-semibold text-text-primary">
+                {kos.status_publikasi === "tayang" ? t("tayangOpt") : t("draftOpt")}
+              </p>
+              <p className="mt-1 text-[10px] text-text-secondary">{t("statusHint")}</p>
+            </>
+          ) : (
+            <select id="status_publikasi" name="status_publikasi" defaultValue="draft" className={inputCls}>
+              <option value="draft">{t("draftOpt")}</option>
+              <option value="tayang">{t("tayangOpt")}</option>
+            </select>
+          )}
         </div>
       </div>
 

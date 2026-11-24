@@ -1,11 +1,11 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
-import { getFasilitasMaster, getOwnedKosDetail } from "@/lib/db/queries";
+import { getFasilitasMaster, getOwnedKosDetail, getPendingPenarikan } from "@/lib/db/queries";
 import { updateKosAction } from "@/app/[locale]/kos/actions";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { IconArrowLeft } from "@tabler/icons-react";
 import KosForm from "../KosForm";
-import { DeleteKosButton, PublikasiToggle } from "../KosListActions";
+import { AjukanPenarikanButton, DeleteKosButton, PublikasiToggle } from "../KosListActions";
 import KamarManager from "./KamarManager";
 import GaleriManager from "./GaleriManager";
 import FasilitasPicker from "./FasilitasPicker";
@@ -50,6 +50,8 @@ export default async function KelolaKosDetailPage({ params }: PageProps) {
 
   const { kos, kamar, galeri, fasilitas } = detail;
   const master = await getFasilitasMaster();
+  const pending = await getPendingPenarikan();
+  const alasanPenarikan = pending.find((p) => p.kos_id === kos.id_kos)?.alasan ?? null;
 
   // Tanpa sidebar: halaman form fokus penuh.
   return (
@@ -69,7 +71,11 @@ export default async function KelolaKosDetailPage({ params }: PageProps) {
                 <span className="text-[11px] text-text-secondary">
                   {tk("status")} <strong className="text-text-primary">{kos.status_publikasi === "tayang" ? t("tayang") : t("draft")}</strong>
                 </span>
-                <PublikasiToggle kosId={kos.id_kos} status={kos.status_publikasi} />
+                {kos.status_publikasi === "tayang" ? (
+                  <AjukanPenarikanButton kosId={kos.id_kos} alasan={alasanPenarikan} />
+                ) : (
+                  <PublikasiToggle kosId={kos.id_kos} status={kos.status_publikasi} />
+                )}
                 <DeleteKosButton kosId={kos.id_kos} />
               </div>
             </Section>

@@ -1,15 +1,16 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
-import { getMyKosList } from "@/lib/db/queries";
+import { getMyKosList, getPendingPenarikan } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DeleteKosButton, PublikasiToggle } from "./KosListActions";
+import { AjukanPenarikanButton, DeleteKosButton, PublikasiToggle } from "./KosListActions";
 
 export default async function KelolaKosPage() {
   const t = await getTranslations("KelolaKos");
   const tc = await getTranslations("Common");
-  const kosList = await getMyKosList();
+  const [kosList, pending] = await Promise.all([getMyKosList(), getPendingPenarikan()]);
+  const pendingByKos = new Map(pending.map((p) => [p.kos_id, p.alasan]));
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -56,7 +57,11 @@ export default async function KelolaKosPage() {
                         {t("viewPublic")}
                       </Link>
                     )}
-                    <PublikasiToggle kosId={kos.id_kos} status={kos.status_publikasi} />
+                    {kos.status_publikasi === "tayang" ? (
+                      <AjukanPenarikanButton kosId={kos.id_kos} alasan={pendingByKos.get(kos.id_kos) ?? null} />
+                    ) : (
+                      <PublikasiToggle kosId={kos.id_kos} status={kos.status_publikasi} />
+                    )}
                     <DeleteKosButton kosId={kos.id_kos} />
                   </div>
                 </div>

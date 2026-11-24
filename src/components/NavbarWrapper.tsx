@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Navbar from "./Navbar";
-import NotificationBell from "./NotificationBell";
+import { getUnreadNotifikasiCount } from "@/lib/db/queries";
 
 export default async function NavbarWrapper() {
   const supabase = await createClient();
@@ -21,6 +21,8 @@ export default async function NavbarWrapper() {
     if (role === "admin") {
       const { count } = await supabase.from("pengajuan_pemilik").select("*", { count: "exact", head: true }).eq("status", "menunggu_verifikasi");
       pendingCount = count ?? 0;
+    } else {
+      pendingCount = await getUnreadNotifikasiCount();
     }
   }
 

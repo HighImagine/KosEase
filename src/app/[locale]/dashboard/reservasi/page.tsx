@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { IconBed } from "@tabler/icons-react";
 import { CancelButton } from "@/app/[locale]/dashboard/pemilik/reservasi/PemesananActions";
+import PerpanjanganForm from "./PerpanjanganForm";
 
 const badgeStyle: Record<StatusPemesanan, string> = {
   menunggu: "bg-warning text-white",
@@ -83,6 +84,7 @@ export default async function ReservasiPage() {
                       <CancelButton pemesananId={p.id} />
                     </div>
                   )}
+                  {p.status === "dikonfirmasi" && <PerpanjanganForm pemesananId={p.id} />}
                 </div>
               ))
             )}

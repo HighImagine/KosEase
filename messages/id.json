@@ -89,6 +89,7 @@
     "type": "Tipe Kos",
     "fullMsg": "Kos ini sedang penuh — cek kembali nanti atau hubungi pemilik.",
     "full": "Penuh",
+    "noRoomsMsg": "Kos ini belum memiliki kamar.",
     "order": "Ajukan Pemesanan",
     "available": "Tersedia",
     "unavailable": "Penuh",
@@ -126,7 +127,12 @@
     "submitting": "Mengirim...",
     "backHome": "Kembali ke Beranda",
     "dash": "-",
-    "submitAlert": "Ajukan Pemesanan: {nama} | {kamar} | {durasi} Bulan | Total {total}"
+    "submitAlert": "Ajukan Pemesanan: {nama} | {kamar} | {durasi} Bulan | Total {total}",
+    "fullTitle": "Kos Sedang Penuh",
+    "fullDesc": "Maaf, semua kamar di kos ini sedang penuh. Silakan cari kos lain atau hubungi pemiliknya.",
+    "fullCta": "Cari Kos Lain",
+    "noRooms": "Kos Ini Belum Punya Kamar",
+    "noRoomsMsg": "Belum ada kamar yang tersedia untuk dipesan."
   },
   "Login": {
     "title": "Masuk ke Akun Anda",
@@ -249,7 +255,9 @@
     "reject": "Tolak",
     "rejecting": "...",
     "renter": "Pemesan",
-    "moveIn": "Masuk {date} · {n} bulan"
+    "moveIn": "Masuk {date} · {n} bulan",
+    "stockLeft": "{n} kamar tersisa",
+    "stockOut": "Stok Habis"
   },
   "Footer": {
     "tagline": "Platform pencarian kos modern di Indonesia yang mengutamakan kemudahan, kenyamanan, dan transparansi harga untuk para pelajar dan pekerja muda.",

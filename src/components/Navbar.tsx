@@ -53,7 +53,7 @@ export default function Navbar({ user, avatarUrl, pendingCount = 0 }: NavbarProp
           </div>
         ) : (
           <div className="relative flex items-center gap-3">
-            {user?.role === "admin" && <NotificationBell count={pendingCount} />}
+            {user && <NotificationBell count={pendingCount} href={user.role === "admin" ? "/dashboard/admin/pengajuan" : "/dashboard/notifikasi"} />}
             <LanguageSwitcher />
             <button onClick={toggleDropdown} className="flex items-center gap-2 rounded-full px-0 hover:bg-background">
               <Image src={avatarUrl ?? "/img/avatar-default.png"} alt={user.displayName ?? "User"} width={28} height={28} className="rounded-full object-cover" />

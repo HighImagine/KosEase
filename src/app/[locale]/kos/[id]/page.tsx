@@ -3,6 +3,7 @@ import { tipeStyles, type TipeKos } from "@/data/kos";
 import { formatHarga } from "@/lib/format";
 import { getKosOwner, getPublicKosDetail } from "@/lib/db/queries";
 import { getFallbackKosDetail } from "@/lib/db/compat";
+import { hasAvailableKamar, isKamarTersedia } from "@/lib/kos";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
@@ -36,6 +37,8 @@ export default async function KosDetailPage({ params }: PageProps) {
     const { kos, kamar, galeri, fasilitas } = detail;
     const cover = galeri[0]?.image_url ?? PLACEHOLDER;
     const owner = await getKosOwner(kos.id_pemilik);
+    // Sekarang: ketersediaan ditentukan dari stok aktual (stok > 0).
+    const canOrder = hasAvailableKamar(kamar);
 
     return (
         <><main className="min-h-screen bg-background">
@@ -158,7 +161,7 @@ export default async function KosDetailPage({ params }: PageProps) {
                                 </div>
 
 {kamar.map((k) => {
-    const isTersedia = k.ketersediaan === "Tersedia";
+    const isTersedia = isKamarTersedia(k);
     const badgeStyle = isTersedia ? "bg-success/10 text-success" : "bg-error/10 text-error";
     return (
     <div key={k.id} className="grid grid-cols-[1fr_auto_auto] items-center border-t border-border px-4 py-4 gap-4">
@@ -207,9 +210,15 @@ export default async function KosDetailPage({ params }: PageProps) {
                                 </div>
                             </div>
 
-                            <Link href={`/pemesanan?kosId=${kos.id_kos}`} className="mt-4 block w-full rounded-lg bg-primary px-4 py-2.5 text-center text-xs font-semibold text-white transition-colors hover:bg-primary-dark">
-                                {t("order")}
-                            </Link>
+                            {canOrder ? (
+                                <Link href={`/pemesanan?kosId=${kos.id_kos}`} className="mt-4 block w-full rounded-lg bg-primary px-4 py-2.5 text-center text-xs font-semibold text-white transition-colors hover:bg-primary-dark">
+                                    {t("order")}
+                                </Link>
+                            ) : (
+                                <button disabled type="button" className="mt-4 block w-full cursor-not-allowed rounded-lg bg-gray-300 px-4 py-2.5 text-center text-xs font-semibold text-gray-500">
+                                    {t("full")}
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -241,11 +250,13 @@ export default async function KosDetailPage({ params }: PageProps) {
 
                         </div>
 
-{kamar.length > 0 && kamar.every((k) => k.ketersediaan === "Penuh") && <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">{t("fullMsg")}</p>}
-                        {kamar.length > 0 && kamar.every((k) => k.ketersediaan === "Penuh") ? (
-                            <button disabled className="mt-5 w-full rounded-lg bg-gray-300 px-4 py-3 text-sm font-semibold text-gray-500">{t("full")}</button>
-                        ) : (
+                        {canOrder ? (
                             <Link href={`/pemesanan?kosId=${kos.id_kos}`} className="mt-5 block w-full rounded-lg bg-accent px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-orange-600">{t("order")}</Link>
+                        ) : (
+                            <>
+                                <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">{t("fullMsg")}</p>
+                                <button disabled type="button" className="mt-5 w-full cursor-not-allowed rounded-lg bg-gray-300 px-4 py-3 text-sm font-semibold text-gray-500">{t("full")}</button>
+                            </>
                         )}
 
                     </div>

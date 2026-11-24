@@ -4,6 +4,7 @@ import { z } from "zod";
 // redirect polos next/navigation: path SELALU sudah berprefix via withLocale(),
 // karena redirect next-intl tidak dijamin di dalam Server Actions.
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { formLocale, withLocale } from "@/lib/locale";
 
@@ -250,4 +251,40 @@ export async function updateProfileAction(_prev: unknown, formData: FormData) {
   await supabase.auth.updateUser({ data: { full_name: nama } });
 
   return { success: "Profil berhasil diperbarui", currentFullName: nama, currentEmail, currentPhone: phone ?? "", currentAvatar: avatarUrl };
+}
+
+// Trigger edge function waitlist-notifier (recompute slot final + notifikasi
+// ke waitlist ~3 hari sebelum end date). Hanya admin. Dipakai: manual trigger
+// dari admin + auto-recompute pas booking/perpanjangan dikonfirmasi.
+export async function triggerWaitlistNotificationsAction(_prev: unknown, formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Harus login terlebih dahulu" };
+
+  const { data: profileData } = await supabase.from("profiles").select("role").eq("id", user.id).limit(1);
+  const role = (profileData?.[0] as { role?: string } | undefined)?.role ?? "";
+  if (role.toLowerCase() !== "admin") return { error: "Hanya admin yang dapat memicu notifikasi" };
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey) return { error: "Konfigurasi Supabase tidak lengkap (NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY)" };
+
+  const functionUrl = `${supabaseUrl.replace(/^\/*(https?:\/\/)?/, "")}/functions/v1/waitlist-notifier`;
+  const res = await fetch(functionUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${serviceRoleKey}`,
+      "apikey": supabaseUrl,
+    },
+    body: "{}",
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    return { error: `Gagal memicu notifikasi: ${res.status} ${text}` };
+  }
+
+  for (const loc of ["id", "en"]) revalidatePath(`/${loc}/dashboard/notifikasi`);
+  return { success: "Notifikasi waitlist dipicu" };
 }

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { formLocale, withLocale } from "@/lib/locale";
+import { triggerWaitlistNotificationsAction } from "@/app/[locale]/(auth)/actions";
 
 type ActionResult = { error?: string; success?: string };
 
@@ -27,6 +28,7 @@ const pesanSchema = z.object({
   tanggal: z.string().min(1, "Wajib diisi"),
   durasi: z.coerce.number().int().min(1).max(24),
   catatan: z.string().max(1000).optional().or(z.literal("")),
+  waitlistId: z.string().uuid().optional().or(z.literal("")),
 });
 
 // Buat pesanan baru. Total dihitung ulang di server (harga kamar x durasi),
@@ -54,17 +56,42 @@ export async function createPemesananAction(_prev: unknown, formData: FormData):
 
   const { data: kamarRows } = await supabase
     .from("kamar")
-    .select("id, kos_id, harga, ketersediaan")
+    .select("id, kos_id, harga, stok, ketersediaan")
     .eq("id", parsed.data.kamarId)
     .limit(1);
   const kamar = kamarRows?.[0] as
-    | { id: string; kos_id: string; harga: number; ketersediaan: string }
+    | { id: string; kos_id: string; harga: number; stok: number; ketersediaan: string }
     | undefined;
   if (!kamar || kamar.kos_id !== parsed.data.kosId) return { error: "Kamar tidak valid" };
-  if (kamar.ketersediaan !== "Tersedia") return { error: "Kamar sudah penuh" };
-
-  if (parsed.data.tanggal < new Date().toISOString().slice(0, 10)) {
-    return { error: "Tanggal mulai tidak boleh di masa lalu" };
+  if (parsed.data.tanggal < new Date().toISOString().slice(0, 10)) return { error: "Tanggal mulai tidak boleh di masa lalu" };
+  if (parsed.data.waitlistId) {
+    const { data: rows } = await supabase.from("waitlist").select("*").eq("id", parsed.data.waitlistId).eq("user_id", user.id).limit(1);
+    const offer = rows?.[0] as { id: string; kos_id: string; kamar_id: string; nama: string; no_wa: string; slot_mulai: string | null; durasi: number; catatan: string | null; status: string; berlaku_sampai: string | null } | undefined;
+    if (!offer || offer.status !== "ditawarkan" || !offer.slot_mulai || !offer.berlaku_sampai || new Date(offer.berlaku_sampai) < new Date()) return { error: "Tawaran waitlist sudah tidak berlaku" };
+    if (offer.kos_id !== parsed.data.kosId || offer.kamar_id !== parsed.data.kamarId) return { error: "Tawaran tidak cocok" };
+    const { data: booking, error } = await supabase.from("pemesanan").insert({ user_id: user.id, kos_id: offer.kos_id, kamar_id: offer.kamar_id, nama_pemesan: offer.nama, no_wa: offer.no_wa, tanggal_mulai: offer.slot_mulai, durasi: offer.durasi, total_harga: kamar.harga * offer.durasi, catatan: offer.catatan, status: "menunggu", waitlist_id: offer.id }).select("id").single();
+    if (error || !booking) return { error: error?.message ?? "Gagal mengklaim tawaran" };
+    await supabase.from("waitlist").update({ status: "diklaim", pemesanan_id: booking.id }).eq("id", offer.id).eq("status", "ditawarkan");
+    revalidatePemesananPages();
+    redirect(withLocale("/dashboard/reservasi?success=1", locale));
+  }
+  // Sumber kebenaran ketersediaan: stok > 0. Tidak bisa memesan kamar penuh.
+  if ((kamar.stok ?? 0) <= 0) {
+    // Kos/kamar penuh -> masuk antrian waitlist, bukan langsung ditolak.
+    const { error: wlError } = await supabase.from("waitlist").insert({
+      user_id: user.id,
+      kos_id: parsed.data.kosId,
+      kamar_id: parsed.data.kamarId,
+      nama: parsed.data.nama,
+      no_wa: parsed.data.wa,
+      tanggal_mulai: parsed.data.tanggal,
+      durasi: parsed.data.durasi,
+      catatan: parsed.data.catatan || null,
+      status: "menunggu",
+    });
+    if (wlError) return { error: wlError.message };
+    revalidatePemesananPages();
+    return { success: "Kamar penuh — Anda masuk antrian waitlist" };
   }
 
   const total = (kamar.harga ?? 0) * parsed.data.durasi;
@@ -116,8 +143,8 @@ export async function setPemesananStatusAction(_prev: unknown, formData: FormDat
   } = await supabase.auth.getUser();
   if (!user) return { error: "Harus login terlebih dahulu" };
 
-  const { data } = await supabase.from("pemesanan").select("id, kos_id, status").eq("id", id).limit(1);
-  const row = data?.[0] as { id: string; kos_id: string; status: string } | undefined;
+  const { data } = await supabase.from("pemesanan").select("id, kos_id, kamar_id, status, waitlist_id").eq("id", id).limit(1);
+  const row = data?.[0] as { id: string; kos_id: string; kamar_id: string; status: string; waitlist_id?: string | null } | undefined;
   if (!row) return { error: "Pesanan tidak ditemukan" };
   if (row.status !== "menunggu") return { error: "Pesanan sudah diproses" };
 
@@ -137,8 +164,26 @@ export async function setPemesananStatusAction(_prev: unknown, formData: FormDat
   } catch {}
   if (!allowed) return { error: "Tidak berhak memproses pesanan ini" };
 
+  // Konfirmasi wajib lewat RPC: satu transaksi (cek status -> decrement stok
+  // -> update status) supaya tidak ada race condition saat dua pemanggil mencoba
+  // mengonfirmasi pemesanan untuk kamar terakhir.
+  if (status === "dikonfirmasi") {
+    const { data: rpcData, error: rpcError } = await supabase.rpc("konfirmasi_pemesanan", { p_id: id });
+    if (rpcError) return { error: rpcError.message };
+    const rpcResult = typeof rpcData === "string" ? rpcData : "";
+    if (rpcResult === "stok_habis") return { error: "Kamar sudah penuh" };
+    if (rpcResult !== "ok") return { error: "Pesanan tidak valid" };
+
+    revalidatePemesananPages();
+    // Pas booking dikonfirmasi, kamar yang tadinya penuh bisa jadi punya
+    // slot akhir baru (stok > 0). Rekomputasi slot final waitlist + notifikasi.
+    await triggerWaitlistNotificationsAction(null, formData);
+    return { success: "Pesanan dikonfirmasi" };
+  }
+
   const { error } = await supabase.from("pemesanan").update({ status }).eq("id", id);
   if (error) return { error: error.message };
+  if (row.waitlist_id) await supabase.from("waitlist").update({ status: "selesai" }).eq("id", row.waitlist_id);
   revalidatePemesananPages();
-  return { success: status === "dikonfirmasi" ? "Pesanan dikonfirmasi" : "Pesanan ditolak" };
+  return { success: "Pesanan ditolak" };
 }

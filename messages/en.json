@@ -89,6 +89,7 @@
     "type": "Kos Type",
     "fullMsg": "This kos is currently full — check back later or contact the owner.",
     "full": "Full",
+    "noRoomsMsg": "This kos has no rooms listed yet.",
     "order": "Request Booking",
     "available": "Available",
     "unavailable": "Full",
@@ -126,7 +127,12 @@
     "submitting": "Submitting...",
     "backHome": "Back to Home",
     "dash": "-",
-    "submitAlert": "Booking request: {nama} | {kamar} | {durasi} Months | Total {total}"
+    "submitAlert": "Booking request: {nama} | {kamar} | {durasi} Months | Total {total}",
+    "fullTitle": "Boarding House Is Full",
+    "fullDesc": "Sorry, all rooms at this boarding house are currently full. Please find another kos or contact the owner.",
+    "fullCta": "Find Other Kos",
+    "noRooms": "This Kos Has No Rooms Yet",
+    "noRoomsMsg": "There are no rooms available to book yet."
   },
   "Login": {
     "title": "Log In to Your Account",
@@ -249,7 +255,9 @@
     "reject": "Reject",
     "rejecting": "...",
     "renter": "Renter",
-    "moveIn": "Move in {date} · {n} months"
+    "moveIn": "Move in {date} · {n} months",
+    "stockLeft": "{n} rooms left",
+    "stockOut": "Out of Stock"
   },
   "Footer": {
     "tagline": "A modern kos search platform in Indonesia focused on ease, comfort, and price transparency for students and young professionals.",

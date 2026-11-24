@@ -1,7 +1,7 @@
 // Query baca kos dari Supabase. Semua query publik hanya menyentuh
 // kos dengan status_publikasi = 'tayang' (diperkuat juga oleh RLS).
 import { createClient } from "@/lib/supabase/server";
-import type { Galeri, Kamar, Kos, KosCardData, KosDetail, PengajuanPenarikan } from "./types";
+import type { Galeri, Kamar, Kos, KosCardData, KosDetail, Notifikasi, PengajuanPenarikan, PengajuanPerpanjangan, Waitlist } from "./types";
 
 const KOS_COVER_FALLBACK = "/img/kos-placeholder.png";
 
@@ -351,6 +351,7 @@ export type Pemesanan = {
   total_harga: number;
   catatan: string | null;
   status: StatusPemesanan;
+  waitlist_id?: string | null;
   created_at: string;
 };
 
@@ -358,6 +359,7 @@ export type PemesananTampil = Pemesanan & {
   kos_nama: string;
   kamar_nama: string;
   kamar_harga: number;
+  kamar_stok: number; // sisa stok kamar pada saat pesanan dibuat (source of truth: stok)
 };
 
 async function withNamaKosKamar(rows: Pemesanan[]): Promise<PemesananTampil[]> {
@@ -367,17 +369,21 @@ async function withNamaKosKamar(rows: Pemesanan[]): Promise<PemesananTampil[]> {
   const kamarIds = [...new Set(rows.map((r) => r.kamar_id))];
   const [{ data: kosRows }, { data: kamarRows }] = await Promise.all([
     supabase.from("kos").select("id_kos, nama").in("id_kos", kosIds),
-    supabase.from("kamar").select("id, nama, harga").in("id", kamarIds),
+    supabase.from("kamar").select("id, nama, harga, stok").in("id", kamarIds),
   ]);
   const kosById = new Map(((kosRows ?? []) as { id_kos: string; nama: string }[]).map((k) => [k.id_kos, k.nama]));
   const kamarById = new Map(
-    ((kamarRows ?? []) as { id: string; nama: string; harga: number }[]).map((k) => [k.id, { nama: k.nama, harga: k.harga ?? 0 }])
+    ((kamarRows ?? []) as { id: string; nama: string; harga: number; stok: number }[]).map((k) => [
+      k.id,
+      { nama: k.nama, harga: k.harga ?? 0, stok: k.stok ?? 0 },
+    ])
   );
   return rows.map((r) => ({
     ...r,
     kos_nama: kosById.get(r.kos_id) ?? "-",
     kamar_nama: kamarById.get(r.kamar_id)?.nama ?? "-",
     kamar_harga: kamarById.get(r.kamar_id)?.harga ?? 0,
+    kamar_stok: kamarById.get(r.kamar_id)?.stok ?? 0,
   }));
 }
 
@@ -407,6 +413,68 @@ export async function getMasukReservasi(): Promise<PemesananTampil[]> {
     .in("kos_id", mine.map((k) => k.id_kos))
     .order("created_at", { ascending: false });
   return withNamaKosKamar((data ?? []) as Pemesanan[]);
+}
+
+// Antrian waitlist milik kos tertentu (dipakai pemilik + admin untuk moderasi).
+export async function getWaitlistByKos(kosId: string): Promise<Waitlist[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("waitlist")
+    .select("*")
+    .eq("kos_id", kosId)
+    .order("created_at", { ascending: true });
+  if (error) return [];
+  return (data ?? []) as Waitlist[];
+}
+
+// Antrian waitlist milik user login (untuk halaman "antrian saya").
+export async function getMyWaitlist(): Promise<Waitlist[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data } = await supabase
+    .from("waitlist")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true });
+  return (data ?? []) as Waitlist[];
+}
+
+export async function getMyNotifikasi(): Promise<Notifikasi[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data } = await supabase.from("notifikasi").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+  return (data ?? []) as Notifikasi[];
+}
+
+export async function getUnreadNotifikasiCount(): Promise<number> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 0;
+  const { count } = await supabase.from("notifikasi").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("dibaca_at", null);
+  return count ?? 0;
+}
+
+export async function getMyPengajuanPerpanjangan(): Promise<PengajuanPerpanjangan[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data } = await supabase.from("pengajuan_perpanjangan").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+  return (data ?? []) as PengajuanPerpanjangan[];
+}
+
+export async function getMasukPerpanjangan(): Promise<PengajuanPerpanjangan[]> {
+  const mine = await getMyKosList();
+  if (!mine.length) return [];
+  const supabase = await createClient();
+  const { data: bookingRows } = await supabase.from("pemesanan").select("id").in("kos_id", mine.map((k) => k.id_kos));
+  const ids = (bookingRows ?? []).map((row) => String(row.id));
+  if (!ids.length) return [];
+  const { data } = await supabase.from("pengajuan_perpanjangan").select("*").in("pemesanan_id", ids).order("created_at", { ascending: false });
+  return (data ?? []) as PengajuanPerpanjangan[];
 }
 
 // Pengajuan penarikan yang masih menunggu persetujuan admin.

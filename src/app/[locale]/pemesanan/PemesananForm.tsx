@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { createPemesananAction } from "./actions";
 import { formatHarga } from "@/lib/format";
+import { isKamarTersedia } from "@/lib/kos";
 import { Link } from "@/i18n/navigation";
 
 type FormState = { error?: string; success?: string } | null;
@@ -14,23 +15,23 @@ type Props = {
         nama: string;
         kamar: { id: string; nama: string; ukuran: string | null; harga: number; ketersediaan: string; stok: number; deskripsi: string | null }[];
     } | null;
+    claim?: { id: string; kamarId: string; slotMulai: string } | null;
 };
 
-export default function PemesananForm({ kos }: Props) {
+export default function PemesananForm({ kos, claim = null }: Props) {
     const t = useTranslations("Booking");
     const locale = useLocale();
     const [state, formAction, pending] = useActionState(createPemesananAction as never, null as FormState);
-    const availableKamar = kos?.kamar.filter((k) => k.ketersediaan === "Tersedia") ?? [];
-    const [selectedKamar, setSelectedKamar] = useState<string>(availableKamar[0]?.nama ?? "");
+    const [selectedKamarId, setSelectedKamarId] = useState<string>(claim?.kamarId ?? kos?.kamar[0]?.id ?? "");
     const [nama, setNama] = useState("");
     const [wa, setWa] = useState("");
-    const [tanggal, setTanggal] = useState("");
+    const [tanggal, setTanggal] = useState(claim?.slotMulai ?? "");
     const [durasi, setDurasi] = useState(3);
     const [catatan, setCatatan] = useState("");
 
-    const selected = kos?.kamar.find((k) => k.nama === selectedKamar);
+    const selected = kos?.kamar.find((k) => k.id === selectedKamarId);
     const hargaPerBulan = selected?.harga ?? 0;
-    const total = hargaPerBulan * durasi;
+    const total = selected ? hargaPerBulan * durasi : 0;
 
     if (!kos) {
         return (
@@ -41,24 +42,31 @@ export default function PemesananForm({ kos }: Props) {
         );
     }
 
+    const canSubmit = !!selected;
+
     return (
         <form action={formAction} className="grid gap-6 lg:grid-cols-[1fr_380px]">
             <input type="hidden" name="kosId" value={kos.id} />
             <input type="hidden" name="kamarId" value={selected?.id ?? ""} />
             <input type="hidden" name="locale" value={locale} />
+            {claim && <input type="hidden" name="waitlistId" value={claim.id} />}
             <div className="space-y-4">
                 {state?.error && (
                     <p className="rounded-md bg-error/10 px-3 py-2 text-xs text-error">{state.error}</p>
                 )}
                 <div>
                     <label className="text-sm font-semibold text-text-primary">{t("roomType")}</label>
-                    <select value={selectedKamar} onChange={(e) => setSelectedKamar(e.target.value)} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary">
-                        {kos.kamar.map((k) => (
-                            <option key={k.nama} value={k.nama} disabled={k.ketersediaan !== "Tersedia"}>
-                                {k.nama}
-                            </option>
-                        ))}
-                    </select>
+                    {kos.kamar.length > 0 ? (
+                        <select value={selectedKamarId} disabled={!!claim} onChange={(e) => setSelectedKamarId(e.target.value)} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary disabled:opacity-70">
+                            {kos.kamar.map((k) => (
+                                <option key={k.id} value={k.id}>
+                                    {k.nama}{isKamarTersedia(k) ? "" : " (Waitlist)"}
+                                </option>
+                            ))}
+                        </select>
+                    ) : (
+                        <p className="mt-1.5 rounded-lg border border-border bg-background px-4 py-3 text-sm text-text-secondary">{t("noRooms")}</p>
+                    )}
                 </div>
 
                 <div>
@@ -72,7 +80,7 @@ export default function PemesananForm({ kos }: Props) {
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="text-sm font-semibold text-text-primary">{t("startDate")}</label>
-                        <input name="tanggal" type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" />
+                        <input name="tanggal" type="date" value={tanggal} readOnly={!!claim} onChange={(e) => setTanggal(e.target.value)} className="mt-1.5 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" />
                     </div>
                     <div>
                         <label className="text-sm font-semibold text-text-primary">{t("duration")}</label>
@@ -103,7 +111,7 @@ export default function PemesananForm({ kos }: Props) {
                 <div className="rounded-lg bg-blue-50 px-3 py-3 text-xs leading-5 text-blue-700 border border-blue-200">
                     <p>{t("info")}</p>
                 </div>
-                <button type="submit" disabled={pending} className="mt-2 w-full rounded-lg bg-accent py-3 text-sm font-semibold text-white hover:bg-orange-600 transition-colors disabled:opacity-50">{pending ? t("submitting") : t("submit")}</button>
+                <button type="submit" disabled={pending || !canSubmit} className="mt-2 w-full rounded-lg bg-accent py-3 text-sm font-semibold text-white hover:bg-orange-600 transition-colors disabled:opacity-50">{pending ? t("submitting") : claim ? "Klaim Slot" : isKamarTersedia(selected) ? t("submit") : "Masuk Waitlist"}</button>
                 <Link href="/" className="mt-2 block w-full rounded-lg border border-border bg-surface py-3 text-center text-xs font-semibold text-text-secondary hover:bg-background">{t("backHome")}</Link>
             </div>
         </form>

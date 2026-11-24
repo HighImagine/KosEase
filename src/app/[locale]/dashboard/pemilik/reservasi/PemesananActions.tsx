@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import {
   cancelPemesananAction,
@@ -12,16 +12,18 @@ function hidden(id: string) {
   return <input type="hidden" name="pemesananId" value={id} />;
 }
 
-export function ConfirmButton({ pemesananId }: { pemesananId: string }) {
+export function ConfirmButton({ pemesananId, stok }: { pemesananId: string; stok?: number }) {
   const t = useTranslations("ReservasiMasuk");
   const [state, formAction, pending] = useActionState(setPemesananStatusAction as never, null as FormState);
+  const outOfStock = stok !== undefined && stok <= 0;
+  const disabled = pending || outOfStock;
   return (
     <form action={formAction} className="inline">
       {hidden(pemesananId)}
       <input type="hidden" name="status" value="dikonfirmasi" />
       {state?.error && <span className="mr-2 text-[10px] text-error">{state.error}</span>}
-      <button type="submit" disabled={pending} className="rounded-lg bg-success px-4 py-2 text-xs font-semibold text-white hover:bg-green-600 disabled:opacity-50">
-        {pending ? t("confirming") : t("confirm")}
+      <button type="submit" disabled={disabled} className="rounded-lg bg-success px-4 py-2 text-xs font-semibold text-white hover:bg-green-600 disabled:opacity-50">
+        {pending ? t("confirming") : outOfStock ? t("stockOut") : t("confirm")}
       </button>
     </form>
   );

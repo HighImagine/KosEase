@@ -7,6 +7,50 @@ export type StatusPublikasi = "draft" | "tayang";
 export type Ketersediaan = "Tersedia" | "Penuh";
 export type StatusPenarikan = "menunggu" | "disetujui" | "ditolak";
 
+// Antrian waitlist penyewaan kos (dipakai saat kos/kamar penuh).
+export type StatusWaitlist = "menunggu" | "ditawarkan" | "diklaim" | "selesai" | "dibatalkan" | "kedaluwarsa";
+
+export type Waitlist = {
+  id: string; // uuid
+  user_id: string; // uuid -> auth.users.id
+  kos_id: string; // uuid -> kos.id_kos (tanpa FK)
+  kamar_id: string; // uuid -> kamar.id (tanpa FK)
+  nama: string;
+  no_wa: string;
+  tanggal_mulai: string; // date
+  durasi: number; // bulan
+  catatan: string | null;
+  status: StatusWaitlist;
+  slot_mulai: string | null;
+  ditawarkan_at: string | null;
+  berlaku_sampai: string | null;
+  pemesanan_id: string | null;
+  created_at: string; // timestamptz
+};
+
+export type Notifikasi = {
+  id: string;
+  user_id: string;
+  jenis: "waitlist" | "perpanjangan" | "sistem";
+  judul: string;
+  isi: string;
+  href: string | null;
+  dibaca_at: string | null;
+  created_at: string;
+};
+
+export type PengajuanPerpanjangan = {
+  id: string;
+  pemesanan_id: string;
+  user_id: string;
+  tambahan_bulan: number;
+  status: "menunggu" | "disetujui" | "ditolak";
+  diproses_oleh: string | null;
+  diproses_at: string | null;
+  alasan_tolak: string | null;
+  created_at: string;
+};
+
 // Pengajuan penarikan kos oleh pemilik (menunggu persetujuan admin).
 export type PengajuanPenarikan = {
   id: string; // uuid

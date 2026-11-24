@@ -62,25 +62,27 @@ export default function LogoutButton({ variant = "sidebar", onClose }: Props) {
   // confirm state — centered modal popup (tengah halaman + backdrop blur)
   const modal = (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
       onClick={handleCancel}
+      style={{ animation: "modal-overlay-in 0.2s ease-out" }}
     >
       <div
         role="alertdialog"
         aria-modal="true"
-        className="flex w-full max-w-sm aspect-square flex-col items-center justify-center rounded-2xl bg-surface p-6 text-center shadow-xl"
+        className="flex w-full max-w-sm flex-col items-center justify-center rounded-2xl bg-surface p-6 text-center shadow-xl"
+        style={{ animation: "modal-card-in 0.25s ease-out" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col items-center">
-          <IconAlertCircle size={128} stroke={2} className="text-error" />
+          <IconAlertCircle size={64} stroke={1.5} className="text-error" />
           <p className="mt-3 text-xs font-semibold text-text-primary">{t("confirm")}</p>
         </div>
-        <div className="mt-3 flex w-full justify-center gap-2">
+        <div className="mt-8 flex w-full justify-center gap-2">
           <button
             type="button"
             disabled={isPending}
             onClick={handleLogout}
-            className="flex-1 rounded-lg bg-error px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+            className="flex-1 rounded-lg bg-error px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50 transition-transform duration-150 ease-out active:scale-[0.97]"
           >
             {isPending ? "..." : t("yes")}
           </button>
@@ -88,7 +90,7 @@ export default function LogoutButton({ variant = "sidebar", onClose }: Props) {
             type="button"
             disabled={isPending}
             onClick={handleCancel}
-            className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-xs font-semibold text-text-primary hover:bg-background disabled:opacity-50"
+            className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-xs font-semibold text-text-primary hover:bg-background disabled:opacity-50 transition-transform duration-150 ease-out active:scale-[0.97]"
           >
             {t("cancel")}
           </button>

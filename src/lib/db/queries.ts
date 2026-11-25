@@ -258,6 +258,16 @@ export async function getRecentPendingPengajuan(limit = 3): Promise<PendingPenga
   return (data ?? []) as PendingPengajuanItem[];
 }
 
+// Hitungan ringan pengajuan pemilik yang masih menunggu (badge notifikasi admin).
+export async function getPendingPengajuanCount(): Promise<number> {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("pengajuan_pemilik")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "menunggu_verifikasi");
+  return count ?? 0;
+}
+
 export type UserRoleCounts = { total: number; penyewa: number; pemilik: number; admin: number };
 
 // Hitungan user per role untuk preview Kelola Pengguna.
@@ -442,19 +452,29 @@ export async function getMyWaitlist(): Promise<Waitlist[]> {
   return (data ?? []) as Waitlist[];
 }
 
-export async function getMyNotifikasi(): Promise<Notifikasi[]> {
+export async function getMyNotifikasi(limit?: number, userId?: string): Promise<Notifikasi[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-  const { data } = await supabase.from("notifikasi").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+  let uid = userId;
+  if (!uid) {
+    const { data: { user } } = await supabase.auth.getUser();
+    uid = user?.id;
+  }
+  if (!uid) return [];
+  let query = supabase.from("notifikasi").select("*").eq("user_id", uid).order("created_at", { ascending: false });
+  if (limit && limit > 0) query = query.limit(limit);
+  const { data } = await query;
   return (data ?? []) as Notifikasi[];
 }
 
-export async function getUnreadNotifikasiCount(): Promise<number> {
+export async function getUnreadNotifikasiCount(userId?: string): Promise<number> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return 0;
-  const { count } = await supabase.from("notifikasi").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("dibaca_at", null);
+  let uid = userId;
+  if (!uid) {
+    const { data: { user } } = await supabase.auth.getUser();
+    uid = user?.id;
+  }
+  if (!uid) return 0;
+  const { count } = await supabase.from("notifikasi").select("id", { count: "exact", head: true }).eq("user_id", uid).is("dibaca_at", null);
   return count ?? 0;
 }
 
@@ -489,6 +509,17 @@ export async function getPendingPenarikan(): Promise<PengajuanPenarikan[]> {
     .order("created_at", { ascending: false });
   if (error) return [];
   return (data ?? []) as PengajuanPenarikan[];
+}
+
+// Hitungan ringan penarikan yang menunggu (badge notifikasi admin).
+export async function getPendingPenarikanCount(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("pengajuan_penarikan")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "menunggu");
+  if (error) return 0;
+  return count ?? 0;
 }
 
 export type AdminStats = { total: number; tayang: number; draft: number; pengajuanPending: number };

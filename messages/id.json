@@ -26,7 +26,16 @@
     "pengajuan": "Pengajuan",
     "language": "Bahasa",
     "indonesian": "Indonesia",
-    "english": "English"
+    "english": "English",
+    "notifications": "Notifikasi",
+    "noNotifications": "Belum ada notifikasi.",
+    "loading": "Memuat notifikasi...",
+    "markAllRead": "Tandai semua dibaca",
+    "viewAll": "Lihat semua",
+    "groupPengajuan": "Pengajuan Pemilik",
+    "groupPenarikan": "Penarikan Kos",
+    "adminNewOwnerRequest": "Pengajuan pemilik kos baru",
+    "adminWithdrawRequest": "Pengajuan penarikan kos"
   },
   "Hero": {
     "titleA": "Temukan Kos Nyaman Tanpa",

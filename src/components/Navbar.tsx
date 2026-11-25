@@ -6,14 +6,15 @@ import { Link, usePathname } from "@/i18n/navigation";
 import LogoutButton from "./LogoutButton";
 import NotificationBell from "./NotificationBell";
 import LanguageSwitcher from "./LanguageSwitcher";
+import type { NotificationBellSummary } from "@/lib/db/notification-bell";
 
 type NavbarProps = {
   user: { email: string; displayName: string | null; role: string | null } | null;
   avatarUrl?: string | null;
-  pendingCount?: number;
+  notification?: NotificationBellSummary | null;
 };
 
-export default function Navbar({ user, avatarUrl, pendingCount = 0 }: NavbarProps) {
+export default function Navbar({ user, avatarUrl, notification }: NavbarProps) {
   const pathname = usePathname();
   const t = useTranslations("Navbar");
   const role = user?.role ?? "penyewa";
@@ -53,7 +54,7 @@ export default function Navbar({ user, avatarUrl, pendingCount = 0 }: NavbarProp
           </div>
         ) : (
           <div className="relative flex items-center gap-3">
-            {user && <NotificationBell count={pendingCount} href={user.role === "admin" ? "/dashboard/admin/pengajuan" : "/dashboard/notifikasi"} />}
+            {notification && <NotificationBell summary={notification} onOpen={closeDropdown} />}
             <LanguageSwitcher />
             <button onClick={toggleDropdown} className="flex items-center gap-2 rounded-full px-0 hover:bg-background">
               <Image src={avatarUrl ?? "/img/avatar-default.png"} alt={user.displayName ?? "User"} width={28} height={28} className="rounded-full object-cover" />

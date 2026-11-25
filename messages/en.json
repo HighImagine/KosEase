@@ -26,7 +26,16 @@
     "pengajuan": "Applications",
     "language": "Language",
     "indonesian": "Indonesia",
-    "english": "English"
+    "english": "English",
+    "notifications": "Notifications",
+    "noNotifications": "No notifications yet.",
+    "loading": "Loading notifications...",
+    "markAllRead": "Mark all as read",
+    "viewAll": "View all",
+    "groupPengajuan": "Owner Applications",
+    "groupPenarikan": "Kos Withdrawals",
+    "adminNewOwnerRequest": "New kos owner application",
+    "adminWithdrawRequest": "Kos withdrawal request"
   },
   "Hero": {
     "titleA": "Find a Comfortable Kos",

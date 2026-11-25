@@ -4,7 +4,6 @@ import { z } from "zod";
 // redirect polos next/navigation: path SELALU sudah berprefix via withLocale(),
 // karena redirect next-intl tidak dijamin di dalam Server Actions.
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { formLocale, withLocale } from "@/lib/locale";
 
@@ -300,6 +299,5 @@ export async function triggerWaitlistNotificationsAction(_prev: unknown, formDat
     return { error: `Gagal memicu notifikasi: ${res.status} ${text}` };
   }
 
-  for (const loc of ["id", "en"]) revalidatePath(`/${loc}/dashboard/notifikasi`);
   return { success: "Notifikasi waitlist dipicu" };
 }

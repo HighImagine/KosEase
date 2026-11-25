@@ -34,8 +34,8 @@ export async function createPengajuanPerpanjanganAction(_prev: unknown, formData
 }
 
 export async function decidePengajuanPerpanjanganAction(_prev: unknown, formData: FormData) {
-  const requestId = idSchema.safeParse(String(formData.get("pengajuanId") ?? "")); const decision = String(formData.get("decision") ?? ""); const conflict = String(formData.get("conflict") ?? "");
-  if (!requestId.success || !["setujui", "tolak"].includes(decision)) return { error: "Data keputusan tidak valid" };
+  const requestId = idSchema.safeParse(String(formData.get("pengajuanId") ?? "")); const decision = String(formData.get("decision") ?? "");
+  if (!requestId.success || !["setujui", "tolak", "setujui_batalkan"].includes(decision)) return { error: "Data keputusan tidak valid" };
   const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser(); if (!user) return { error: "Harus login terlebih dahulu" };
   const { data: reqRows } = await supabase.from("pengajuan_perpanjangan").select("*").eq("id", requestId.data).limit(1); const req = reqRows?.[0] as { id: string; pemesanan_id: string; tambahan_bulan: number; status: string; user_id: string } | undefined;
   if (!req || req.status !== "menunggu") return { error: "Pengajuan sudah diproses" };
@@ -46,7 +46,7 @@ export async function decidePengajuanPerpanjanganAction(_prev: unknown, formData
   const newEnd = addMonths(booking.tanggal_mulai, booking.durasi + req.tambahan_bulan);
   const { data: conflicts } = await supabase.from("pemesanan").select("id,waitlist_id,user_id").eq("kamar_id", booking.kamar_id).eq("status", "menunggu").not("waitlist_id", "is", null).lt("tanggal_mulai", newEnd);
   const admin = createAdminClient();
-  if (conflict === "perpanjangan") {
+  if (decision === "setujui_batalkan" && conflicts && conflicts.length > 0) {
     for (const item of conflicts ?? []) {
       await supabase.from("pemesanan").update({ status: "ditolak" }).eq("id", item.id);
       if (item.waitlist_id) await supabase.from("waitlist").update({ status: "selesai" }).eq("id", item.waitlist_id);

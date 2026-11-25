@@ -254,16 +254,31 @@ export async function updateProfileAction(_prev: unknown, formData: FormData) {
 }
 
 // Trigger edge function waitlist-notifier (recompute slot final + notifikasi
-// ke waitlist ~3 hari sebelum end date). Hanya admin. Dipakai: manual trigger
-// dari admin + auto-recompute pas booking/perpanjangan dikonfirmasi.
+// ke waitlist ~3 hari sebelum end date). Admin atau pemilik kos boleh memicu.
+// Dipakai: manual trigger dari admin/pemilik + auto-recompute pas booking dikonfirmasi.
 export async function triggerWaitlistNotificationsAction(_prev: unknown, formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Harus login terlebih dahulu" };
 
+  const pemesananId = String(formData.get("pemesananId") ?? "");
   const { data: profileData } = await supabase.from("profiles").select("role").eq("id", user.id).limit(1);
   const role = (profileData?.[0] as { role?: string } | undefined)?.role ?? "";
-  if (role.toLowerCase() !== "admin") return { error: "Hanya admin yang dapat memicu notifikasi" };
+  const isAdmin = role.toLowerCase() === "admin";
+  if (!isAdmin) {
+    // Owner pemilik kos juga boleh memicu notifikasi (mis. pas owner mengonfirmasi booking).
+    let ownedKos = false;
+    if (pemesananId) {
+      const { data: bookingRows } = await supabase.from("pemesanan").select("kos_id").eq("id", pemesananId).limit(1);
+      const booking = bookingRows?.[0] as { kos_id?: string } | undefined;
+      if (booking?.kos_id) {
+        const { data: kosRows } = await supabase.from("kos").select("id_pemilik").eq("id_kos", booking.kos_id).limit(1);
+        const ownerId = (kosRows?.[0] as { id_pemilik?: string } | undefined)?.id_pemilik ?? null;
+        ownedKos = ownerId === user.id;
+      }
+    }
+    if (!ownedKos) return { error: "Hanya admin atau pemilik kos yang dapat memicu notifikasi" };
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

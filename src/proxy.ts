@@ -58,8 +58,22 @@ export default async function proxy(request: NextRequest) {
   // diperlakukan publik seperti /login — kalau ikut dijaga, terjadi
   // ayam-telur: buka login admin malah dibuang ke /login.
   const isAdminPath = path.startsWith("/dashboard/admin");
+  const isPemilikPath = path.startsWith("/dashboard/pemilik");
   const isDashboard = path.startsWith("/dashboard");
   const isAuth = ["/login", "/register"].includes(path);
+
+  // Role dibaca sekali per request lalu dipakai guard auth/admin/pemilik.
+  let cachedRole: string | null = null;
+  let roleLoaded = false;
+  const getRole = async (): Promise<string | null> => {
+    if (roleLoaded) return cachedRole;
+    roleLoaded = true;
+    try {
+      const { data } = await supabase.from("profiles").select("role").eq("id", user!.id).limit(1);
+      cachedRole = ((data?.[0] as { role?: string } | undefined)?.role ?? null)?.toLowerCase() ?? null;
+    } catch {}
+    return cachedRole;
+  };
 
   if (!user && (isDashboard || isAdminPath)) {
     const url = request.nextUrl.clone();
@@ -68,14 +82,8 @@ export default async function proxy(request: NextRequest) {
     return applyCookies(NextResponse.redirect(url));
   }
   if (user && isAuth) {
-    let role: string | null = null;
-    try {
-      const { data: profileData } = await supabase.from("profiles").select("role").eq("id", user.id).limit(1);
-      const profileDatum = profileData?.[0];
-      role = (profileDatum?.role as string) ?? null;
-    } catch {}
+    const norm = await getRole();
     const url = request.nextUrl.clone();
-    const norm = role?.toLowerCase();
     if (norm === "pemilik" || norm === "pemilik_kos") {
       url.pathname = `/${locale}/dashboard`;
     } else if (norm === "admin") {
@@ -87,15 +95,24 @@ export default async function proxy(request: NextRequest) {
     return applyCookies(NextResponse.redirect(url));
   }
   if (user && isAdminPath) {
-    let role: string | null = null;
-    try {
-      const { data: profileData } = await supabase.from("profiles").select("role").eq("id", user.id).limit(1);
-      const profileDatum = profileData?.[0];
-      role = (profileDatum?.role as string) ?? null;
-    } catch {}
+    const role = await getRole();
     if (role !== "admin") {
       const url = request.nextUrl.clone();
       url.pathname = `/${locale}/login`;
+      return applyCookies(NextResponse.redirect(url));
+    }
+  }
+
+  // Area pemilik = /dashboard/pemilik/*. Penyewa dipantulkan ke beranda;
+  // admin tetap diizinkan untuk memeriksa aktivitas & kos draft milik pemilik.
+  // Keamanan data tetap dijaga server action + RLS, guard ini untuk UX.
+  if (user && isPemilikPath) {
+    const role = await getRole();
+    const isOwner = role === "pemilik" || role === "pemilik_kos";
+    if (!isOwner && role !== "admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${locale}/dashboard`;
+      url.search = "";
       return applyCookies(NextResponse.redirect(url));
     }
   }

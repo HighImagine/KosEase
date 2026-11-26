@@ -31,7 +31,16 @@ export default function KamarFilter({ kos }: Props) {
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    navigate({ q, kos: kosId, status });
+    // Kos spesifik dan search tidak dipakai bersamaan: memilih kos
+    // mengosongkan search agar kos tersebut langsung tampil lengkap.
+    const nextQ = kosId === "semua" ? q : "";
+    if (kosId !== "semua") setQ("");
+    navigate({ q: nextQ, kos: kosId, status });
+  };
+
+  const handleKosChange = (value: string) => {
+    setKosId(value);
+    if (value !== "semua") setQ("");
   };
 
   const reset = () => {
@@ -54,7 +63,7 @@ export default function KamarFilter({ kos }: Props) {
       />
       <select
         value={kosId}
-        onChange={(e) => setKosId(e.target.value)}
+        onChange={(e) => handleKosChange(e.target.value)}
         aria-label={t("filterKos")}
         className="max-w-44 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-text-primary"
       >

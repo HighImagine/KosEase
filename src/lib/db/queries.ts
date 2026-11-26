@@ -227,25 +227,149 @@ export async function getMyKamarBoard(): Promise<KamarBoard> {
   return { kos, kamar };
 }
 
-export type PemilikStats = { total: number; tayang: number; draft: number; stokTersedia: number };
+export type PemilikKosRingkas = {
+  kos: Kos;
+  cover: string | null;
+  totalStok: number;
+  sisaStok: number;
+  kamarTipe: number;
+  adaFoto: boolean;
+};
 
-// Agregat ringkas untuk panel dashboard pemilik.
-export async function getPemilikKosStats(): Promise<PemilikStats> {
-  const mine = await getMyKosList();
-  const empty = { total: 0, tayang: 0, draft: 0, stokTersedia: 0 };
-  if (mine.length === 0) return empty;
+export type PemilikDashboardStats = {
+  total: number;
+  tayang: number;
+  draft: number;
+  stokTersedia: number;
+  totalStok: number;
+  kamarTipe: number;
+};
+
+export type PemilikDashboardData = {
+  stats: PemilikDashboardStats;
+  ringkas: PemilikKosRingkas[];
+  masuk: PemesananTampil[];
+  perpanjangan: PengajuanPerpanjangan[];
+  penarikan: PengajuanPenarikan[];
+};
+
+// Seluruh data Beranda pemilik dalam tiga gelombang query:
+// kos -> (kamar | galeri | pemesanan | penarikan) -> perpanjangan.
+// Nama kos/kamar dilengkapi dari data yang sudah diambil sehingga tidak
+// memanggil getMyKosList/withNamaKosKamar lagi.
+export async function getPemilikDashboardData(): Promise<PemilikDashboardData> {
+  const kos = await getMyKosList();
+  if (kos.length === 0) {
+    return {
+      stats: { total: 0, tayang: 0, draft: 0, stokTersedia: 0, totalStok: 0, kamarTipe: 0 },
+      ringkas: [],
+      masuk: [],
+      perpanjangan: [],
+      penarikan: [],
+    };
+  }
+
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("kamar")
-    .select("kos_id, ketersediaan, stok")
-    .in("kos_id", mine.map((k) => k.id_kos));
-  const km = (data ?? []) as { kos_id: string; ketersediaan: string; stok: number }[];
-  return {
-    total: mine.length,
-    tayang: mine.filter((k) => k.status_publikasi === "tayang").length,
-    draft: mine.filter((k) => k.status_publikasi !== "tayang").length,
-    stokTersedia: km.filter((k) => k.ketersediaan === "Tersedia").reduce((a, k) => a + (k.stok ?? 0), 0),
+  const ids = kos.map((k) => k.id_kos);
+
+  const [{ data: kamarRows }, { data: galeriRows }, { data: pemesananRows }, { data: penarikanRows }] =
+    await Promise.all([
+      supabase.from("kamar").select("id, kos_id, nama, harga, stok, ketersediaan").in("kos_id", ids),
+      supabase
+        .from("galeri")
+        .select("kos_id, image_url, created_at")
+        .in("kos_id", ids)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("pemesanan")
+        .select("*")
+        .in("kos_id", ids)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("pengajuan_penarikan")
+        .select("*")
+        .eq("status", "menunggu")
+        .order("created_at", { ascending: false }),
+    ]);
+
+  const kamar = (kamarRows ?? []) as Pick<
+    Kamar,
+    "id" | "kos_id" | "nama" | "harga" | "stok" | "ketersediaan"
+  >[];
+  const galeri = (galeriRows ?? []) as Pick<Galeri, "kos_id" | "image_url" | "created_at">[];
+  const pemesanan = (pemesananRows ?? []) as Pemesanan[];
+
+  const coverByKos = new Map<string, string>();
+  for (const g of galeri) {
+    if (g.image_url && !coverByKos.has(g.kos_id)) coverByKos.set(g.kos_id, g.image_url);
+  }
+
+  const ringkas: PemilikKosRingkas[] = kos.map((k) => {
+    const km = kamar.filter((r) => r.kos_id === k.id_kos);
+    return {
+      kos: k,
+      cover: coverByKos.get(k.id_kos) ?? null,
+      totalStok: km.reduce((a, r) => a + (r.stok ?? 0), 0),
+      sisaStok: km.filter((r) => r.ketersediaan === "Tersedia").reduce((a, r) => a + (r.stok ?? 0), 0),
+      kamarTipe: km.length,
+      adaFoto: coverByKos.has(k.id_kos),
+    };
+  });
+
+  const stats: PemilikDashboardStats = {
+    total: kos.length,
+    tayang: kos.filter((k) => k.status_publikasi === "tayang").length,
+    draft: kos.filter((k) => k.status_publikasi !== "tayang").length,
+    stokTersedia: ringkas.reduce((a, r) => a + r.sisaStok, 0),
+    totalStok: ringkas.reduce((a, r) => a + r.totalStok, 0),
+    kamarTipe: ringkas.reduce((a, r) => a + r.kamarTipe, 0),
   };
+
+  const kosNamaById = new Map(kos.map((k) => [k.id_kos, k.nama]));
+  const kamarById = new Map(kamar.map((r) => [r.id, r]));
+  const masuk: PemesananTampil[] = pemesanan.map((p) => {
+    const km = kamarById.get(p.kamar_id);
+    return {
+      ...p,
+      kos_nama: kosNamaById.get(p.kos_id) ?? "-",
+      kamar_nama: km?.nama ?? "-",
+      kamar_harga: km?.harga ?? 0,
+      kamar_stok: km?.stok ?? 0,
+    };
+  });
+
+  let perpanjangan: PengajuanPerpanjangan[] = [];
+  const pemesananIds = pemesanan.map((p) => p.id);
+  if (pemesananIds.length > 0) {
+    const { data } = await supabase
+      .from("pengajuan_perpanjangan")
+      .select("*")
+      .in("pemesanan_id", pemesananIds)
+      .eq("status", "menunggu")
+      .order("created_at", { ascending: false });
+    perpanjangan = (data ?? []) as PengajuanPerpanjangan[];
+  }
+
+  return {
+    stats,
+    ringkas,
+    masuk,
+    perpanjangan,
+    penarikan: (penarikanRows ?? []) as PengajuanPenarikan[],
+  };
+}
+
+// Hitungan ringan pesanan yang menunggu konfirmasi (badge sidebar pemilik).
+export async function getPendingReservasiCount(): Promise<number> {
+  const mine = await getMyKosList();
+  if (mine.length === 0) return 0;
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("pemesanan")
+    .select("id", { count: "exact", head: true })
+    .in("kos_id", mine.map((k) => k.id_kos))
+    .eq("status", "menunggu");
+  return count ?? 0;
 }
 
 export type PendingPengajuanItem = {

@@ -1,20 +1,12 @@
 import { redirect } from "next/navigation";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
+import StatTile from "@/components/StatTile";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminDashboardData, getUserRoleCounts } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-
-function StatTile({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="rounded-xl border border-border bg-background px-4 py-3 text-center">
-      <p className="font-heading text-xl font-bold text-primary">{value}</p>
-      <p className="mt-0.5 text-[10px] text-text-secondary">{label}</p>
-    </div>
-  );
-}
 
 function PreviewSection({
   title,

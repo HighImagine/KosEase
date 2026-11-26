@@ -1,24 +1,11 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
-import { getMasukPerpanjangan, getMasukReservasi, type StatusPemesanan } from "@/lib/db/queries";
+import StatusPemesananPill, { statusPemesananKey } from "@/components/StatusPemesananPill";
+import { getMasukPerpanjangan, getMasukReservasi } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
 import { ConfirmButton, RejectButton } from "./PemesananActions";
 import { ExtensionDecision } from "./PerpanjanganActions";
-
-const badgeStyle: Record<StatusPemesanan, string> = {
-  menunggu: "bg-warning text-white",
-  dikonfirmasi: "bg-success text-white",
-  ditolak: "bg-error text-white",
-  dibatalkan: "bg-gray-300 text-gray-600",
-};
-
-const statusKey: Record<StatusPemesanan, string> = {
-  menunggu: "statusMenunggu",
-  dikonfirmasi: "statusDikonfirmasi",
-  ditolak: "statusDitolak",
-  dibatalkan: "statusDibatalkan",
-};
 
 function formatTanggal(iso: string): string {
   try {
@@ -49,8 +36,8 @@ export default async function ReservasiMasukPage() {
 
             {extensions.filter((item) => item.status === "menunggu").map((item) => (
               <div key={item.id} className="rounded-xl border border-primary/30 bg-surface p-5 shadow-sm">
-                <p className="font-semibold text-text-primary">Pengajuan perpanjangan</p>
-                <p className="mt-1 text-xs text-text-secondary">Tambahan {item.tambahan_bulan} bulan.</p>
+                <p className="font-semibold text-text-primary">{t("extensionTitle")}</p>
+                <p className="mt-1 text-xs text-text-secondary">{t("extensionMonths", { n: item.tambahan_bulan })}</p>
                 <ExtensionDecision id={item.id} />
               </div>
             ))}
@@ -75,8 +62,8 @@ export default async function ReservasiMasukPage() {
                         <p className="mt-0.5 text-xs text-text-secondary">{t("stockLeft", { n: Math.max(0, p.kamar_stok ?? 0) })}</p>
                         {p.catatan && <p className="mt-1 text-xs italic text-text-secondary">“{p.catatan}”</p>}
                       </div>
-                      <span className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-semibold ${badgeStyle[p.status]}`}>
-                        {tr(statusKey[p.status])}
+                      <span className="shrink-0">
+                        <StatusPemesananPill status={p.status} label={tr(statusPemesananKey[p.status])} />
                       </span>
                     </div>
                     <div className="mt-3 flex gap-2 border-t border-border pt-3">
@@ -96,8 +83,8 @@ export default async function ReservasiMasukPage() {
                         {p.nama_pemesan} · {t("moveIn", { date: formatTanggal(p.tanggal_mulai), n: p.durasi })} · {formatHarga(p.total_harga)}
                       </p>
                     </div>
-                    <span className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-semibold ${badgeStyle[p.status]}`}>
-                      {tr(statusKey[p.status])}
+                    <span className="shrink-0">
+                      <StatusPemesananPill status={p.status} label={tr(statusPemesananKey[p.status])} />
                     </span>
                   </div>
                 ))}

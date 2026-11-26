@@ -2,34 +2,27 @@ import Image from "next/image";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
 import PengajuanCard from "@/components/PengajuanCard";
-import EmptyStateCard from "@/components/EmptyStateCard";
+import StatTile from "@/components/StatTile";
+import OwnerHome from "./OwnerHome";
 import { createClient } from "@/lib/supabase/server";
-import { getAdminKosStats, getPemilikKosStats, getTayangKosCards } from "@/lib/db/queries";
+import { getAdminKosStats, getPemilikDashboardData, getTayangKosCards } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 
-function StatTile({ value, label }: { value: number; label: string }) {
-    return (
-        <div className="rounded-xl border border-border bg-background px-4 py-3 text-center">
-            <p className="font-heading text-xl font-bold text-primary">{value}</p>
-            <p className="mt-0.5 text-[10px] text-text-secondary">{label}</p>
-        </div>
-    );
-}
-
 export default async function DashboardPage() {
     const t = await getTranslations("Dashboard");
     const tc = await getTranslations("Common");
-    const to = await getTranslations("OwnerOnboarding");
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     let roleLabel = "Penyewa";
+    let profileName: string | null = null;
     let pengajuanStatus: "belum_mengajukan" | "menunggu" | "disetujui" | "ditolak" = "belum_mengajukan";
     if (user) {
         try {
-            const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+            const { data } = await supabase.from("profiles").select("role, full_name").eq("id", user.id).single();
             const r = (data?.role as string | undefined)?.toLowerCase();
+            profileName = (data?.full_name as string | null) ?? null;
             if (r === "pemilik" || r === "pemilik_kos") roleLabel = "Pemilik Kos";
             else if (r === "admin") roleLabel = "Admin";
             else roleLabel = "Penyewa";
@@ -54,7 +47,8 @@ export default async function DashboardPage() {
     const isPemilik = roleLabel === "Pemilik Kos";
     const isAdmin = roleLabel === "Admin";
     // Data ringkasan sesuai peran — masing-masing satu query agregat.
-    const pemilikStats = isPemilik ? await getPemilikKosStats() : null;
+    const pemilikData = isPemilik ? await getPemilikDashboardData() : null;
+    const ownerName = (user?.user_metadata?.full_name as string | undefined) ?? profileName ?? "";
     const adminStats = isAdmin ? await getAdminKosStats() : null;
     const kosTerbaru = !isPemilik && !isAdmin ? (await getTayangKosCards()).slice(0, 3) : [];
 
@@ -66,101 +60,76 @@ export default async function DashboardPage() {
                 <DashboardNavbar title={t("title")} />
 
                 <main className="flex-1 p-6">
-                    <div className="grid gap-4 lg:grid-cols-3">
-
-                        {/* Ringkasan peran — ganti card Profil Saya yang redundan */}
-                        {isPemilik && pemilikStats && pemilikStats.total === 0 ? (
-                            <EmptyStateCard
-                                badge={to("badge")}
-                                title={to("title")}
-                                description={to("desc")}
-                                ctaLabel={to("cta")}
-                                ctaHref="/dashboard/pemilik/kos/tambah"
-                                steps={[
-                                    { title: to("step1Title"), description: to("step1Desc") },
-                                    { title: to("step2Title"), description: to("step2Desc") },
-                                    { title: to("step3Title"), description: to("step3Desc") },
-                                ]}
-                                className="lg:col-span-3"
-                            />
-                        ) : (
-                            <div className={`${showPengajuanCard ? "lg:col-span-2" : "lg:col-span-3"} rounded-xl bg-surface p-5`}>
-                                {isPemilik && pemilikStats && (
-                                    <>
-                                        <h2 className="font-heading text-base font-bold text-text-primary">{t("ownerSummary")}</h2>
-                                        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                                            <StatTile value={pemilikStats.total} label={t("statTotal")} />
-                                            <StatTile value={pemilikStats.tayang} label={t("statTayang")} />
-                                            <StatTile value={pemilikStats.draft} label={t("statDraft")} />
-                                            <StatTile value={pemilikStats.stokTersedia} label={t("statRooms")} />
-                                        </div>
-                                    </>
-                                )}
-
-                                {isAdmin && adminStats && (
-                                    <>
-                                        <div className="flex items-center justify-between">
-                                            <h2 className="font-heading text-base font-bold text-text-primary">{t("platformSummary")}</h2>
-                                            <div className="flex gap-2">
-                                                <Link href="/dashboard/admin/kos" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("moderation")}</Link>
-                                                <Link href="/dashboard/admin/pengajuan" className="rounded-lg border border-border px-3 py-1.5 text-[10px] font-semibold text-text-secondary hover:text-primary">{t("pengajuanLink")}</Link>
+                    {pemilikData ? (
+                        <OwnerHome data={pemilikData} name={ownerName} />
+                    ) : (
+                        <>
+                            <div className="grid gap-4 lg:grid-cols-3">
+                                <div className={`${showPengajuanCard ? "lg:col-span-2" : "lg:col-span-3"} rounded-xl bg-surface p-5`}>
+                                    {isAdmin && adminStats && (
+                                        <>
+                                            <div className="flex items-center justify-between">
+                                                <h2 className="font-heading text-base font-bold text-text-primary">{t("platformSummary")}</h2>
+                                                <div className="flex gap-2">
+                                                    <Link href="/dashboard/admin/kos" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("moderation")}</Link>
+                                                    <Link href="/dashboard/admin/pengajuan" className="rounded-lg border border-border px-3 py-1.5 text-[10px] font-semibold text-text-secondary hover:text-primary">{t("pengajuanLink")}</Link>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                                            <StatTile value={adminStats.total} label={t("statTotal")} />
-                                            <StatTile value={adminStats.tayang} label={t("statTayang")} />
-                                            <StatTile value={adminStats.draft} label={t("statDraft")} />
-                                            <StatTile value={adminStats.pengajuanPending} label={t("statPending")} />
-                                        </div>
-                                    </>
-                                )}
+                                            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                                <StatTile value={adminStats.total} label={t("statTotal")} />
+                                                <StatTile value={adminStats.tayang} label={t("statTayang")} />
+                                                <StatTile value={adminStats.draft} label={t("statDraft")} />
+                                                <StatTile value={adminStats.pengajuanPending} label={t("statPending")} />
+                                            </div>
+                                        </>
+                                    )}
 
-                                {!isPemilik && !isAdmin && (
-                                    <>
-                                        <div className="flex items-center justify-between">
-                                            <h2 className="font-heading text-base font-bold text-text-primary">{t("latestKos")}</h2>
-                                            <Link href="/cari-kos" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("searchKos")}</Link>
-                                        </div>
-                                        <div className="mt-4 space-y-3">
-                                            {kosTerbaru.length === 0 ? (
-                                                <p className="text-xs text-text-secondary">{t("noKos")}</p>
-                                            ) : (
-                                                kosTerbaru.map(({ kos, cover }) => (
-                                                    <Link key={kos.id_kos} href={`/kos/${kos.id_kos}`} className="flex items-center gap-3 rounded-xl border border-border p-3 hover:border-primary">
-                                                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
-                                                            <Image src={cover ?? "/img/kos-placeholder.png"} alt={kos.nama} fill sizes="48px" className="object-cover" />
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <p className="truncate text-xs font-semibold text-text-primary">{kos.nama}</p>
-                                                            <p className="mt-0.5 truncate text-[10px] text-text-secondary">{kos.lokasi} · {formatHarga(kos.harga)}{tc("perMonthShort")}</p>
-                                                        </div>
-                                                    </Link>
-                                                ))
-                                            )}
-                                        </div>
-                                    </>
-                                )}
+                                    {!isPemilik && !isAdmin && (
+                                        <>
+                                            <div className="flex items-center justify-between">
+                                                <h2 className="font-heading text-base font-bold text-text-primary">{t("latestKos")}</h2>
+                                                <Link href="/cari-kos" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("searchKos")}</Link>
+                                            </div>
+                                            <div className="mt-4 space-y-3">
+                                                {kosTerbaru.length === 0 ? (
+                                                    <p className="text-xs text-text-secondary">{t("noKos")}</p>
+                                                ) : (
+                                                    kosTerbaru.map(({ kos, cover }) => (
+                                                        <Link key={kos.id_kos} href={`/kos/${kos.id_kos}`} className="flex items-center gap-3 rounded-xl border border-border p-3 hover:border-primary">
+                                                            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
+                                                                <Image src={cover ?? "/img/kos-placeholder.png"} alt={kos.nama} fill sizes="48px" className="object-cover" />
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <p className="truncate text-xs font-semibold text-text-primary">{kos.nama}</p>
+                                                                <p className="mt-0.5 truncate text-[10px] text-text-secondary">{kos.lokasi} · {formatHarga(kos.harga)}{tc("perMonthShort")}</p>
+                                                            </div>
+                                                        </Link>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Pengajuan Pemilik — disembunyikan untuk pemilik/admin */}
+                                {showPengajuanCard && <PengajuanCard status={pengajuanStatus} />}
+
                             </div>
-                        )}
 
-                        {/* Pengajuan Pemilik — disembunyikan untuk pemilik/admin */}
-                        {showPengajuanCard && <PengajuanCard status={pengajuanStatus} />}
-
-                    </div>
-
-                    {/* Reservasi Aktif — khusus penyewa. Pemilik/admin tidak melihatnya;
-                        panel "Reservasi Masuk" pemilik menyusul bersama backend booking. */}
-                    {!isPemilik && !isAdmin && (
-                    <div className="mt-6 rounded-xl bg-surface p-8 text-center">
-                        <p className="text-sm font-semibold text-text-primary">{t("noBooking")}</p>
-                        <p className="mx-auto mt-1 max-w-md text-xs text-text-secondary">{t("noBookingDesc")}</p>
-                        <Link
-                            href="/cari-kos"
-                            className="mt-4 inline-block rounded-lg bg-primary px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-primary-dark"
-                        >
-                            {t("noBookingCta")}
-                        </Link>
-                    </div>
+                            {/* Reservasi Aktif — khusus penyewa. Panel Reservasi Masuk pemilik ada di OwnerHome. */}
+                            {!isPemilik && !isAdmin && (
+                            <div className="mt-6 rounded-xl bg-surface p-8 text-center">
+                                <p className="text-sm font-semibold text-text-primary">{t("noBooking")}</p>
+                                <p className="mx-auto mt-1 max-w-md text-xs text-text-secondary">{t("noBookingDesc")}</p>
+                                <Link
+                                    href="/cari-kos"
+                                    className="mt-4 inline-block rounded-lg bg-primary px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-primary-dark"
+                                >
+                                    {t("noBookingCta")}
+                                </Link>
+                            </div>
+                            )}
+                        </>
                     )}
                 </main>
             </div>

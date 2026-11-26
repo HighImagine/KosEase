@@ -1,26 +1,13 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
-import { getMyPemesanan, type StatusPemesanan } from "@/lib/db/queries";
+import StatusPemesananPill, { statusPemesananKey } from "@/components/StatusPemesananPill";
+import { getMyPemesanan } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { IconBed } from "@tabler/icons-react";
 import { CancelButton } from "@/app/[locale]/dashboard/pemilik/reservasi/PemesananActions";
 import PerpanjanganForm from "./PerpanjanganForm";
-
-const badgeStyle: Record<StatusPemesanan, string> = {
-  menunggu: "bg-warning text-white",
-  dikonfirmasi: "bg-success text-white",
-  ditolak: "bg-error text-white",
-  dibatalkan: "bg-gray-300 text-gray-600",
-};
-
-const statusKey: Record<StatusPemesanan, string> = {
-  menunggu: "statusMenunggu",
-  dikonfirmasi: "statusDikonfirmasi",
-  ditolak: "statusDitolak",
-  dibatalkan: "statusDibatalkan",
-};
 
 function formatTanggal(iso: string): string {
   try {
@@ -75,9 +62,7 @@ export default async function ReservasiPage() {
                       </p>
                       <p className="mt-1 text-[10px] text-text-secondary">{t("bookedAt", { date: formatTanggal(p.created_at) })}</p>
                     </div>
-                    <span className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-semibold ${badgeStyle[p.status]}`}>
-                      {t(statusKey[p.status])}
-                    </span>
+                    <StatusPemesananPill status={p.status} label={t(statusPemesananKey[p.status])} />
                   </div>
                   {p.status === "menunggu" && (
                     <div className="mt-3 border-t border-border pt-3">

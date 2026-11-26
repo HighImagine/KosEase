@@ -3,22 +3,33 @@
 import Image from "next/image";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { IconLayoutDashboard, IconHome, IconBuildingStore, IconBed } from "@tabler/icons-react";
+import { IconLayoutDashboard, IconHome, IconBuildingStore, IconBed, IconCalendarEvent } from "@tabler/icons-react";
+import type { ComponentType } from "react";
 import LogoutButton from "./LogoutButton";
 
 type Props = {
     userName?: string | null;
     userAvatar?: string | null;
     userEmail?: string | null;
+    reservasiCount?: number;
 };
 
-export default function PemilikSidebar({ userName, userAvatar, userEmail }: Props) {
+type MenuItem = {
+    href: string;
+    label: string;
+    icon: ComponentType<{ size?: number | string; stroke?: number | string }>;
+    exact: boolean;
+    badge?: number;
+};
+
+export default function PemilikSidebar({ userName, userAvatar, userEmail, reservasiCount = 0 }: Props) {
     const pathname = usePathname();
     const t = useTranslations("SidebarOwner");
     const displayName = userName ?? t("fallbackName");
 
-    const MENU = [
+    const MENU: MenuItem[] = [
         { href: "/dashboard", label: t("home"), icon: IconLayoutDashboard, exact: true },
+        { href: "/dashboard/pemilik/reservasi", label: t("reservasi"), icon: IconCalendarEvent, exact: false, badge: reservasiCount },
         { href: "/dashboard/pemilik/kos", label: t("kos"), icon: IconBuildingStore, exact: false },
         { href: "/dashboard/pemilik/kamar", label: t("kamar"), icon: IconBed, exact: false },
     ];
@@ -37,7 +48,7 @@ export default function PemilikSidebar({ userName, userAvatar, userEmail }: Prop
             </div>
 
             <nav className="flex flex-col gap-1 px-4">
-                {MENU.map(({ href, label, icon: Icon, exact }) => {
+                {MENU.map(({ href, label, icon: Icon, exact, badge = 0 }) => {
                     const active = exact ? pathname === href : pathname.startsWith(href);
                     return (
                         <Link
@@ -48,6 +59,11 @@ export default function PemilikSidebar({ userName, userAvatar, userEmail }: Prop
                         >
                             <Icon size={18} stroke={2} />
                             {label}
+                            {badge > 0 && (
+                                <span className="ml-auto rounded-full bg-warning px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                                    {badge}
+                                </span>
+                            )}
                         </Link>
                     );
                 })}

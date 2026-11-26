@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import DashboardSidebarUser from "./DashboardSidebarUser";
 import AdminSidebar from "./AdminSidebar";
 import PemilikSidebar from "./PemilikSidebar";
+import { getPendingReservasiCount } from "@/lib/db/queries";
 
 // Satu wrapper untuk semua halaman dashboard: otomatis memakai sidebar sesuai
 // role (admin/pemilik/user), sehingga halaman tidak perlu wrapper terpisah.
@@ -39,11 +40,13 @@ export default async function DashboardSidebarUserWrapper() {
   }
 
   if (normRole === "pemilik" || normRole === "pemilik_kos") {
+    const reservasiCount = await getPendingReservasiCount();
     return (
       <PemilikSidebar
         userName={displayName}
         userAvatar={avatarUrl}
         userEmail={user?.email ?? null}
+        reservasiCount={reservasiCount}
       />
     );
   }

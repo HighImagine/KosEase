@@ -41,6 +41,7 @@
     "titleA": "Temukan Kos Nyaman Tanpa",
     "titleB": "Ribet dengan",
     "subtitle": "Pencarian kos terpercaya, proses cepat, harga transparan, dan sesuai dengan kebutuhanmu.",
+    "cta": "Cari Kos Sekarang",
     "searchPlaceholder": "Cari kos di kota mana? (e.g. Jakarta, Yogyakarta, Malang)",
     "search": "Cari",
     "filterLocation": "Lokasi",
@@ -414,6 +415,9 @@
   },
   "PengajuanForm": {
     "title": "Ajukan Diri sebagai Pemilik Kos",
+    "adminManagedTitle": "Verifikasi Pemilik Kos Dikelola Admin",
+    "adminManagedDesc": "Pengajuan mandiri sudah dinonaktifkan. Untuk mengubah akun menjadi Pemilik Kos, silakan hubungi admin agar peran dan verifikasi akun Anda diaktifkan melalui menu Kelola Pengguna.",
+    "backDashboard": "Kembali ke Dashboard",
     "bannerTitle": "Langkah Mudah Menjadi Pemilik Kos",
     "bannerDesc": "Ingin mendaftarkan kos Anda di KosEase? Isi formulir di bawah ini untuk mengajukan diri sebagai Pemilik Kos!",
     "name": "Nama Lengkap Sesuai KTP",
@@ -679,6 +683,23 @@
     "reasonPh": "Alasan penolakan (wajib diisi)",
     "confirmReject": "Tolak",
     "cancel": "Batal"
+  },
+  "AdminPengguna": {
+    "title": "Kelola Pengguna",
+    "heading": "Daftar Pengguna & Verifikasi Pemilik",
+    "subtitle": "Ubah peran pengguna secara langsung. Memilih peran Pemilik otomatis mencatat verifikator dan waktu verifikasi.",
+    "updatedNotice": "Peran pengguna diperbarui",
+    "statTotal": "Total Pengguna",
+    "rolePenyewa": "Penyewa",
+    "rolePemilik": "Pemilik Kos",
+    "roleAdmin": "Admin",
+    "selectRole": "Pilih peran",
+    "save": "Simpan",
+    "saving": "...",
+    "noName": "Tanpa Nama",
+    "verifiedAt": "Terverifikasi {date}",
+    "joined": "Bergabung {date}",
+    "empty": "Belum ada pengguna terdaftar."
   },
   "PenggunaPlaceholder": {
     "title": "Kelola Pengguna",

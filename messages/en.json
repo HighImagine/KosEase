@@ -41,6 +41,7 @@
     "titleA": "Find a Comfortable Kos",
     "titleB": "the Easy Way with",
     "subtitle": "Trusted kos search, fast process, transparent prices, matched to your needs.",
+    "cta": "Find Kos Now",
     "searchPlaceholder": "Which city? (e.g. Jakarta, Yogyakarta, Malang)",
     "search": "Search",
     "filterLocation": "Location",
@@ -414,6 +415,9 @@
   },
   "PengajuanForm": {
     "title": "Apply as a Kos Owner",
+    "adminManagedTitle": "Owner Verification Managed by Admin",
+    "adminManagedDesc": "Self-service applications have been disabled. To upgrade your account to a Kos Owner, please contact an admin to verify and update your role in Manage Users.",
+    "backDashboard": "Back to Dashboard",
     "bannerTitle": "Easy Steps to Become a Kos Owner",
     "bannerDesc": "Want to list your kos on KosEase? Fill in the form below to apply as a Kos Owner!",
     "name": "Full Name (as on ID)",
@@ -679,6 +683,23 @@
     "reasonPh": "Rejection reason (required)",
     "confirmReject": "Reject",
     "cancel": "Cancel"
+  },
+  "AdminPengguna": {
+    "title": "Manage Users",
+    "heading": "User List & Owner Verification",
+    "subtitle": "Update user roles directly. Setting a user to Owner automatically records the verifier and verification timestamp.",
+    "updatedNotice": "User role updated",
+    "statTotal": "Total Users",
+    "rolePenyewa": "Renter",
+    "rolePemilik": "Kos Owner",
+    "roleAdmin": "Admin",
+    "selectRole": "Select role",
+    "save": "Save",
+    "saving": "...",
+    "noName": "Unnamed",
+    "verifiedAt": "Verified {date}",
+    "joined": "Joined {date}",
+    "empty": "No registered users yet."
   },
   "PenggunaPlaceholder": {
     "title": "Manage Users",

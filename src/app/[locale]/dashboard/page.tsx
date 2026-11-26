@@ -20,28 +20,20 @@ export default async function DashboardPage() {
     let pengajuanStatus: "belum_mengajukan" | "menunggu" | "disetujui" | "ditolak" = "belum_mengajukan";
     if (user) {
         try {
-            const { data } = await supabase.from("profiles").select("role, full_name").eq("id", user.id).single();
+            const { data } = await supabase.from("profiles").select("role, full_name, status_verifikasi").eq("id", user.id).single();
             const r = (data?.role as string | undefined)?.toLowerCase();
             profileName = (data?.full_name as string | null) ?? null;
             if (r === "pemilik" || r === "pemilik_kos") roleLabel = "Pemilik Kos";
             else if (r === "admin") roleLabel = "Admin";
             else roleLabel = "Penyewa";
-        } catch {}
-        // Status pengajuan hanya relevan untuk penyewa; default belum_mengajukan.
-        if (roleLabel === "Penyewa") {
-            try {
-                const { data } = await supabase
-                    .from("pengajuan_pemilik")
-                    .select("status")
-                    .eq("user_id", user.id)
-                    .order("created_at", { ascending: false })
-                    .limit(1);
-                const s = (data?.[0] as { status?: string } | undefined)?.status;
+
+            if (roleLabel === "Penyewa") {
+                const s = (data?.status_verifikasi as string | null) ?? null;
                 if (s === "menunggu_verifikasi") pengajuanStatus = "menunggu";
                 else if (s === "disetujui") pengajuanStatus = "disetujui";
                 else if (s === "ditolak") pengajuanStatus = "ditolak";
-            } catch {}
-        }
+            }
+        } catch {}
     }
     const showPengajuanCard = roleLabel !== "Pemilik Kos" && roleLabel !== "Admin";
     const isPemilik = roleLabel === "Pemilik Kos";

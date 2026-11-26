@@ -127,14 +127,6 @@ const resetSchema = z.object({
 
 // Batas panjang pengajuan dilonggarkan sementara untuk testing (hanya wajib isi).
 // TODO: kembalikan min yang wajar (nama 2, lainnya 5) sebelum rilis.
-const pengajuanSchema = z.object({
-  nama: z.string().min(1, "Wajib diisi"),
-  phone: z.string().min(1, "Wajib diisi"),
-  alamat: z.string().min(1, "Wajib diisi"),
-  alasan: z.string().min(1, "Wajib diisi"),
-  info_kos: z.string().min(1, "Wajib diisi"),
-});
-
 export async function resetPasswordAction(_prev: unknown, formData: FormData) {
   const raw = Object.fromEntries(formData) as Record<string, string>;
   const parsed = resetSchema.safeParse(raw);
@@ -145,6 +137,14 @@ export async function resetPasswordAction(_prev: unknown, formData: FormData) {
   redirect(withLocale("/login?reset=1", formLocale(formData)));
 }
 
+const pengajuanSchema = z.object({
+  nama: z.string().min(1, "Wajib diisi"),
+  phone: z.string().min(1, "Wajib diisi"),
+  alamat: z.string().min(1, "Wajib diisi"),
+  alasan: z.string().min(1, "Wajib diisi"),
+  info_kos: z.string().min(1, "Wajib diisi"),
+});
+
 const DOKUMEN_MIME = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 const DOKUMEN_MAX = 10 * 1024 * 1024; // 10MB
 
@@ -152,7 +152,6 @@ export type PengajuanValues = { nama: string; phone: string; alamat: string; ala
 
 export async function pengajuanPemilikAction(_prev: unknown, formData: FormData) {
   const raw = Object.fromEntries(formData) as Record<string, string>;
-  // Kembalikan isian agar form tidak kosong saat error (UX).
   const values: PengajuanValues = {
     nama: raw.nama ?? "",
     phone: raw.phone ?? "",
@@ -167,7 +166,7 @@ export async function pengajuanPemilikAction(_prev: unknown, formData: FormData)
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "User tidak ditemukan", values };
 
-  // Dokumen opsional; bila ada, simpan ke bucket privat, catat path-nya.
+  // Dokumen opsional; bila ada, simpan ke bucket privat, catat path-nya di profiles.
   let dokumenUrl: string | null = null;
   const dokumen = formData.get("dokumen") as File | null;
   if (dokumen && dokumen.size > 0) {
@@ -180,44 +179,66 @@ export async function pengajuanPemilikAction(_prev: unknown, formData: FormData)
     dokumenUrl = path;
   }
 
-  const { error } = await supabase.from("pengajuan_pemilik").insert({ user_id: user.id, nama_lengkap: nama, no_hp: phone, alamat, alasan, info_kos, dokumen_url: dokumenUrl, status: "menunggu_verifikasi" });
+  const { error } = await supabase.rpc("submit_pengajuan_pemilik", {
+    p_nama: nama,
+    p_no_hp: phone,
+    p_alamat: alamat,
+    p_alasan: alasan,
+    p_info_kos: info_kos,
+    p_dokumen_url: dokumenUrl,
+  });
   if (error) return { error: error.message, values };
   redirect(withLocale("/dashboard/pengajuan-pemilik?success=1", formLocale(formData)));
 }
 
 export async function approvePengajuanAction(_prev: unknown, formData: FormData) {
-  const pengajuanId = z.string().uuid().safeParse(formData.get("pengajuanId"));
-  if (!pengajuanId.success) return { error: "ID pengajuan tidak valid" };
+  const userId = z.string().uuid().safeParse(formData.get("pengajuanId"));
+  if (!userId.success) return { error: "ID pengajuan tidak valid" };
   const supabase = await createClient();
-  const { data: { user: admin } } = await supabase.auth.getUser();
-  if (!admin) return { error: "Anda harus masuk sebagai admin" };
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", admin.id).single();
-  if (profile?.role !== "admin") return { error: "Hanya admin yang dapat menyetujui pengajuan" };
-
-  const { error } = await supabase.rpc("approve_pengajuan_pemilik", { p_pengajuan_id: pengajuanId.data });
+  const { error } = await supabase.rpc("admin_review_pengajuan_pemilik", {
+    p_user_id: userId.data,
+    p_action: "disetujui",
+    p_alasan_tolak: null,
+  });
   if (error) return { error: error.message };
   redirect(withLocale("/dashboard/admin/pengajuan", formLocale(formData)));
 }
 
 export async function rejectPengajuanAction(_prev: unknown, formData: FormData) {
-  const pengajuanId = z.string().uuid().safeParse(formData.get("pengajuanId"));
-  if (!pengajuanId.success) return { error: "ID pengajuan tidak valid" };
+  const userId = z.string().uuid().safeParse(formData.get("pengajuanId"));
+  if (!userId.success) return { error: "ID pengajuan tidak valid" };
   const alasanTolak = String(formData.get("alasanTolak") ?? "Ditolak oleh admin");
   const supabase = await createClient();
-  const { data: { user: admin } } = await supabase.auth.getUser();
-  if (!admin) return { error: "Anda harus masuk sebagai admin" };
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", admin.id).single();
-  if (profile?.role !== "admin") return { error: "Hanya admin yang dapat menolak pengajuan" };
-
-  const { error } = await supabase
-    .from("pengajuan_pemilik")
-    .update({ status: "ditolak", alasan_tolak: alasanTolak, diverifikasi_oleh: admin.id, diverifikasi_at: new Date().toISOString() })
-    .eq("id", pengajuanId.data)
-    .eq("status", "menunggu_verifikasi")
-    .select()
-    .limit(1);
+  const { error } = await supabase.rpc("admin_review_pengajuan_pemilik", {
+    p_user_id: userId.data,
+    p_action: "ditolak",
+    p_alasan_tolak: alasanTolak,
+  });
   if (error) return { error: error.message };
   redirect(withLocale("/dashboard/admin/pengajuan", formLocale(formData)));
+}
+
+const updateUserRoleSchema = z.object({
+  userId: z.string().uuid("ID pengguna tidak valid"),
+  role: z.enum(["penyewa", "pemilik", "admin"]),
+});
+
+// Admin ubah role pengguna langsung di profiles lewat RPC SECURITY DEFINER.
+export async function updateUserRoleAction(_prev: unknown, formData: FormData) {
+  const parsed = updateUserRoleSchema.safeParse({
+    userId: formData.get("userId"),
+    role: formData.get("role"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_update_user_role", {
+    p_user_id: parsed.data.userId,
+    p_role: parsed.data.role,
+  });
+  if (error) return { error: error.message };
+
+  redirect(withLocale("/dashboard/admin/pengguna?updated=1", formLocale(formData)));
 }
 
 export async function updateProfileAction(_prev: unknown, formData: FormData) {

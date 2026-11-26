@@ -1,7 +1,6 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
-import { getPengajuanStatusCounts } from "@/lib/db/queries";
-import { createClient } from "@/lib/supabase/server";
+import { getPengajuanStatusCounts, getRecentPendingPengajuan } from "@/lib/db/queries";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 
@@ -14,28 +13,11 @@ function StatTile({ value, label }: { value: number; label: string }) {
   );
 }
 
-type PengajuanRow = {
-  id: string;
-  nama_lengkap: string;
-  no_hp: string | null;
-  created_at: string;
-};
-
-async function getPendingPengajuan() {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("pengajuan_pemilik")
-    .select("id, nama_lengkap, no_hp, created_at")
-    .eq("status", "menunggu_verifikasi")
-    .order("created_at", { ascending: false });
-  return (data ?? []) as PengajuanRow[];
-}
-
 export default async function AdminPengajuanPage() {
   const t = await getTranslations("AdminPengajuan");
   const td = await getTranslations("PengajuanDetail");
   const [pengajuanList, counts] = await Promise.all([
-    getPendingPengajuan(),
+    getRecentPendingPengajuan(50),
     getPengajuanStatusCounts(),
   ]);
 
@@ -55,9 +37,8 @@ export default async function AdminPengajuanPage() {
         <DashboardNavbar title={t("title")} />
 
         <main className="flex-1 p-6">
-          <h2 className="font-heading text-xl font-bold text-text-primary mb-4">{t("heading")}</h2>
+          <h2 className="mb-4 font-heading text-xl font-bold text-text-primary">{t("heading")}</h2>
 
-          {/* Snapshot + dropdown daftar cepat (pola sama seperti Beranda admin) */}
           <div className="mb-4 grid grid-cols-3 items-start gap-3">
             <details className="rounded-xl border border-border bg-surface">
               <summary title={t("heading")} className="cursor-pointer list-none px-4 py-3 text-center [&::-webkit-details-marker]:hidden">
@@ -80,7 +61,7 @@ export default async function AdminPengajuanPage() {
             <StatTile value={counts.ditolak} label={t("rejected")} />
           </div>
 
-          {pengajuanList && pengajuanList.length > 0 ? (
+          {pengajuanList.length > 0 ? (
             <div className="space-y-3">
               {pengajuanList.map((pengajuan) => (
                 <div key={pengajuan.id} className="flex items-center gap-4 rounded-xl border border-border bg-surface px-5 py-4">

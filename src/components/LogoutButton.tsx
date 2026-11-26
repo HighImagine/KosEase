@@ -1,4 +1,5 @@
 "use client";
+import * as React from "react";
 import { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
@@ -62,7 +63,7 @@ export default function LogoutButton({ variant = "sidebar", onClose }: Props) {
   // confirm state — centered modal popup (tengah halaman + backdrop blur)
   const modal = (
     <div
-      className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-[2px] px-4"
       onClick={handleCancel}
       style={{ animation: "modal-overlay-in 0.2s ease-out" }}
     >

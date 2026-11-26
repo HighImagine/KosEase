@@ -11,7 +11,7 @@ export default async function PengajuanPemilik() {
             <DashboardSidebarUserWrapper />
 
             <div className="flex flex-1 flex-col">
-<DashboardNavbar title={t("title")} />
+                <DashboardNavbar title={t("title")} />
 
                 <main className="flex-1 p-6">
                     <div className="rounded-xl border border-primary-light bg-primary-light p-5">
@@ -28,5 +28,5 @@ export default async function PengajuanPemilik() {
                 </main>
             </div>
         </div>
-    )
+    );
 }

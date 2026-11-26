@@ -245,16 +245,6 @@ export default async function KosDetailPage({ params }: PageProps) {
                                     <p className="mt-1 text-xs text-text-secondary">{t("viaPlatform")}</p>
                                 </div>
                             </div>
-
-                            {canOrder ? (
-                                <Link href={`/pemesanan?kosId=${kos.id_kos}`} className="mt-4 block w-full rounded-lg bg-primary px-4 py-2.5 text-center text-xs font-semibold text-white transition-colors hover:bg-primary-dark">
-                                    {t("order")}
-                                </Link>
-                            ) : (
-                                <button disabled type="button" className="mt-4 block w-full cursor-not-allowed rounded-lg bg-gray-300 px-4 py-2.5 text-center text-xs font-semibold text-gray-500">
-                                    {t("full")}
-                                </button>
-                            )}
                         </div>
                     </div>
 

@@ -1,4 +1,6 @@
 import { getTranslations } from "next-intl/server";
+import { IconArrowRight } from "@tabler/icons-react";
+import { Link } from "@/i18n/navigation";
 
 export default async function Hero() {
     const t = await getTranslations("Hero");
@@ -29,44 +31,14 @@ export default async function Hero() {
                     {t("subtitle")}
                 </p>
 
-                <div className="mt-10 rounded-2xl bg-surface p-5 text-left shadow-lg">
-
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                        <input
-                            type="text"
-                            placeholder={t("searchPlaceholder")}
-                            className="flex-1 rounded-lg bg-background px-4 py-3 text-text-primary outline-none"
-                        />
-
-                        <button className="rounded-lg bg-primary px-7 py-3 font-semibold text-white hover:bg-primary-dark">
-                            {t("search")}
-                        </button>
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap gap-3">
-
-                        <button className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-primary-light">
-                            {t("filterLocation")}
-                        </button>
-
-                        <button className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-primary-light">
-                            {t("filterPrice")}
-                        </button>
-
-                        <button className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-primary-light">
-                            {t("filterType")}
-                        </button>
-
-                        <button className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-primary-light">
-                            {t("filterFacility")}
-                        </button>
-
-                        <button className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-primary-light">
-                            {t("filterAvailable")}
-                        </button>
-
-                    </div>
-
+                <div className="mt-8 flex justify-center">
+                    <Link
+                        href="/"
+                        className="inline-flex items-center gap-2 rounded-xl bg-accent px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-opacity hover:opacity-90"
+                    >
+                        {t("cta")}
+                        <IconArrowRight size={18} />
+                    </Link>
                 </div>
             </div>
         </section>

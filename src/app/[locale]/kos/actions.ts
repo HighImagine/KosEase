@@ -275,7 +275,7 @@ export async function deleteKosAction(_prev: unknown, formData: FormData): Promi
   }
   await supabase.from("galeri").delete().eq("kos_id", kosId);
   await supabase.from("kamar").delete().eq("kos_id", kosId);
-  await supabase.from("kos_fasilitas").delete().eq("kos_id", kosId);
+  await supabase.from("detail_kos").delete().eq("kos_id", kosId);
   await supabase.from("pengajuan_penarikan").delete().eq("kos_id", kosId);
   const { error } = await supabase.from("kos").delete().eq("id_kos", kosId);
   if (error) return { error: error.message };
@@ -385,11 +385,11 @@ export async function setKosFasilitasAction(_prev: unknown, formData: FormData):
   const access = await assertKosAccess(kosId);
   if ("error" in access) return { error: access.error };
   const ids = formData.getAll("fasilitasId").map(String).filter(Boolean);
-  const { error: delError } = await access.supabase.from("kos_fasilitas").delete().eq("kos_id", kosId);
+  const { error: delError } = await access.supabase.from("detail_kos").delete().eq("kos_id", kosId);
   if (delError) return { error: delError.message };
   if (ids.length > 0) {
     const { error } = await access.supabase
-      .from("kos_fasilitas")
+      .from("detail_kos")
       .insert(ids.map((fid) => ({ kos_id: kosId, fasilitas_id: fid })));
     if (error) return { error: error.message };
   }

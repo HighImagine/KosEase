@@ -52,14 +52,14 @@ export async function getTayangKosCards(): Promise<KosCardData[]> {
     if (!coverByKos.has(g.kos_id) && g.image_url) coverByKos.set(g.kos_id, g.image_url);
   }
 
-  const { data: relRows } = await supabase.from("kos_fasilitas").select("kos_id, fasilitas_id").in("kos_id", ids);
+  const { data: relRows } = await supabase.from("detail_kos").select("kos_id, fasilitas_id").in("kos_id", ids);
   const fasilitasMaster = await getFasilitasMaster();
   const fasilitasNameById = new Map(fasilitasMaster.map((f) => [f.id, f.nama]));
   const fasilitasByKos = new Map<string, string[]>();
   for (const r of (relRows ?? []) as { kos_id: string; fasilitas_id: string }[]) {
     const list = fasilitasByKos.get(r.kos_id) ?? [];
     const nama = fasilitasNameById.get(r.fasilitas_id);
-    if (nama) list.push(nama);
+    if (nama && !list.includes(nama)) list.push(nama);
     fasilitasByKos.set(r.kos_id, list);
   }
 
@@ -93,15 +93,15 @@ export async function getPublicKosDetail(idKos: string): Promise<KosDetail | nul
   const [{ data: kamarRows }, { data: galeriRows }, { data: relRows }] = await Promise.all([
     supabase.from("kamar").select("*").eq("kos_id", idKos).order("harga", { ascending: true }),
     supabase.from("galeri").select("*").eq("kos_id", idKos).order("created_at", { ascending: true }),
-    supabase.from("kos_fasilitas").select("fasilitas_id").eq("kos_id", idKos),
+    supabase.from("detail_kos").select("fasilitas_id").eq("kos_id", idKos),
   ]);
-  const rel = (relRows ?? []) as { fasilitas_id: string }[];
+  const relIds = Array.from(new Set(((relRows ?? []) as { fasilitas_id: string }[]).map((r) => r.fasilitas_id)));
   let fasilitas: string[] = [];
-  if (rel.length > 0) {
+  if (relIds.length > 0) {
     const { data: fasRows } = await supabase
       .from("fasilitas")
       .select("id, nama")
-      .in("id", rel.map((r) => r.fasilitas_id));
+      .in("id", relIds);
     fasilitas = ((fasRows ?? []) as { nama: string }[]).map((f) => f.nama);
   }
 
@@ -137,15 +137,15 @@ export async function getOwnedKosDetail(idKos: string): Promise<KosDetail | null
   const [{ data: kamarRows }, { data: galeriRows }, { data: relRows }] = await Promise.all([
     supabase.from("kamar").select("*").eq("kos_id", idKos).order("created_at", { ascending: true }),
     supabase.from("galeri").select("*").eq("kos_id", idKos).order("created_at", { ascending: true }),
-    supabase.from("kos_fasilitas").select("fasilitas_id").eq("kos_id", idKos),
+    supabase.from("detail_kos").select("fasilitas_id").eq("kos_id", idKos),
   ]);
-  const rel = (relRows ?? []) as { fasilitas_id: string }[];
+  const relIds = Array.from(new Set(((relRows ?? []) as { fasilitas_id: string }[]).map((r) => r.fasilitas_id)));
   let fasilitas: string[] = [];
-  if (rel.length > 0) {
+  if (relIds.length > 0) {
     const { data: fasRows } = await supabase
       .from("fasilitas")
       .select("id, nama")
-      .in("id", rel.map((r) => r.fasilitas_id));
+      .in("id", relIds);
     fasilitas = ((fasRows ?? []) as { nama: string }[]).map((f) => f.nama);
   }
 
@@ -379,25 +379,40 @@ export type PendingPengajuanItem = {
   created_at: string;
 };
 
-// Antrean pengajuan terbaru untuk preview Beranda admin.
+type InfoPengajuanJson = {
+  nama_lengkap?: string;
+  no_hp?: string;
+  alamat?: string;
+  alasan?: string;
+  info_kos?: string;
+  alasan_tolak?: string;
+  diajukan_at?: string;
+};
+
+// Antrean pengajuan terbaru dari kolom pengajuan di profiles.
 export async function getRecentPendingPengajuan(limit = 3): Promise<PendingPengajuanItem[]> {
   const supabase = await createClient();
   const { data } = await supabase
-    .from("pengajuan_pemilik")
-    .select("id, nama_lengkap, no_hp, created_at")
-    .eq("status", "menunggu_verifikasi")
+    .from("profiles")
+    .select("id, full_name, phone, info_pengajuan, created_at")
+    .eq("status_verifikasi", "menunggu_verifikasi")
     .order("created_at", { ascending: false })
     .limit(limit);
-  return (data ?? []) as PendingPengajuanItem[];
+  return ((data ?? []) as { id: string; full_name: string | null; phone: string | null; info_pengajuan: InfoPengajuanJson | null; created_at: string | null }[]).map((p) => ({
+    id: p.id,
+    nama_lengkap: p.info_pengajuan?.nama_lengkap ?? p.full_name ?? "-",
+    no_hp: p.info_pengajuan?.no_hp ?? p.phone ?? null,
+    created_at: p.info_pengajuan?.diajukan_at ?? p.created_at ?? new Date().toISOString(),
+  }));
 }
 
 // Hitungan ringan pengajuan pemilik yang masih menunggu (badge notifikasi admin).
 export async function getPendingPengajuanCount(): Promise<number> {
   const supabase = await createClient();
   const { count } = await supabase
-    .from("pengajuan_pemilik")
+    .from("profiles")
     .select("id", { count: "exact", head: true })
-    .eq("status", "menunggu_verifikasi");
+    .eq("status_verifikasi", "menunggu_verifikasi");
   return count ?? 0;
 }
 
@@ -421,21 +436,39 @@ export async function getUserRoleCounts(): Promise<UserRoleCounts> {
   return { total: rows.length, penyewa, pemilik, admin };
 }
 
+export type AdminUserItem = {
+  id: string;
+  full_name: string | null;
+  role: string | null;
+  phone: string | null;
+  diverifikasi_oleh: string | null;
+  diverifikasi_at: string | null;
+  created_at: string | null;
+};
+
+// Daftar seluruh pengguna untuk halaman Kelola Pengguna admin.
+export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, role, phone, diverifikasi_oleh, diverifikasi_at, created_at")
+    .order("created_at", { ascending: false });
+  return (data ?? []) as AdminUserItem[];
+}
+
 export type PengajuanStatusCounts = { menunggu: number; disetujui: number; ditolak: number; total: number };
 
-// Hitungan pengajuan per status untuk snapshot halaman verifikasi.
+// Hitungan pengajuan per status dari profiles.status_verifikasi.
 export async function getPengajuanStatusCounts(): Promise<PengajuanStatusCounts> {
   const supabase = await createClient();
   const [menunggu, disetujui, ditolak] = await Promise.all(
-    (["menunggu_verifikasi", "disetujui", "ditolak"] as const).map(
-      async (s) => {
-        const { count } = await supabase
-          .from("pengajuan_pemilik")
-          .select("id", { count: "exact", head: true })
-          .eq("status", s);
-        return count ?? 0;
-      }
-    )
+    (["menunggu_verifikasi", "disetujui", "ditolak"] as const).map(async (s) => {
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("status_verifikasi", s);
+      return count ?? 0;
+    })
   );
   return { menunggu, disetujui, ditolak, total: menunggu + disetujui + ditolak };
 }
@@ -456,11 +489,42 @@ export type PengajuanDetail = {
   created_at: string;
 };
 
-// Satu pengajuan by id (untuk halaman detail admin).
+// Satu pengajuan by user id (untuk halaman detail admin).
 export async function getPengajuanDetail(id: string): Promise<PengajuanDetail | null> {
   const supabase = await createClient();
-  const { data } = await supabase.from("pengajuan_pemilik").select("*").eq("id", id).limit(1);
-  return (data?.[0] as PengajuanDetail | undefined) ?? null;
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, phone, status_verifikasi, diverifikasi_oleh, diverifikasi_at, dokumen_url, info_pengajuan, created_at")
+    .eq("id", id)
+    .not("status_verifikasi", "is", null)
+    .limit(1);
+  const p = (data?.[0] as {
+    id: string;
+    full_name: string | null;
+    phone: string | null;
+    status_verifikasi: string;
+    diverifikasi_oleh: string | null;
+    diverifikasi_at: string | null;
+    dokumen_url: string | null;
+    info_pengajuan: InfoPengajuanJson | null;
+    created_at: string | null;
+  } | undefined);
+  if (!p) return null;
+  return {
+    id: p.id,
+    user_id: p.id,
+    nama_lengkap: p.info_pengajuan?.nama_lengkap ?? p.full_name ?? "-",
+    no_hp: p.info_pengajuan?.no_hp ?? p.phone ?? null,
+    alamat: p.info_pengajuan?.alamat ?? null,
+    alasan: p.info_pengajuan?.alasan ?? null,
+    info_kos: p.info_pengajuan?.info_kos ?? null,
+    status: p.status_verifikasi,
+    diverifikasi_oleh: p.diverifikasi_oleh,
+    diverifikasi_at: p.diverifikasi_at,
+    alasan_tolak: p.info_pengajuan?.alasan_tolak ?? null,
+    dokumen_url: p.dokumen_url,
+    created_at: p.info_pengajuan?.diajukan_at ?? p.created_at ?? new Date().toISOString(),
+  };
 }
 
 export type KosOwner = { nama: string | null; avatar_url: string | null };
@@ -659,17 +723,12 @@ export type AdminStats = { total: number; tayang: number; draft: number; pengaju
 
 // Agregat ringkas untuk panel dashboard admin.
 export async function getAdminKosStats(): Promise<AdminStats> {
-  const all = await getAllKosForAdmin();
-  const supabase = await createClient();
-  const { count } = await supabase
-    .from("pengajuan_pemilik")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "menunggu_verifikasi");
+  const [all, pengajuanPending] = await Promise.all([getAllKosForAdmin(), getPendingPengajuanCount()]);
   return {
     total: all.length,
     tayang: all.filter((k) => k.status_publikasi === "tayang").length,
     draft: all.filter((k) => k.status_publikasi !== "tayang").length,
-    pengajuanPending: count ?? 0,
+    pengajuanPending,
   };
 }
 
@@ -680,22 +739,20 @@ export type AdminDashboardData = {
   penarikan: PengajuanPenarikan[];
 };
 
-// Gabungan data untuk Beranda admin: agregat stat + daftar kos + antrean
-// pengajuan pending dalam satu respons, tanpa query ganda ke tabel kos.
+// Gabungan data untuk Beranda admin.
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
-  const allKos = await getAllKosForAdmin();
-  const supabase = await createClient();
-  const { count } = await supabase
-    .from("pengajuan_pemilik")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "menunggu_verifikasi");
-  const [pending, penarikan] = await Promise.all([getRecentPendingPengajuan(3), getPendingPenarikan()]);
+  const [allKos, pengajuanPending, pending, penarikan] = await Promise.all([
+    getAllKosForAdmin(),
+    getPendingPengajuanCount(),
+    getRecentPendingPengajuan(3),
+    getPendingPenarikan(),
+  ]);
   return {
     stats: {
       total: allKos.length,
       tayang: allKos.filter((k) => k.status_publikasi === "tayang").length,
       draft: allKos.filter((k) => k.status_publikasi !== "tayang").length,
-      pengajuanPending: count ?? 0,
+      pengajuanPending,
     },
     allKos,
     pending,

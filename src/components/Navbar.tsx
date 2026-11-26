@@ -65,7 +65,6 @@ export default function Navbar({ user, avatarUrl, notification }: NavbarProps) {
                 className={`absolute right-0 top-12 z-50 w-48 origin-top-right rounded-xl border border-border bg-surface p-2 shadow-lg transition-all duration-75 ease-out ${show ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-1"}`}
               >
                 <Link href="/dashboard" onClick={closeDropdown} className="block rounded-lg px-3 py-2 text-xs hover:bg-background">{t("dashboard")}</Link>
-                {(role === "pemilik" || role === "pemilik_kos") && <Link href="/dashboard/pemilik" onClick={closeDropdown} className="block rounded-lg px-3 py-2 text-xs hover:bg-background">{t("manageKos")}</Link>}
                 {role === "admin" && <Link href="/dashboard/admin/pengajuan" onClick={closeDropdown} className="block rounded-lg px-3 py-2 text-xs hover:bg-background">{t("pengajuan")}</Link>}
                 <LogoutButton variant="dropdown" onClose={closeDropdown} />
               </div>

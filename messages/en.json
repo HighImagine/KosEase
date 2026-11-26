@@ -330,6 +330,21 @@
     "noBookingDesc": "Ongoing reservations will appear here.",
     "noBookingCta": "Find Kos"
   },
+  "OwnerOnboarding": {
+    "badge": "Start here",
+    "title": "No kos registered yet",
+    "desc": "Add your first kos so prospective renters can find it. It takes about 5 minutes.",
+    "cta": "+ Add Your First Kos",
+    "step1Title": "Fill in kos details",
+    "step1Desc": "Name, location, address, and lowest price.",
+    "step2Title": "Complete the details",
+    "step2Desc": "Add rooms, photos, and facilities.",
+    "step3Title": "Publish",
+    "step3Desc": "Your kos appears in search and can take bookings.",
+    "compactTitle": "No kos yet",
+    "compactDesc": "Add your first kos to start receiving bookings.",
+    "compactCta": "+ Add Your First Kos"
+  },
   "PengajuanCard": {
     "ctaTitleA": "Own a Kos?",
     "ctaTitleB": "List It Now!",
@@ -339,8 +354,8 @@
     "pendingBadge": "Under Admin Review",
     "pendingDesc": "Your application is being reviewed by our Admin. Please wait until the Admin finishes verifying your documents.",
     "approvedBadge": "Application Approved",
-    "approvedDesc": "Congratulations! Your application has been approved. You can now start managing your kos.",
-    "approvedCta": "Owner Dashboard",
+    "approvedDesc": "Congratulations! Your application has been approved. Start by adding your first kos.",
+    "approvedCta": "Add Your First Kos",
     "rejectedBadge": "Application Rejected",
     "rejectedDesc": "Your application could not be approved yet. Please re-check your documents and read the instructions again.",
     "rejectedCta": "Re-apply"
@@ -501,6 +516,7 @@
     "title": "Manage Rooms",
     "heading": "All My Rooms",
     "desc": "List of all room types across your kos. Adding/editing/deleting stays on each kos manage page.",
+    "emptyTitle": "No rooms yet",
     "empty": "No rooms yet. Add them via the Manage Kos page.",
     "goKos": "Go to Manage Kos",
     "manage": "Manage",

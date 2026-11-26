@@ -1,6 +1,7 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
-import { getMyKamarList } from "@/lib/db/queries";
+import EmptyStateCard from "@/components/EmptyStateCard";
+import { getMyKamarList, getMyKosList } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -8,7 +9,9 @@ import { Link } from "@/i18n/navigation";
 export default async function KelolaKamarPage() {
   const t = await getTranslations("KamarList");
   const tc = await getTranslations("Common");
-  const kamarList = await getMyKamarList();
+  const to = await getTranslations("OwnerOnboarding");
+  const [kamarList, kosList] = await Promise.all([getMyKamarList(), getMyKosList()]);
+  const hasKos = kosList.length > 0;
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -25,12 +28,13 @@ export default async function KelolaKamarPage() {
             </p>
 
             {kamarList.length === 0 ? (
-              <div className="rounded-xl bg-surface p-8 text-center">
-                <p className="text-sm text-text-secondary">{t("empty")}</p>
-                <Link href="/dashboard/pemilik/kos" className="mt-3 inline-block rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-dark">
-                  {t("goKos")}
-                </Link>
-              </div>
+              <EmptyStateCard
+                variant="compact"
+                title={t("emptyTitle")}
+                description={t("empty")}
+                ctaLabel={hasKos ? t("goKos") : to("cta")}
+                ctaHref={hasKos ? "/dashboard/pemilik/kos" : "/dashboard/pemilik/kos/tambah"}
+              />
             ) : (
               <div className="space-y-3">
                 {kamarList.map((k) => (

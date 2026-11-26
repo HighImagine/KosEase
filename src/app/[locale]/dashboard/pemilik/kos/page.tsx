@@ -1,5 +1,6 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
+import EmptyStateCard from "@/components/EmptyStateCard";
 import { getMyKosList, getPendingPenarikan } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
@@ -9,6 +10,7 @@ import { AjukanPenarikanButton, DeleteKosButton, PublikasiToggle } from "./KosLi
 export default async function KelolaKosPage() {
   const t = await getTranslations("KelolaKos");
   const tc = await getTranslations("Common");
+  const to = await getTranslations("OwnerOnboarding");
   const [kosList, pending] = await Promise.all([getMyKosList(), getPendingPenarikan()]);
   const pendingByKos = new Map(pending.map((p) => [p.kos_id, p.alasan]));
 
@@ -22,18 +24,26 @@ export default async function KelolaKosPage() {
         <main className="flex-1 p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-heading text-xl font-bold text-text-primary">{t("heading")}</h2>
-            <Link href="/dashboard/pemilik/kos/tambah" className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-dark">
-              {t("add")}
-            </Link>
+            {kosList.length > 0 && (
+              <Link href="/dashboard/pemilik/kos/tambah" className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-dark">
+                {t("add")}
+              </Link>
+            )}
           </div>
 
           {kosList.length === 0 ? (
-            <div className="rounded-xl bg-surface p-8 text-center">
-              <p className="text-sm text-text-secondary">{t("empty")}</p>
-              <Link href="/dashboard/pemilik/kos/tambah" className="mt-3 inline-block rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-dark">
-                {t("add")}
-              </Link>
-            </div>
+            <EmptyStateCard
+              badge={to("badge")}
+              title={to("title")}
+              description={to("desc")}
+              ctaLabel={to("cta")}
+              ctaHref="/dashboard/pemilik/kos/tambah"
+              steps={[
+                { title: to("step1Title"), description: to("step1Desc") },
+                { title: to("step2Title"), description: to("step2Desc") },
+                { title: to("step3Title"), description: to("step3Desc") },
+              ]}
+            />
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">
               {kosList.map((kos) => (

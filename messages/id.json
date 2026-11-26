@@ -330,6 +330,21 @@
     "noBookingDesc": "Reservasi yang sedang berjalan akan tampil di sini.",
     "noBookingCta": "Cari Kos"
   },
+  "OwnerOnboarding": {
+    "badge": "Mulai di sini",
+    "title": "Belum ada kos yang terdaftar",
+    "desc": "Tambahkan kos pertamamu supaya bisa ditemukan calon penyewa. Prosesnya sekitar 5 menit.",
+    "cta": "+ Tambah Kos Pertama",
+    "step1Title": "Isi data kos",
+    "step1Desc": "Nama, lokasi, alamat, dan harga termurah.",
+    "step2Title": "Lengkapi detail",
+    "step2Desc": "Tambah kamar, foto, dan fasilitas kos.",
+    "step3Title": "Tayangkan",
+    "step3Desc": "Kos muncul di pencarian dan siap menerima pesanan.",
+    "compactTitle": "Belum ada kos",
+    "compactDesc": "Tambahkan kos pertamamu untuk mulai menerima reservasi.",
+    "compactCta": "+ Tambah Kos Pertama"
+  },
   "PengajuanCard": {
     "ctaTitleA": "Punya Kos?",
     "ctaTitleB": "Ayo Daftarkan!",
@@ -339,8 +354,8 @@
     "pendingBadge": "Sedang Ditinjau Admin",
     "pendingDesc": "Pengajuan Anda sedang ditinjau oleh Admin kami. Mohon tunggu sampai Admin selesai melakukan verifikasi dokumen Anda.",
     "approvedBadge": "Pengajuan Disetujui",
-    "approvedDesc": "Selamat! Pengajuan Anda telah disetujui. Sekarang Anda dapat mulai mengelola kos Anda.",
-    "approvedCta": "Dashboard Pemilik",
+    "approvedDesc": "Selamat! Pengajuan Anda telah disetujui. Sekarang mulai dengan menambahkan kos pertama Anda.",
+    "approvedCta": "Tambah Kos Pertama",
     "rejectedBadge": "Pengajuan Ditolak",
     "rejectedDesc": "Pengajuan Anda belum dapat disetujui. Silakan periksa kembali dokumen dan baca kembali instruksi yang diberikan.",
     "rejectedCta": "Ajukan Kembali"
@@ -501,6 +516,7 @@
     "title": "Kelola Kamar",
     "heading": "Semua Kamar Saya",
     "desc": "Daftar seluruh tipe kamar di semua kos Anda. Tambah/edit/hapus tetap di halaman kelola masing-masing kos.",
+    "emptyTitle": "Belum ada kamar",
     "empty": "Belum ada kamar. Tambahkan lewat halaman Kelola Kos.",
     "goKos": "Ke Kelola Kos",
     "manage": "Kelola",

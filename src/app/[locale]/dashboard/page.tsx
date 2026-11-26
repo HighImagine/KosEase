@@ -2,6 +2,7 @@ import Image from "next/image";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
 import PengajuanCard from "@/components/PengajuanCard";
+import EmptyStateCard from "@/components/EmptyStateCard";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminKosStats, getPemilikKosStats, getTayangKosCards } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
@@ -20,6 +21,7 @@ function StatTile({ value, label }: { value: number; label: string }) {
 export default async function DashboardPage() {
     const t = await getTranslations("Dashboard");
     const tc = await getTranslations("Common");
+    const to = await getTranslations("OwnerOnboarding");
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     let roleLabel = "Penyewa";
@@ -67,66 +69,79 @@ export default async function DashboardPage() {
                     <div className="grid gap-4 lg:grid-cols-3">
 
                         {/* Ringkasan peran — ganti card Profil Saya yang redundan */}
-                        <div className={`${showPengajuanCard ? "lg:col-span-2" : "lg:col-span-3"} rounded-xl bg-surface p-5`}>
-                            {isPemilik && pemilikStats && (
-                                <>
-                                    <div className="flex items-center justify-between">
+                        {isPemilik && pemilikStats && pemilikStats.total === 0 ? (
+                            <EmptyStateCard
+                                badge={to("badge")}
+                                title={to("title")}
+                                description={to("desc")}
+                                ctaLabel={to("cta")}
+                                ctaHref="/dashboard/pemilik/kos/tambah"
+                                steps={[
+                                    { title: to("step1Title"), description: to("step1Desc") },
+                                    { title: to("step2Title"), description: to("step2Desc") },
+                                    { title: to("step3Title"), description: to("step3Desc") },
+                                ]}
+                                className="lg:col-span-3"
+                            />
+                        ) : (
+                            <div className={`${showPengajuanCard ? "lg:col-span-2" : "lg:col-span-3"} rounded-xl bg-surface p-5`}>
+                                {isPemilik && pemilikStats && (
+                                    <>
                                         <h2 className="font-heading text-base font-bold text-text-primary">{t("ownerSummary")}</h2>
-                                        <Link href="/dashboard/pemilik/kos" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("manageKos")}</Link>
-                                    </div>
-                                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                                        <StatTile value={pemilikStats.total} label={t("statTotal")} />
-                                        <StatTile value={pemilikStats.tayang} label={t("statTayang")} />
-                                        <StatTile value={pemilikStats.draft} label={t("statDraft")} />
-                                        <StatTile value={pemilikStats.stokTersedia} label={t("statRooms")} />
-                                    </div>
-                                </>
-                            )}
-
-                            {isAdmin && adminStats && (
-                                <>
-                                    <div className="flex items-center justify-between">
-                                        <h2 className="font-heading text-base font-bold text-text-primary">{t("platformSummary")}</h2>
-                                        <div className="flex gap-2">
-                                            <Link href="/dashboard/admin/kos" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("moderation")}</Link>
-                                            <Link href="/dashboard/admin/pengajuan" className="rounded-lg border border-border px-3 py-1.5 text-[10px] font-semibold text-text-secondary hover:text-primary">{t("pengajuanLink")}</Link>
+                                        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                            <StatTile value={pemilikStats.total} label={t("statTotal")} />
+                                            <StatTile value={pemilikStats.tayang} label={t("statTayang")} />
+                                            <StatTile value={pemilikStats.draft} label={t("statDraft")} />
+                                            <StatTile value={pemilikStats.stokTersedia} label={t("statRooms")} />
                                         </div>
-                                    </div>
-                                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                                        <StatTile value={adminStats.total} label={t("statTotal")} />
-                                        <StatTile value={adminStats.tayang} label={t("statTayang")} />
-                                        <StatTile value={adminStats.draft} label={t("statDraft")} />
-                                        <StatTile value={adminStats.pengajuanPending} label={t("statPending")} />
-                                    </div>
-                                </>
-                            )}
+                                    </>
+                                )}
 
-                            {!isPemilik && !isAdmin && (
-                                <>
-                                    <div className="flex items-center justify-between">
-                                        <h2 className="font-heading text-base font-bold text-text-primary">{t("latestKos")}</h2>
-                                        <Link href="/cari-kos" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("searchKos")}</Link>
-                                    </div>
-                                    <div className="mt-4 space-y-3">
-                                        {kosTerbaru.length === 0 ? (
-                                            <p className="text-xs text-text-secondary">{t("noKos")}</p>
-                                        ) : (
-                                            kosTerbaru.map(({ kos, cover }) => (
-                                                <Link key={kos.id_kos} href={`/kos/${kos.id_kos}`} className="flex items-center gap-3 rounded-xl border border-border p-3 hover:border-primary">
-                                                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
-                                                        <Image src={cover ?? "/img/kos-placeholder.png"} alt={kos.nama} fill sizes="48px" className="object-cover" />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <p className="truncate text-xs font-semibold text-text-primary">{kos.nama}</p>
-                                                        <p className="mt-0.5 truncate text-[10px] text-text-secondary">{kos.lokasi} · {formatHarga(kos.harga)}{tc("perMonthShort")}</p>
-                                                    </div>
-                                                </Link>
-                                            ))
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                                {isAdmin && adminStats && (
+                                    <>
+                                        <div className="flex items-center justify-between">
+                                            <h2 className="font-heading text-base font-bold text-text-primary">{t("platformSummary")}</h2>
+                                            <div className="flex gap-2">
+                                                <Link href="/dashboard/admin/kos" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("moderation")}</Link>
+                                                <Link href="/dashboard/admin/pengajuan" className="rounded-lg border border-border px-3 py-1.5 text-[10px] font-semibold text-text-secondary hover:text-primary">{t("pengajuanLink")}</Link>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                            <StatTile value={adminStats.total} label={t("statTotal")} />
+                                            <StatTile value={adminStats.tayang} label={t("statTayang")} />
+                                            <StatTile value={adminStats.draft} label={t("statDraft")} />
+                                            <StatTile value={adminStats.pengajuanPending} label={t("statPending")} />
+                                        </div>
+                                    </>
+                                )}
+
+                                {!isPemilik && !isAdmin && (
+                                    <>
+                                        <div className="flex items-center justify-between">
+                                            <h2 className="font-heading text-base font-bold text-text-primary">{t("latestKos")}</h2>
+                                            <Link href="/cari-kos" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("searchKos")}</Link>
+                                        </div>
+                                        <div className="mt-4 space-y-3">
+                                            {kosTerbaru.length === 0 ? (
+                                                <p className="text-xs text-text-secondary">{t("noKos")}</p>
+                                            ) : (
+                                                kosTerbaru.map(({ kos, cover }) => (
+                                                    <Link key={kos.id_kos} href={`/kos/${kos.id_kos}`} className="flex items-center gap-3 rounded-xl border border-border p-3 hover:border-primary">
+                                                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
+                                                            <Image src={cover ?? "/img/kos-placeholder.png"} alt={kos.nama} fill sizes="48px" className="object-cover" />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="truncate text-xs font-semibold text-text-primary">{kos.nama}</p>
+                                                            <p className="mt-0.5 truncate text-[10px] text-text-secondary">{kos.lokasi} · {formatHarga(kos.harga)}{tc("perMonthShort")}</p>
+                                                        </div>
+                                                    </Link>
+                                                ))
+                                            )}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
 
                         {/* Pengajuan Pemilik — disembunyikan untuk pemilik/admin */}
                         {showPengajuanCard && <PengajuanCard status={pengajuanStatus} />}

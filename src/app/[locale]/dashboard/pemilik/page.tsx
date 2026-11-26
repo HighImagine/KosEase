@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
+import EmptyStateCard from "@/components/EmptyStateCard";
 import { getMasukReservasi, getMyKosList } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
@@ -10,6 +11,7 @@ export default async function PemilikPage() {
   const t = await getTranslations("PemilikHome");
   const tk = await getTranslations("KelolaKos");
   const tr = await getTranslations("Reservasi");
+  const to = await getTranslations("OwnerOnboarding");
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -97,11 +99,19 @@ export default async function PemilikPage() {
             <div className="rounded-xl bg-surface p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-heading text-base font-bold text-text-primary">{t("kosTitle")}</h3>
-                <Link href="/dashboard/pemilik/kos" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("manage")}</Link>
+                {kosList.length > 0 && (
+                  <Link href="/dashboard/pemilik/kos" className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-primary-dark">{t("manage")}</Link>
+                )}
               </div>
               <div className="space-y-3">
                 {kosList.length === 0 ? (
-                  <p className="text-sm text-text-secondary">{t("empty")}</p>
+                  <EmptyStateCard
+                    variant="compact"
+                    title={to("compactTitle")}
+                    description={to("compactDesc")}
+                    ctaLabel={to("compactCta")}
+                    ctaHref="/dashboard/pemilik/kos/tambah"
+                  />
                 ) : (
                   kosList.slice(0, 5).map((kos) => (
                     <Link key={kos.id_kos} href={`/dashboard/pemilik/kos/${kos.id_kos}`} className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5 hover:border-primary">

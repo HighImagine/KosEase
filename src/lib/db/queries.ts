@@ -193,29 +193,38 @@ export async function getFasilitasMaster(): Promise<{ id: string; nama: string }
   return (data ?? []) as { id: string; nama: string }[];
 }
 
-export type KamarMilik = {
-  id: string;
-  kos_id: string;
+export type KamarMilik = Kamar & {
   kos_nama: string;
-  nama: string;
-  harga: number;
-  stok: number;
-  ketersediaan: string;
+  kos_lokasi: string;
+  kos_tipe: Kos["tipe"];
+  kos_status: Kos["status_publikasi"];
 };
 
-// Semua kamar milik pemilik login (untuk /dashboard/pemilik/kamar).
-export async function getMyKamarList(): Promise<KamarMilik[]> {
-  const mine = await getMyKosList();
-  if (mine.length === 0) return [];
+export type KamarBoard = { kos: Kos[]; kamar: KamarMilik[] };
+
+// Kos + seluruh kamar milik pemilik login (untuk /dashboard/pemilik/kamar).
+// Cukup dua query: daftar kos, lalu semua kamar dari kos tersebut.
+export async function getMyKamarBoard(): Promise<KamarBoard> {
+  const kos = await getMyKosList();
+  if (kos.length === 0) return { kos, kamar: [] };
   const supabase = await createClient();
   const { data } = await supabase
     .from("kamar")
-    .select("id, kos_id, nama, harga, stok, ketersediaan")
-    .in("kos_id", mine.map((k) => k.id_kos))
+    .select("*")
+    .in("kos_id", kos.map((k) => k.id_kos))
     .order("created_at", { ascending: true });
-  const rows = (data ?? []) as Omit<KamarMilik, "kos_nama">[];
-  const namaByKos = new Map(mine.map((k) => [k.id_kos, k.nama]));
-  return rows.map((r) => ({ ...r, kos_nama: namaByKos.get(r.kos_id) ?? "-" }));
+  const kosById = new Map(kos.map((k) => [k.id_kos, k]));
+  const kamar = ((data ?? []) as Kamar[]).map(normKamar).map((row) => {
+    const parent = kosById.get(row.kos_id);
+    return {
+      ...row,
+      kos_nama: parent?.nama ?? "-",
+      kos_lokasi: parent?.lokasi ?? "-",
+      kos_tipe: parent?.tipe ?? "Campur",
+      kos_status: parent?.status_publikasi ?? "draft",
+    } satisfies KamarMilik;
+  });
+  return { kos, kamar };
 }
 
 export type PemilikStats = { total: number; tayang: number; draft: number; stokTersedia: number };

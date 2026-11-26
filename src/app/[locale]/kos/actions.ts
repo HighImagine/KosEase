@@ -14,6 +14,7 @@ function revalidateKosPages(kosId?: string) {
   for (const loc of ["id", "en"]) {
     revalidatePath(`/${loc}/dashboard/pemilik`);
     revalidatePath(`/${loc}/dashboard/pemilik/kos`);
+    revalidatePath(`/${loc}/dashboard/pemilik/kamar`);
     revalidatePath(`/${loc}/dashboard/admin`);
     revalidatePath(`/${loc}/dashboard/admin/kos`);
     revalidatePath(`/${loc}`);
@@ -324,11 +325,57 @@ export async function deleteKamarAction(_prev: unknown, formData: FormData): Pro
   const kamarId = String(formData.get("kamarId") ?? "");
   const access = await assertKosAccess(kosId);
   if ("error" in access) return { error: access.error };
+
+  // Tanpa FK constraint: cegah kamar dihapus saat masih ada reservasi aktif,
+  // supaya baris pemesanan tidak kehilangan referensi kamar.
+  const { data: active } = await access.supabase
+    .from("pemesanan")
+    .select("id")
+    .eq("kamar_id", kamarId)
+    .in("status", ["menunggu", "dikonfirmasi"])
+    .limit(1);
+  if ((active ?? []).length > 0) {
+    return { error: "Kamar masih punya reservasi aktif. Selesaikan atau batalkan reservasi terlebih dahulu." };
+  }
+
   const { error } = await access.supabase.from("kamar").delete().eq("id", kamarId).eq("kos_id", kosId);
   if (error) return { error: error.message };
   await recalcHargaMin(kosId);
   revalidateKosPages(kosId);
   return { success: "Kamar dihapus" };
+}
+
+// Ubah stok cepat (+1 / -1) dari daftar kamar. Ketersediaan selalu
+// diturunkan dari stok aktual: stok > 0 ? Tersedia : Penuh.
+export async function adjustKamarStokAction(_prev: unknown, formData: FormData): Promise<ActionResult> {
+  const kosId = String(formData.get("kosId") ?? "");
+  const kamarId = String(formData.get("kamarId") ?? "");
+  const delta = Number(formData.get("delta"));
+  if (!Number.isInteger(delta) || Math.abs(delta) !== 1) return { error: "Perubahan stok tidak valid" };
+
+  const access = await assertKosAccess(kosId);
+  if ("error" in access) return { error: access.error };
+
+  const { data } = await access.supabase
+    .from("kamar")
+    .select("stok")
+    .eq("id", kamarId)
+    .eq("kos_id", kosId)
+    .limit(1);
+  const row = data?.[0] as { stok: number | null } | undefined;
+  if (!row) return { error: "Kamar tidak ditemukan" };
+
+  const stok = Math.max(0, (row.stok ?? 0) + delta);
+  const ketersediaan: Ketersediaan = stok > 0 ? "Tersedia" : "Penuh";
+  const { error } = await access.supabase
+    .from("kamar")
+    .update({ stok, ketersediaan })
+    .eq("id", kamarId)
+    .eq("kos_id", kosId);
+  if (error) return { error: error.message };
+
+  revalidateKosPages(kosId);
+  return { success: "Stok diperbarui" };
 }
 
 // Ganti seluruh set fasilitas kos dengan daftar id terpilih.

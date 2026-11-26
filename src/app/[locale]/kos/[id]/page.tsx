@@ -4,6 +4,8 @@ import { formatHarga } from "@/lib/format";
 import { getKosOwner, getPublicKosDetail } from "@/lib/db/queries";
 import { getFallbackKosDetail } from "@/lib/db/compat";
 import { hasAvailableKamar, isKamarTersedia } from "@/lib/kos";
+import { ATURAN_LIST } from "@/lib/aturan";
+import { IconUsersGroup } from "@tabler/icons-react";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
@@ -28,6 +30,7 @@ export default async function KosDetailPage({ params }: PageProps) {
     const t = await getTranslations("Detail");
     const tc = await getTranslations("Common");
     const tk = await getTranslations("KosCard");
+    const ta = await getTranslations("AturanKos");
     // id uuid dari DB; fallback ke data statis (id numerik lama) selama migrasi.
     const detail = (await getPublicKosDetail(id)) ?? getFallbackKosDetail(id);
 
@@ -35,6 +38,8 @@ export default async function KosDetailPage({ params }: PageProps) {
         return <div>{tc("kosNotFound")}</div>;
     }
     const { kos, kamar, galeri, fasilitas } = detail;
+    const aturanKos = kos.aturan ?? [];
+    const aturanTampil = ATURAN_LIST.filter((item) => aturanKos.includes(item.key));
     const cover = galeri[0]?.image_url ?? PLACEHOLDER;
     const owner = await getKosOwner(kos.id_pemilik);
     // Sekarang: ketersediaan ditentukan dari stok aktual (stok > 0).
@@ -129,6 +134,37 @@ export default async function KosDetailPage({ params }: PageProps) {
                                     fasilitas.map((f) => (
                                         <span key={f} className="rounded-full border border-border bg-background px-3 py-1.5 text-sm text-text-primary">{f}</span>
                                     ))
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Aturan Kos */}
+                        <div className="rounded-2xl bg-surface p-6">
+                            <h2 className="font-heading text-xl font-bold text-text-primary">
+                                {t("rulesTitle")}
+                            </h2>
+
+                            <div className="mt-4">
+                                {aturanTampil.length === 0 && !kos.maks_penghuni ? (
+                                    <p className="text-sm text-text-secondary">{t("rulesEmpty")}</p>
+                                ) : (
+                                    <ul className="space-y-2">
+                                        {aturanTampil.map((item) => {
+                                            const Icon = item.icon;
+                                            return (
+                                                <li key={item.key} className="flex items-start gap-2 text-sm text-text-primary">
+                                                    <Icon size={16} stroke={1.8} className="mt-0.5 shrink-0 text-primary" />
+                                                    <span>{ta(item.labelKey)}</span>
+                                                </li>
+                                            );
+                                        })}
+                                        {kos.maks_penghuni && (
+                                            <li className="flex items-start gap-2 text-sm text-text-primary">
+                                                <IconUsersGroup size={16} stroke={1.8} className="mt-0.5 shrink-0 text-primary" />
+                                                <span>{t("rulesMaks", { n: kos.maks_penghuni })}</span>
+                                            </li>
+                                        )}
+                                    </ul>
                                 )}
                             </div>
                         </div>

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { formLocale, withLocale } from "@/lib/locale";
 import type { Ketersediaan } from "@/lib/db/types";
+import { isAturanKos, MAKS_PENGHUNI_MAX, MAKS_PENGHUNI_MIN } from "@/lib/aturan";
 
 type ActionResult = { error?: string; success?: string };
 
@@ -394,6 +395,41 @@ export async function setKosFasilitasAction(_prev: unknown, formData: FormData):
   }
   revalidateKosPages(kosId);
   return { success: "Fasilitas diperbarui" };
+}
+
+// Ganti seluruh aturan kos (checkbox) + kapasitas maksimal penghuni per kamar.
+// Aturan merokok/hewan saling eksklusif; validasi juga dilakukan di UI.
+export async function setKosAturanAction(_prev: unknown, formData: FormData): Promise<ActionResult> {
+  const kosId = String(formData.get("kosId") ?? "");
+  const access = await assertKosAccess(kosId);
+  if ("error" in access) return { error: access.error };
+
+  const aturan = [...new Set(formData.getAll("aturan").map(String).filter(isAturanKos))];
+  if (aturan.includes("merokok") && aturan.includes("dilarang_merokok")) {
+    return { error: "Pilih salah satu: boleh merokok atau dilarang merokok." };
+  }
+  if (aturan.includes("boleh_hewan") && aturan.includes("dilarang_hewan")) {
+    return { error: "Pilih salah satu: boleh membawa hewan atau dilarang membawa hewan." };
+  }
+
+  const rawMaks = String(formData.get("maks_penghuni") ?? "").trim();
+  let maksPenghuni: number | null = null;
+  if (rawMaks !== "") {
+    const n = Number(rawMaks);
+    if (!Number.isInteger(n) || n < MAKS_PENGHUNI_MIN || n > MAKS_PENGHUNI_MAX) {
+      return { error: `Maksimal penghuni harus ${MAKS_PENGHUNI_MIN}–${MAKS_PENGHUNI_MAX} orang.` };
+    }
+    maksPenghuni = n;
+  }
+
+  const { error } = await access.supabase
+    .from("kos")
+    .update({ aturan, maks_penghuni: maksPenghuni })
+    .eq("id_kos", kosId);
+  if (error) return { error: error.message };
+
+  revalidateKosPages(kosId);
+  return { success: "Aturan kos diperbarui" };
 }
 
 export async function uploadGaleriAction(_prev: unknown, formData: FormData): Promise<ActionResult> {

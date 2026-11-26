@@ -9,6 +9,7 @@ import { AjukanPenarikanButton, DeleteKosButton, PublikasiToggle } from "../KosL
 import KamarManager from "./KamarManager";
 import GaleriManager from "./GaleriManager";
 import FasilitasPicker from "./FasilitasPicker";
+import AturanManager from "./AturanManager";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -90,6 +91,10 @@ export default async function KelolaKosDetailPage({ params }: PageProps) {
 
             <Section title={tk("fasilitasTitle")} desc={tk("fasilitasDesc")}>
               <FasilitasPicker kosId={kos.id_kos} master={master} selected={fasilitas} />
+            </Section>
+
+            <Section title={tk("aturanTitle")} desc={tk("aturanDesc")}>
+              <AturanManager kosId={kos.id_kos} selected={kos.aturan ?? []} maksPenghuni={kos.maks_penghuni} />
             </Section>
           </div>
         </main>

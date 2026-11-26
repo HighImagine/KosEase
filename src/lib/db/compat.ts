@@ -22,6 +22,8 @@ export function getFallbackKosCards(): KosCardData[] {
         deskripsi: k.deskripsi,
         rating: k.rating,
         ulasan: k.ulasanCount,
+        aturan: [],
+        maks_penghuni: null,
         created_at: "",
       },
       cover: k.gambar ?? PLACEHOLDER,
@@ -48,6 +50,8 @@ export function getFallbackKosDetail(idKos: string): KosDetail | null {
       deskripsi: k.deskripsi,
       rating: k.rating,
       ulasan: k.ulasanCount,
+      aturan: [],
+      maks_penghuni: null,
       created_at: "",
     },
     kamar: k.kamar.map((r) => ({

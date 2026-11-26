@@ -2,19 +2,27 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { IconBuilding, IconMapPin, IconTag } from "@tabler/icons-react";
+import { IconBuilding, IconMapPin, IconTag, IconUsers } from "@tabler/icons-react";
 import KosCard from "@/components/KosCard";
 import SearchDropdown from "@/components/SearchDropdown";
 import type { KosCardData } from "@/lib/db/types";
 import { formatHarga } from "@/lib/format";
 
-type OpenPanel = "location" | "facility" | "price" | null;
+type OpenPanel = "location" | "type" | "facility" | "price" | null;
+
+const tipeLabelKey: Record<string, string> = {
+  Campur: "tipeCampur",
+  "Laki-laki": "tipeLaki",
+  Perempuan: "tipePerempuan",
+};
 
 export default function CariKosClient({ initial }: { initial: KosCardData[] }) {
   const t = useTranslations("Search");
+  const tc = useTranslations("KosCard");
   const sp = useSearchParams();
   const [q, setQ] = useState(sp.get("q") ?? "");
   const [lokasi, setLokasi] = useState("");
+  const [tipe, setTipe] = useState(sp.get("tipe") ?? "");
   const [fasilitas, setFasilitas] = useState<string[]>([]);
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
 
@@ -36,21 +44,36 @@ export default function CariKosClient({ initial }: { initial: KosCardData[] }) {
     setFasilitas((prev) => (prev.includes(nama) ? prev.filter((n) => n !== nama) : [...prev, nama]));
   };
 
+  // Tipe kos disimpan di URL (?tipe=Campur) agar bisa dibagikan. Pakai
+  // history.replaceState supaya filter lokal lain tidak ikut ter-reset.
+  const updateTipe = (value: string) => {
+    setTipe(value);
+    setOpenPanel(null);
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (value) params.set("tipe", value);
+    else params.delete("tipe");
+    const qs = params.toString();
+    window.history.replaceState(null, "", `${window.location.pathname}${qs ? `?${qs}` : ""}`);
+  };
+
   const resetFilters = () => {
     setLokasi("");
     setFasilitas([]);
     setMaxHarga(hargaMax);
+    updateTipe("");
   };
 
   const filtered = initial.filter(({ kos, fasilitas: kosFasilitas }) => {
     if (q && !`${kos.nama} ${kos.lokasi}`.toLowerCase().includes(q.toLowerCase())) return false;
     if (lokasi && kos.lokasi !== lokasi) return false;
+    if (tipe && kos.tipe !== tipe) return false;
     if (fasilitas.length > 0 && !(kosFasilitas ?? []).every((f) => fasilitas.includes(f))) return false;
     if (kos.harga < hargaMin || kos.harga > maxHarga) return false;
     return true;
   });
 
-  const hasActiveFilters = lokasi !== "" || fasilitas.length > 0 || maxHarga < hargaMax;
+  const hasActiveFilters = lokasi !== "" || tipe !== "" || fasilitas.length > 0 || maxHarga < hargaMax;
 
   return (
     <>
@@ -64,7 +87,7 @@ export default function CariKosClient({ initial }: { initial: KosCardData[] }) {
           />
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Bagian 1 — Dropdown Lokasi */}
           <div>
             <SearchDropdown
@@ -101,7 +124,37 @@ export default function CariKosClient({ initial }: { initial: KosCardData[] }) {
             </SearchDropdown>
           </div>
 
-          {/* Bagian 2 — Dropdown Fasilitas */}
+          {/* Bagian 2 — Dropdown Tipe Kos */}
+          <div>
+            <SearchDropdown
+              label={tipe ? tc(tipeLabelKey[tipe] ?? "tipeCampur") : t("allTypes")}
+              icon={<IconUsers size={16} className="text-primary" />}
+              open={openPanel === "type"}
+              onOpenChange={(o) => setOpen("type", o)}
+            >
+              <div className="flex flex-col gap-1">
+                <button
+                  type="button"
+                  onClick={() => updateTipe("")}
+                  className={`block w-full rounded-lg px-3 py-2 text-left text-sm ${tipe === "" ? "bg-primary-light font-semibold text-text-primary" : "text-text-primary hover:bg-background"}`}
+                >
+                  {t("allTypes")}
+                </button>
+                {(["Laki-laki", "Perempuan", "Campur"] as const).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => updateTipe(value)}
+                    className={`block w-full rounded-lg px-3 py-2 text-left text-sm ${tipe === value ? "bg-primary-light font-semibold text-text-primary" : "text-text-primary hover:bg-background"}`}
+                  >
+                    {tc(tipeLabelKey[value])}
+                  </button>
+                ))}
+              </div>
+            </SearchDropdown>
+          </div>
+
+          {/* Bagian 3 — Dropdown Fasilitas */}
           <div>
             <SearchDropdown
               label={fasilitas.length > 0 ? `${fasilitas.length} ${t("selected")}` : t("facility")}
@@ -124,7 +177,7 @@ export default function CariKosClient({ initial }: { initial: KosCardData[] }) {
             </SearchDropdown>
           </div>
 
-          {/* Bagian 3 — Dropdown Harga */}
+          {/* Bagian 4 — Dropdown Harga */}
           <div>
             <SearchDropdown
               label={`${formatHarga(hargaMin)} – ${formatHarga(maxHarga)}`}

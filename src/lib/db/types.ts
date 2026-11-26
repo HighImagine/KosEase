@@ -7,6 +7,21 @@ export type StatusPublikasi = "draft" | "tayang";
 export type Ketersediaan = "Tersedia" | "Penuh";
 export type StatusPenarikan = "menunggu" | "disetujui" | "ditolak";
 
+// Aturan kos (checkbox di dashboard pemilik). Daftar lengkap + label/icon
+// ada di src/lib/aturan.ts. Key disimpan sebagai text[] di kolom kos.aturan.
+export type AturanKos =
+  | "belum_menikah"
+  | "pasutri"
+  | "boleh_anak"
+  | "bawa_tamu"
+  | "tamu_menginap"
+  | "merokok"
+  | "dilarang_merokok"
+  | "boleh_hewan"
+  | "dilarang_hewan"
+  | "akses_24_jam"
+  | "jam_malam_tamu";
+
 // Antrian waitlist penyewaan kos (dipakai saat kos/kamar penuh).
 export type StatusWaitlist = "menunggu" | "ditawarkan" | "diklaim" | "selesai" | "dibatalkan" | "kedaluwarsa";
 
@@ -75,6 +90,8 @@ export type Kos = {
   deskripsi: string | null;
   rating: number; // numeric(2,1), default 0 (dihitung saat fitur ulasan ada)
   ulasan: number; // integer, jumlah ulasan
+  aturan: AturanKos[]; // text[], default '{}'
+  maks_penghuni: number | null; // integer 1-20, per kamar
   created_at: string; // timestamptz
 };
 

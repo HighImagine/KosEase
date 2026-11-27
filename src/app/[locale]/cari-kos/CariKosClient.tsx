@@ -68,7 +68,7 @@ export default function CariKosClient({ initial }: { initial: KosCardData[] }) {
     if (q && !`${kos.nama} ${kos.lokasi}`.toLowerCase().includes(q.toLowerCase())) return false;
     if (lokasi && kos.lokasi !== lokasi) return false;
     if (tipe && kos.tipe !== tipe) return false;
-    if (fasilitas.length > 0 && !(kosFasilitas ?? []).every((f) => fasilitas.includes(f))) return false;
+    if (fasilitas.length > 0 && !fasilitas.every((f) => (kosFasilitas ?? []).includes(f))) return false;
     if (kos.harga < hargaMin || kos.harga > maxHarga) return false;
     return true;
   });

@@ -4,8 +4,10 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formLocale, withLocale } from "@/lib/locale";
 import { triggerWaitlistNotificationsAction } from "@/app/[locale]/(auth)/actions";
+import { isAlasanPenolakanKey } from "@/lib/alasan-penolakan";
 
 type ActionResult = { error?: string; success?: string };
 
@@ -143,24 +145,23 @@ export async function setPemesananStatusAction(_prev: unknown, formData: FormDat
   } = await supabase.auth.getUser();
   if (!user) return { error: "Harus login terlebih dahulu" };
 
-  const { data } = await supabase.from("pemesanan").select("id, kos_id, kamar_id, status, waitlist_id").eq("id", id).limit(1);
-  const row = data?.[0] as { id: string; kos_id: string; kamar_id: string; status: string; waitlist_id?: string | null } | undefined;
+  const { data } = await supabase.from("pemesanan").select("id, user_id, kos_id, kamar_id, status, waitlist_id").eq("id", id).limit(1);
+  const row = data?.[0] as { id: string; user_id: string; kos_id: string; kamar_id: string; status: string; waitlist_id?: string | null } | undefined;
   if (!row) return { error: "Pesanan tidak ditemukan" };
   if (row.status !== "menunggu") return { error: "Pesanan sudah diproses" };
 
   let allowed = false;
+  let kosNama = "Kos";
   try {
-    const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).limit(1);
+    const [{ data: prof }, { data: kosRows }] = await Promise.all([
+      supabase.from("profiles").select("role").eq("id", user.id).limit(1),
+      supabase.from("kos").select("id_pemilik, nama").eq("id_kos", row.kos_id).limit(1),
+    ]);
     const role = ((prof?.[0] as { role?: string } | undefined)?.role ?? "").toLowerCase();
+    const kosRow = kosRows?.[0] as { id_pemilik?: string; nama?: string } | undefined;
+    if (kosRow?.nama) kosNama = kosRow.nama;
     if (role === "admin") allowed = true;
-    else {
-      const { data: kosRows } = await supabase
-        .from("kos")
-        .select("id_pemilik")
-        .eq("id_kos", row.kos_id)
-        .limit(1);
-      allowed = (kosRows?.[0] as { id_pemilik?: string } | undefined)?.id_pemilik === user.id;
-    }
+    else allowed = kosRow?.id_pemilik === user.id;
   } catch {}
   if (!allowed) return { error: "Tidak berhak memproses pesanan ini" };
 
@@ -181,9 +182,53 @@ export async function setPemesananStatusAction(_prev: unknown, formData: FormDat
     return { success: "Pesanan dikonfirmasi" };
   }
 
-  const { error } = await supabase.from("pemesanan").update({ status }).eq("id", id);
+  // Alasan disimpan sebagai key (+ teks custom untuk "lainnya"), bukan kalimat
+  // terjemahan, supaya bisa dirender dalam bahasa penyewa.
+  const alasanKey = String(formData.get("alasanKey") ?? "");
+  const alasanCustom = String(formData.get("alasanCustom") ?? "").trim();
+  if (!isAlasanPenolakanKey(alasanKey)) return { error: "Pilih alasan penolakan" };
+  if (alasanKey === "lainnya" && !alasanCustom) return { error: "Isi alasan penolakan" };
+  if (alasanCustom.length > 200) return { error: "Alasan penolakan maksimal 200 karakter" };
+
+  // Guard status di query supaya double-submit tidak memproses pesanan dua kali.
+  const { data: updated, error } = await supabase
+    .from("pemesanan")
+    .update({
+      status: "ditolak",
+      alasan_key: alasanKey,
+      alasan_custom: alasanKey === "lainnya" ? alasanCustom : null,
+      ditolak_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .eq("status", "menunggu")
+    .select("id");
   if (error) return { error: error.message };
-  if (row.waitlist_id) await supabase.from("waitlist").update({ status: "selesai" }).eq("id", row.waitlist_id);
+  if (!updated || updated.length === 0) return { error: "Pesanan sudah diproses" };
+
+  if (row.waitlist_id) {
+    const { error: waitlistError } = await supabase
+      .from("waitlist")
+      .update({ status: "selesai" })
+      .eq("id", row.waitlist_id);
+    if (waitlistError) console.error("Gagal menutup waitlist:", waitlistError.message);
+  }
+
+  // Notifikasi hanya menunjuk ke halaman reservasi; alasan dirender dari
+  // alasan_key di sana. Kegagalan notifikasi tidak membatalkan penolakan.
+  try {
+    const admin = createAdminClient();
+    const { error: notifError } = await admin.from("notifikasi").insert({
+      user_id: row.user_id,
+      jenis: "pemesanan",
+      judul: `Reservasi ${kosNama} Ditolak`,
+      isi: "Pemilik menolak reservasi Anda. Alasan penolakan dapat dilihat di halaman Reservasi.",
+      href: "/dashboard/reservasi",
+    });
+    if (notifError) console.error("Gagal mengirim notifikasi penolakan:", notifError.message);
+  } catch (err) {
+    console.error("Gagal mengirim notifikasi penolakan:", err);
+  }
+
   revalidatePemesananPages();
   return { success: "Pesanan ditolak" };
 }

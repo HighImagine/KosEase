@@ -137,6 +137,7 @@
     "sumDuration": "Duration",
     "sumDurationUnit": "{n} Months",
     "sumTotal": "Estimated Total",
+    "sumFacilities": "Facilities",
     "info": "ⓘ Your booking will be confirmed by the owner. Pay the owner directly.",
     "submit": "Request Booking",
     "submitting": "Submitting...",
@@ -274,7 +275,18 @@
     "stockLeft": "{n} rooms left",
     "stockOut": "Out of Stock",
     "extensionTitle": "Extension request",
-    "extensionMonths": "{n} extra months"
+    "extensionMonths": "{n} extra months",
+    "rejectConfirm": "Confirm Reject",
+    "rejectCancel": "Cancel"
+  },
+  "AlasanPenolakan": {
+    "label": "Rejection reason",
+    "penuh": "Room is already full / just occupied",
+    "tanggal": "Move-in date does not match availability",
+    "data": "Incomplete renter details or unreachable",
+    "renovasi": "Room is under maintenance / renovation",
+    "lainnya": "Other (write custom reason)",
+    "customPlaceholder": "Write rejection reason..."
   },
   "Footer": {
     "tagline": "A modern kos search platform in Indonesia focused on ease, comfort, and price transparency for students and young professionals.",

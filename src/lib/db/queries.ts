@@ -559,6 +559,10 @@ export type Pemesanan = {
   catatan: string | null;
   status: StatusPemesanan;
   waitlist_id?: string | null;
+  // Alasan penolakan (lihat src/lib/alasan-penolakan.ts).
+  alasan_key?: string | null;
+  alasan_custom?: string | null;
+  ditolak_at?: string | null;
   created_at: string;
 };
 

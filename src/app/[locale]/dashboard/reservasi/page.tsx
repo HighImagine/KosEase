@@ -3,6 +3,7 @@ import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
 import StatusPemesananPill, { statusPemesananKey } from "@/components/StatusPemesananPill";
 import { getMyPemesanan } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
+import { alasanPenolakanLabel } from "@/lib/alasan-penolakan";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { IconBed } from "@tabler/icons-react";
@@ -19,6 +20,7 @@ function formatTanggal(iso: string): string {
 
 export default async function ReservasiPage() {
   const t = await getTranslations("Reservasi");
+  const ta = await getTranslations("AlasanPenolakan");
   const list = await getMyPemesanan();
 
   return (
@@ -49,29 +51,41 @@ export default async function ReservasiPage() {
                 </Link>
               </div>
             ) : (
-              list.map((p) => (
-                <div key={p.id} className="rounded-2xl bg-surface p-5 shadow-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-heading text-base font-bold text-text-primary">{p.kos_nama}</p>
-                      <p className="mt-0.5 text-xs text-text-secondary">
-                        {p.kamar_nama} · {t("moveIn", { date: formatTanggal(p.tanggal_mulai), n: p.durasi })}
-                      </p>
-                      <p className="mt-1 text-sm font-bold text-primary">
-                        {formatHarga(p.total_harga)}
-                      </p>
-                      <p className="mt-1 text-[10px] text-text-secondary">{t("bookedAt", { date: formatTanggal(p.created_at) })}</p>
+              list.map((p) => {
+                const alasan =
+                  p.status === "ditolak"
+                    ? alasanPenolakanLabel(p.alasan_key, p.alasan_custom, ta)
+                    : null;
+                return (
+                  <div key={p.id} className="rounded-2xl bg-surface p-5 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-heading text-base font-bold text-text-primary">{p.kos_nama}</p>
+                        <p className="mt-0.5 text-xs text-text-secondary">
+                          {p.kamar_nama} · {t("moveIn", { date: formatTanggal(p.tanggal_mulai), n: p.durasi })}
+                        </p>
+                        <p className="mt-1 text-sm font-bold text-primary">
+                          {formatHarga(p.total_harga)}
+                        </p>
+                        <p className="mt-1 text-[10px] text-text-secondary">{t("bookedAt", { date: formatTanggal(p.created_at) })}</p>
+                      </div>
+                      <StatusPemesananPill status={p.status} label={t(statusPemesananKey[p.status])} />
                     </div>
-                    <StatusPemesananPill status={p.status} label={t(statusPemesananKey[p.status])} />
+                    {alasan && (
+                      <div className="mt-3 rounded-xl border border-error/20 bg-error/5 px-3 py-2">
+                        <p className="text-[10px] font-semibold text-error">{ta("label")}</p>
+                        <p className="mt-0.5 text-xs text-text-primary">{alasan}</p>
+                      </div>
+                    )}
+                    {p.status === "menunggu" && (
+                      <div className="mt-3 border-t border-border pt-3">
+                        <CancelButton pemesananId={p.id} />
+                      </div>
+                    )}
+                    {p.status === "dikonfirmasi" && <PerpanjanganForm pemesananId={p.id} />}
                   </div>
-                  {p.status === "menunggu" && (
-                    <div className="mt-3 border-t border-border pt-3">
-                      <CancelButton pemesananId={p.id} />
-                    </div>
-                  )}
-                  {p.status === "dikonfirmasi" && <PerpanjanganForm pemesananId={p.id} />}
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </main>

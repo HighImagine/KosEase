@@ -16,7 +16,7 @@ export default async function PemesananPage({ searchParams }: PageProps) {
     // kosId uuid dari DB; fallback ke id numerik lama selama migrasi.
     const detail = kosId ? ((await getPublicKosDetail(kosId)) ?? getFallbackKosDetail(kosId)) : null;
     const kos = detail
-        ? { id: detail.kos.id_kos, nama: detail.kos.nama, kamar: detail.kamar }
+        ? { id: detail.kos.id_kos, nama: detail.kos.nama, kamar: detail.kamar, fasilitas: detail.fasilitas }
         : null;
 
     const offers = waitlistId ? await getMyWaitlist() : [];

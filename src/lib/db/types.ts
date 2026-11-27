@@ -46,7 +46,7 @@ export type Waitlist = {
 export type Notifikasi = {
   id: string;
   user_id: string;
-  jenis: "waitlist" | "perpanjangan" | "sistem";
+  jenis: "waitlist" | "perpanjangan" | "pemesanan" | "sistem";
   judul: string;
   isi: string;
   href: string | null;

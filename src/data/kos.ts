@@ -113,7 +113,7 @@ export const kosList: Kos[] = [
     tipe: "Laki-laki",
     status: "Tersedia 2 Kamar",
     deskripsi: "Kos putra ekonomis dekat UB dengan fasilitas lengkap dan area parkir luas.",
-    fasilitas: ["WiFi", "Kamar Mandi Dalam", "Parkir Motor Luas", "Dapur Bersama"],
+    fasilitas: ["WiFi", "Kamar Mandi Dalam", "Parkir Motor", "Dapur Bersama"],
     rating: 4.5,
     ulasanCount: 12,
     kamar: [
@@ -169,7 +169,7 @@ export const kosList: Kos[] = [
     tipe: "Laki-laki",
     status: "Tersedia",
     deskripsi: "Kos putra murah dekat UNY dan UGM, cocok untuk mahasiswa baru.",
-    fasilitas: ["WiFi", "Parkir Motor Luas", "Dapur Bersama"],
+    fasilitas: ["WiFi", "Parkir Motor", "Dapur Bersama"],
     rating: 4.3,
     ulasanCount: 9,
     kamar: [

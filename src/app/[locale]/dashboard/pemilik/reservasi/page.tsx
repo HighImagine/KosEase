@@ -3,6 +3,7 @@ import DashboardSidebarUserWrapper from "@/components/DashboardSidebarWrapper";
 import StatusPemesananPill, { statusPemesananKey } from "@/components/StatusPemesananPill";
 import { getMasukPerpanjangan, getMasukReservasi } from "@/lib/db/queries";
 import { formatHarga } from "@/lib/format";
+import { alasanPenolakanLabel } from "@/lib/alasan-penolakan";
 import { getTranslations } from "next-intl/server";
 import { ConfirmButton, RejectButton } from "./PemesananActions";
 import { ExtensionDecision } from "./PerpanjanganActions";
@@ -18,6 +19,7 @@ function formatTanggal(iso: string): string {
 export default async function ReservasiMasukPage() {
   const t = await getTranslations("ReservasiMasuk");
   const tr = await getTranslations("Reservasi");
+  const ta = await getTranslations("AlasanPenolakan");
   const list = await getMasukReservasi();
   const extensions = await getMasukPerpanjangan();
   const menunggu = list.filter((p) => p.status === "menunggu");
@@ -66,28 +68,39 @@ export default async function ReservasiMasukPage() {
                         <StatusPemesananPill status={p.status} label={tr(statusPemesananKey[p.status])} />
                       </span>
                     </div>
-                    <div className="mt-3 flex gap-2 border-t border-border pt-3">
+                    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
                       <ConfirmButton pemesananId={p.id} stok={p.kamar_stok} />
                       <RejectButton pemesananId={p.id} />
                     </div>
                   </div>
                 ))}
 
-                {riwayat.map((p) => (
-                  <div key={p.id} className="flex items-center gap-4 rounded-xl border border-border bg-surface px-5 py-4">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-text-primary">
-                        {p.kos_nama} — {p.kamar_nama}
-                      </p>
-                      <p className="mt-0.5 text-xs text-text-secondary">
-                        {p.nama_pemesan} · {t("moveIn", { date: formatTanggal(p.tanggal_mulai), n: p.durasi })} · {formatHarga(p.total_harga)}
-                      </p>
+                {riwayat.map((p) => {
+                  const alasan =
+                    p.status === "ditolak"
+                      ? alasanPenolakanLabel(p.alasan_key, p.alasan_custom, ta)
+                      : null;
+                  return (
+                    <div key={p.id} className="flex items-center gap-4 rounded-xl border border-border bg-surface px-5 py-4">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-text-primary">
+                          {p.kos_nama} — {p.kamar_nama}
+                        </p>
+                        <p className="mt-0.5 text-xs text-text-secondary">
+                          {p.nama_pemesan} · {t("moveIn", { date: formatTanggal(p.tanggal_mulai), n: p.durasi })} · {formatHarga(p.total_harga)}
+                        </p>
+                        {alasan && (
+                          <p className="mt-1 text-[10px] text-error">
+                            {ta("label")}: {alasan}
+                          </p>
+                        )}
+                      </div>
+                      <span className="shrink-0">
+                        <StatusPemesananPill status={p.status} label={tr(statusPemesananKey[p.status])} />
+                      </span>
                     </div>
-                    <span className="shrink-0">
-                      <StatusPemesananPill status={p.status} label={tr(statusPemesananKey[p.status])} />
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </>
             )}
           </div>

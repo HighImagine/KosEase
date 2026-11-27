@@ -137,6 +137,7 @@
     "sumDuration": "Durasi",
     "sumDurationUnit": "{n} Bulan",
     "sumTotal": "Total Estimasi",
+    "sumFacilities": "Fasilitas",
     "info": "ⓘ Pemesanan akan dikonfirmasi pemilik. Bayar langsung kepada pemilik.",
     "submit": "Ajukan Pemesanan",
     "submitting": "Mengirim...",
@@ -274,7 +275,18 @@
     "stockLeft": "{n} kamar tersisa",
     "stockOut": "Stok Habis",
     "extensionTitle": "Pengajuan perpanjangan",
-    "extensionMonths": "Tambahan {n} bulan"
+    "extensionMonths": "Tambahan {n} bulan",
+    "rejectConfirm": "Konfirmasi Tolak",
+    "rejectCancel": "Batal"
+  },
+  "AlasanPenolakan": {
+    "label": "Alasan penolakan",
+    "penuh": "Kamar sudah penuh / baru saja terisi",
+    "tanggal": "Tanggal masuk tidak sesuai ketersediaan",
+    "data": "Data pemesan belum lengkap atau tidak dapat dihubungi",
+    "renovasi": "Kamar sedang dalam perbaikan / renovasi",
+    "lainnya": "Lainnya (tulis alasan sendiri)",
+    "customPlaceholder": "Tulis alasan penolakan..."
   },
   "Footer": {
     "tagline": "Platform pencarian kos modern di Indonesia yang mengutamakan kemudahan, kenyamanan, dan transparansi harga untuk para pelajar dan pekerja muda.",

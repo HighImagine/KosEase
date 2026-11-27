@@ -14,6 +14,7 @@ type Props = {
         id: string;
         nama: string;
         kamar: { id: string; nama: string; ukuran: string | null; harga: number; ketersediaan: string; stok: number; deskripsi: string | null }[];
+        fasilitas?: string[];
     } | null;
     claim?: { id: string; kamarId: string; slotMulai: string } | null;
 };
@@ -108,6 +109,18 @@ export default function PemesananForm({ kos, claim = null }: Props) {
                     <div className="flex justify-between"><span className="text-text-secondary">{t("sumDuration")}</span><span className="font-semibold text-text-primary">{t("sumDurationUnit", { n: durasi })}</span></div>
                     <div className="flex justify-between border-t border-border pt-2"><span className="font-bold text-text-primary">{t("sumTotal")}</span><span className="font-bold text-accent">{formatHarga(total)}</span></div>
                 </div>
+                {kos.fasilitas && kos.fasilitas.length > 0 && (
+                    <div className="border-t border-border pt-3">
+                        <p className="text-xs font-semibold text-text-secondary">{t("sumFacilities")}</p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                            {kos.fasilitas.map((f) => (
+                                <span key={f} className="rounded-full border border-border bg-background px-2.5 py-0.5 text-[11px] text-text-primary">
+                                    {f}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 <div className="rounded-lg bg-blue-50 px-3 py-3 text-xs leading-5 text-blue-700 border border-blue-200">
                     <p>{t("info")}</p>
                 </div>

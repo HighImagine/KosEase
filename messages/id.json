@@ -276,6 +276,7 @@
     "stockOut": "Stok Habis",
     "extensionTitle": "Pengajuan perpanjangan",
     "extensionMonths": "Tambahan {n} bulan",
+    "extensionRejectReason": "Alasan tolak (opsional)",
     "rejectConfirm": "Konfirmasi Tolak",
     "rejectCancel": "Batal"
   },

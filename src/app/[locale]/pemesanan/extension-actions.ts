@@ -39,10 +39,14 @@ export async function decidePengajuanPerpanjanganAction(_prev: unknown, formData
   const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser(); if (!user) return { error: "Harus login terlebih dahulu" };
   const { data: reqRows } = await supabase.from("pengajuan_perpanjangan").select("*").eq("id", requestId.data).limit(1); const req = reqRows?.[0] as { id: string; pemesanan_id: string; tambahan_bulan: number; status: string; user_id: string } | undefined;
   if (!req || req.status !== "menunggu") return { error: "Pengajuan sudah diproses" };
-  const { data: bookingRows } = await supabase.from("pemesanan").select("*").eq("id", req.pemesanan_id).limit(1); const booking = bookingRows?.[0] as { id: string; kos_id: string; kamar_id: string; tanggal_mulai: string; durasi: number } | undefined;
+  const { data: bookingRows } = await supabase.from("pemesanan").select("*").eq("id", req.pemesanan_id).limit(1); const booking = bookingRows?.[0] as { id: string; kos_id: string; kamar_id: string; tanggal_mulai: string; durasi: number; total_harga: number } | undefined;
   if (!booking) return { error: "Reservasi tidak ditemukan" };
   const { data: kosRows } = await supabase.from("kos").select("id_pemilik").eq("id_kos", booking.kos_id).limit(1); if ((kosRows?.[0] as { id_pemilik?: string } | undefined)?.id_pemilik !== user.id) return { error: "Tidak berhak" };
-  if (decision === "tolak") { await supabase.from("pengajuan_perpanjangan").update({ status: "ditolak", diproses_oleh: user.id, diproses_at: new Date().toISOString() }).eq("id", req.id); revalidate(); return { success: "Perpanjangan ditolak" }; }
+  if (decision === "tolak") {
+    const alasanTolak = String(formData.get("alasanTolak") ?? "").trim().slice(0, 200) || "Ditolak oleh pemilik";
+    await supabase.from("pengajuan_perpanjangan").update({ status: "ditolak", diproses_oleh: user.id, diproses_at: new Date().toISOString(), alasan_tolak: alasanTolak }).eq("id", req.id);
+    revalidate(); return { success: "Perpanjangan ditolak" };
+  }
   const newEnd = addMonths(booking.tanggal_mulai, booking.durasi + req.tambahan_bulan);
   const { data: conflicts } = await supabase.from("pemesanan").select("id,waitlist_id,user_id").eq("kamar_id", booking.kamar_id).eq("status", "menunggu").not("waitlist_id", "is", null).lt("tanggal_mulai", newEnd);
   const admin = createAdminClient();
@@ -53,7 +57,12 @@ export async function decidePengajuanPerpanjanganAction(_prev: unknown, formData
       await admin.from("notifikasi").insert({ user_id: item.user_id, jenis: "perpanjangan", judul: "Booking waitlist dibatalkan", isi: "Pemilik menyetujui perpanjangan penyewa saat ini." });
     }
   }
-  await supabase.from("pemesanan").update({ durasi: booking.durasi + req.tambahan_bulan }).eq("id", booking.id);
+  const { data: kamarRows } = await supabase.from("kamar").select("harga").eq("id", booking.kamar_id).limit(1);
+  const hargaKamar = (kamarRows?.[0] as { harga?: number } | undefined)?.harga ?? 0;
+  await supabase.from("pemesanan").update({
+    durasi: booking.durasi + req.tambahan_bulan,
+    total_harga: (booking.total_harga ?? 0) + hargaKamar * req.tambahan_bulan,
+  }).eq("id", booking.id);
   await supabase.from("pengajuan_perpanjangan").update({ status: "disetujui", diproses_oleh: user.id, diproses_at: new Date().toISOString() }).eq("id", req.id);
   await admin.from("notifikasi").insert({ user_id: req.user_id, jenis: "perpanjangan", judul: "Perpanjangan disetujui", isi: "Durasi sewa Anda telah diperpanjang." }); revalidate(); return { success: "Perpanjangan disetujui" };
 }

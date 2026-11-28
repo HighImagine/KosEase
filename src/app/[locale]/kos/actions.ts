@@ -4,6 +4,7 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formLocale, withLocale } from "@/lib/locale";
 import type { Ketersediaan } from "@/lib/db/types";
 import { isAturanKos, MAKS_PENGHUNI_MAX, MAKS_PENGHUNI_MIN } from "@/lib/aturan";
@@ -258,13 +259,40 @@ export async function prosesPenarikanAction(_prev: unknown, formData: FormData):
   };
 }
 
-// Hapus manual berurutan (tanpa cascade FK): file bucket -> galeri -> kamar ->
-// relasi fasilitas -> kos.
+// Hapus manual berurutan (tanpa cascade FK): file bucket -> ulasan/perpanjangan
+// -> waitlist -> pemesanan -> galeri -> kamar -> relasi fasilitas -> penarikan
+// -> kos. Baris anak dibersihkan lewat service role setelah kepemilikan dicek
+// agar tidak ada orphan dan tidak bergantung pada policy DELETE per tabel.
 export async function deleteKosAction(_prev: unknown, formData: FormData): Promise<ActionResult> {
   const kosId = String(formData.get("kosId") ?? "");
   const access = await assertKosAccess(kosId);
   if ("error" in access) return { error: access.error };
   const { supabase } = access;
+  const admin = createAdminClient();
+
+  // Cegah kos dihapus saat masih ada reservasi aktif (menunggu/dikonfirmasi).
+  const { data: bookingRows, error: bookingError } = await admin
+    .from("pemesanan")
+    .select("id, status")
+    .eq("kos_id", kosId);
+  if (bookingError) return { error: bookingError.message };
+  const bookings = (bookingRows ?? []) as { id: string; status: string }[];
+  if (bookings.some((b) => b.status === "menunggu" || b.status === "dikonfirmasi")) {
+    return { error: "Kos masih punya reservasi aktif. Selesaikan atau batalkan reservasi terlebih dahulu." };
+  }
+  const bookingIds = bookings.map((b) => b.id);
+
+  if (bookingIds.length > 0) {
+    const { error: extError } = await admin.from("pengajuan_perpanjangan").delete().in("pemesanan_id", bookingIds);
+    if (extError) return { error: extError.message };
+    const { error: reviewError } = await admin.from("ulasan").delete().in("pemesanan_id", bookingIds);
+    if (reviewError) return { error: reviewError.message };
+  }
+
+  const { error: waitlistError } = await admin.from("waitlist").delete().eq("kos_id", kosId);
+  if (waitlistError) return { error: waitlistError.message };
+  const { error: bookingDeleteError } = await admin.from("pemesanan").delete().eq("kos_id", kosId);
+  if (bookingDeleteError) return { error: bookingDeleteError.message };
 
   const { data: galeriRows } = await supabase.from("galeri").select("id, image_url").eq("kos_id", kosId);
   const paths = ((galeriRows ?? []) as { id: string; image_url: string }[])
@@ -273,10 +301,10 @@ export async function deleteKosAction(_prev: unknown, formData: FormData): Promi
   if (paths.length > 0) {
     await supabase.storage.from("kos-foto").remove(paths);
   }
-  await supabase.from("galeri").delete().eq("kos_id", kosId);
-  await supabase.from("kamar").delete().eq("kos_id", kosId);
-  await supabase.from("detail_kos").delete().eq("kos_id", kosId);
-  await supabase.from("pengajuan_penarikan").delete().eq("kos_id", kosId);
+  await admin.from("galeri").delete().eq("kos_id", kosId);
+  await admin.from("kamar").delete().eq("kos_id", kosId);
+  await admin.from("detail_kos").delete().eq("kos_id", kosId);
+  await admin.from("pengajuan_penarikan").delete().eq("kos_id", kosId);
   const { error } = await supabase.from("kos").delete().eq("id_kos", kosId);
   if (error) return { error: error.message };
 

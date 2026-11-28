@@ -530,18 +530,17 @@ export async function getPengajuanDetail(id: string): Promise<PengajuanDetail | 
 export type KosOwner = { nama: string | null; avatar_url: string | null };
 
 // Pemilik kos untuk kartu "Dikelola oleh" (nama + avatar saja, tanpa kontak).
+// Lewat RPC SECURITY DEFINER agar pengunjung anonim tetap bisa melihat nama
+// pemilik tanpa membuka seluruh kolom profiles (phone, dokumen, pengajuan).
 // Null bila tak terbaca — pemanggil wajib tampilkan fallback generik.
 export async function getKosOwner(idPemilik: string): Promise<KosOwner | null> {
   if (!idPemilik) return null;
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("profiles")
-    .select("full_name, avatar_url")
-    .eq("id", idPemilik)
-    .limit(1);
-  const row = data?.[0] as { full_name?: string | null; avatar_url?: string | null } | undefined;
+  const { data, error } = await supabase.rpc("get_kos_owner", { p_id: idPemilik });
+  if (error) return null;
+  const row = data?.[0] as { nama?: string | null; avatar?: string | null } | undefined;
   if (!row) return null;
-  return { nama: row.full_name ?? null, avatar_url: row.avatar_url ?? null };
+  return { nama: row.nama ?? null, avatar_url: row.avatar ?? null };
 }
 
 export type StatusPemesanan = "menunggu" | "dikonfirmasi" | "ditolak" | "dibatalkan";

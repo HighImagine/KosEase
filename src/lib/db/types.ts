@@ -85,7 +85,7 @@ export type Kos = {
   tipe: TipeKos;
   lokasi: string;
   alamat: string;
-  harga: number; // integer, harga termurah (auto-update dari kamar)
+  harga: number; // bigint, harga termurah (auto-update dari kamar)
   status_publikasi: StatusPublikasi;
   deskripsi: string | null;
   rating: number; // numeric(2,1), default 0 (dihitung saat fitur ulasan ada)
@@ -100,9 +100,9 @@ export type Kamar = {
   kos_id: string; // uuid -> kos.id_kos (tanpa FK)
   nama: string;
   deskripsi: string | null;
-  stok: number; // integer
+  stok: number; // bigint
   ketersediaan: Ketersediaan; // ditulis kode saat simpan: stok > 0 ? Tersedia : Penuh
-  harga: number; // integer, per bulan (IDR)
+  harga: number; // bigint, per bulan (IDR)
   ukuran: string | null;
   created_at: string;
 };
@@ -128,7 +128,7 @@ export type KosCardData = {
   kamarTersedia: number; // jumlah tipe kamar dengan ketersediaan Tersedia
   kamarTotal: number;
   stokTersedia: number; // total stok kamar Tersedia
-  fasilitas?: string[]; // nama fasilitas yang dimiliki kos (via kos_fasilitas; opsional untuk fallback statis)
+  fasilitas?: string[]; // nama fasilitas yang dimiliki kos (via detail_kos; opsional untuk fallback statis)
 };
 
 // Bentuk agregat untuk halaman detail.

@@ -276,6 +276,7 @@
     "stockOut": "Out of Stock",
     "extensionTitle": "Extension request",
     "extensionMonths": "{n} extra months",
+    "extensionRejectReason": "Rejection reason (optional)",
     "rejectConfirm": "Confirm Reject",
     "rejectCancel": "Cancel"
   },
